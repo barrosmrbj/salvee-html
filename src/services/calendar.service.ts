@@ -7,10 +7,10 @@ export const calendarService = {
   },
 
   async registerForEvent(eventId: string): Promise<void> {
-    await request(`/events/${eventId}/register`, { method: 'POST' })
+    await request<void>(`/events/${eventId}/register`, { method: 'POST' })
   },
 
   async unregisterFromEvent(eventId: string): Promise<void> {
-    await request(`/events/${eventId}/unregister`, { method: 'DELETE' })
+    await request<void>(`/events/${eventId}/unregister`, { method: 'DELETE' })
   },
 }

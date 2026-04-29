@@ -16,7 +16,7 @@ export const institutionService = {
   },
 
   async registerStep(payload: InstitutionRegisterPayload): Promise<{ institutionId: string }> {
-    return request('/institutions/register', {
+    return request<{ institutionId: string }>('/institutions/register', {
       method: 'POST',
       body: JSON.stringify(payload),
     })
