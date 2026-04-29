@@ -19,7 +19,16 @@ export function showToast(message: string, type: ToastType = 'info', duration = 
   const toast = document.createElement('div')
   toast.id = 'salvee-toast'
   toast.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg max-w-xs w-full ${colors[type]} transition-all duration-300 opacity-0`
-  toast.innerHTML = `<span class="font-bold">${icons[type]}</span> ${message}`
+
+  const iconSpan = document.createElement('span')
+  iconSpan.className = 'font-bold'
+  iconSpan.textContent = icons[type]
+
+  const msgSpan = document.createElement('span')
+  msgSpan.textContent = message  // safe: textContent never interprets HTML
+
+  toast.appendChild(iconSpan)
+  toast.appendChild(msgSpan)
 
   document.body.appendChild(toast)
   requestAnimationFrame(() => toast.classList.replace('opacity-0', 'opacity-100'))

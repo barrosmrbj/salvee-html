@@ -26,8 +26,14 @@ export function Input(options: InputOptions): HTMLDivElement {
       value="${value}"
       class="w-full px-4 py-3 rounded-xl border ${error ? 'border-red-400 bg-red-50' : 'border-gray-200 bg-white'} text-gray-900 text-base outline-none focus:border-salvee-orange transition-colors"
     />
-    ${error ? `<span class="text-xs text-red-500">${error}</span>` : ''}
   `
+
+  if (error) {
+    const errorEl = document.createElement('span')
+    errorEl.className = 'text-xs text-red-500'
+    errorEl.textContent = error  // safe: textContent never interprets HTML
+    wrapper.appendChild(errorEl)
+  }
 
   if (onInput) {
     const input = wrapper.querySelector('input')!
