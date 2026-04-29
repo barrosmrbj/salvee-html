@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html, body {
+    @apply h-full m-0 p-0 bg-gray-100 font-sans;
+  }
+
+  #app {
+    @apply max-w-app mx-auto min-h-full bg-white relative overflow-x-hidden;
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+  }
+  .screen {
+    @apply min-h-screen flex flex-col;
+  }
+}
