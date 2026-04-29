@@ -1,11 +1,13 @@
 import '@/styles/global.css'
+import { Router } from '@/router'
 
-document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
-  <div class="p-4">
-    <h1 class="text-2xl font-bold text-salvee-orange">Salvee</h1>
-    <p class="text-gray-600 mt-2">Tailwind funcionando!</p>
-    <div class="mt-4 p-4 bg-salvee-orange-bg rounded-2xl">
-      <p class="text-salvee-orange font-semibold">Tokens de cor OK</p>
-    </div>
-  </div>
-`
+const app = document.getElementById('app')
+if (!app) throw new Error('#app element not found')
+
+const router = new Router()
+
+if (!window.location.hash || window.location.hash === '#') {
+  window.location.hash = '/'
+} else {
+  void router.resolve()
+}
