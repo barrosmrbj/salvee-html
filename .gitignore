@@ -30,3 +30,7 @@ dist-ssr/
 
 # Documentação local
 .Documentacao/
+
+# Server
+server/.env
+server/salvee.db
