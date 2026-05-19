@@ -3,7 +3,8 @@
     "allow": [
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\hkmju\\\\OneDrive\\\\Área de Trabalho\\\\salvee-html\" | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object Name, Attributes)",
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\hkmju\\\\OneDrive\\\\Área de Trabalho\\\\salvee-html\" -Force | Where-Object { $_.Name -ne \"node_modules\" } | Format-Table Name, Attributes -AutoSize)",
-      "Bash(ssh *)"
+      "Bash(ssh *)",
+      "mcp__plugin_context-mode_context-mode__ctx_fetch_and_index"
     ]
   }
 }
