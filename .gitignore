@@ -33,4 +33,5 @@ dist-ssr/
 
 # Server
 server/.env
+server/.env.production
 server/salvee.db
