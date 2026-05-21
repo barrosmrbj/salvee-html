@@ -1,0 +1,11 @@
+Options -MultiViews
+RewriteEngine On
+
+# Proxy /api/* para o backend Node.js na porta 8000
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^api/(.*)$ http://localhost:8000/api/$1 [P,L]
+
+# SPA - redireciona tudo para index.html
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.html [L]

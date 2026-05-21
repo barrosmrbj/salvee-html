@@ -1,7 +1,7 @@
 import { request } from './api';
 export const donationService = {
     async initiate(payload) {
-        return request('/donations', {
+        return request('/donations/initiate', {
             method: 'POST',
             body: JSON.stringify(payload),
         });

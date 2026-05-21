@@ -124,6 +124,17 @@ async function initDb() {
     })
   }
 
+  // column migrations
+  if (!(await db.schema.hasColumn('users', 'role'))) {
+    await db.schema.alterTable('users', t => t.string('role').defaultTo('user'))
+  }
+  if (!(await db.schema.hasColumn('institutions', 'responsible_user_id'))) {
+    await db.schema.alterTable('institutions', t => t.string('responsible_user_id'))
+  }
+  if (!(await db.schema.hasColumn('institutions', 'rejection_reason'))) {
+    await db.schema.alterTable('institutions', t => t.text('rejection_reason'))
+  }
+
   console.log('Database ready')
 }
 

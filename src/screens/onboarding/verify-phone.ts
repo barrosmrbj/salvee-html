@@ -114,7 +114,7 @@ function renderStep(): void {
         document.body.appendChild(overlay)
         try {
           await authService.verifyPhone(phone, code)
-          window.location.hash = '/feed'
+          window.location.hash = '/welcome-success'
         } catch (err) {
           showToast(err instanceof ApiError ? err.message : 'Código inválido', 'error')
         } finally {

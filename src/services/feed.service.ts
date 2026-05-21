@@ -7,6 +7,6 @@ export const feedService = {
   },
 
   async getPostById(id: string): Promise<Post> {
-    return request<Post>(`/posts/${id}`)
+    return request<Post>(`/feed/${id}`)
   },
 }

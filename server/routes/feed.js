@@ -4,8 +4,13 @@ const { authMiddleware } = require('../middleware/auth')
 
 const router = express.Router()
 
-router.get('/posts', authMiddleware, async (req, res) => {
+// GET /api/feed?page=1
+router.get('/', authMiddleware, async (req, res) => {
   try {
+    const page = Math.max(1, parseInt(req.query.page) || 1)
+    const limit = 20
+    const offset = (page - 1) * limit
+
     const posts = await db('posts')
       .join('institutions', 'posts.institution_id', 'institutions.id')
       .select(
@@ -15,7 +20,8 @@ router.get('/posts', authMiddleware, async (req, res) => {
         'institutions.logo_url as institution_logo_url'
       )
       .orderBy('posts.created_at', 'desc')
-      .limit(20)
+      .limit(limit)
+      .offset(offset)
 
     res.json(posts.map(formatPost))
   } catch (err) {
@@ -24,13 +30,20 @@ router.get('/posts', authMiddleware, async (req, res) => {
   }
 })
 
-router.get('/posts/:id', authMiddleware, async (req, res) => {
+// GET /api/feed/:id
+router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const post = await db('posts')
       .join('institutions', 'posts.institution_id', 'institutions.id')
-      .select('posts.*', 'institutions.name as institution_name', 'institutions.verified as institution_verified', 'institutions.logo_url as institution_logo_url')
+      .select(
+        'posts.*',
+        'institutions.name as institution_name',
+        'institutions.verified as institution_verified',
+        'institutions.logo_url as institution_logo_url'
+      )
       .where('posts.id', req.params.id)
       .first()
+
     if (!post) return res.status(404).json({ error: 'Post não encontrado' })
     res.json(formatPost(post))
   } catch (err) {

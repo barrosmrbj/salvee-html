@@ -16,18 +16,24 @@ export const institutionService = {
   },
 
   async registerStep(payload: InstitutionRegisterPayload): Promise<{ institutionId: string }> {
-    return request<{ institutionId: string }>('/institutions/register', {
+    return request<{ institutionId: string }>('/institutions/register/step', {
       method: 'POST',
       body: JSON.stringify(payload),
     })
   },
 
-  async uploadDocs(institutionId: string, files: FormData): Promise<void> {
+  async uploadFile(file: File): Promise<string> {
     const token = localStorage.getItem('accessToken')
-    await fetch(`${import.meta.env.VITE_API_URL}/institutions/${institutionId}/docs`, {
+    const form = new FormData()
+    form.append('file', file)
+    const base = (import.meta.env.VITE_API_URL as string) ?? ''
+    const res = await fetch(`${base}/upload`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: files,
+      body: form,
     })
+    const data = await res.json() as { url?: string; error?: string }
+    if (!res.ok) throw new Error(data.error ?? 'Erro no upload')
+    return data.url!
   },
 }

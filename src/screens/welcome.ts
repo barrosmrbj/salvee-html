@@ -1,4 +1,5 @@
 import { Button } from '@/components'
+import girlSvg from '../../.Documentacao/ilustracoes_salvee/__girl_salvee_003.svg?url'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -6,23 +7,17 @@ export function render(): HTMLElement {
 
   el.innerHTML = `
     <div class="flex-1 flex items-center justify-center p-8">
-      <div class="flex flex-col items-center gap-6 text-center">
-        <div class="w-32 h-32 bg-white/20 rounded-full flex items-center justify-center">
-          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-            <circle cx="32" cy="32" r="28" fill="white" fill-opacity="0.3"/>
-            <path d="M32 16C23.163 16 16 23.163 16 32s7.163 16 16 16 16-7.163 16-16-7.163-16-16-16z" fill="white"/>
-            <path d="M24 32l6 6 12-12" stroke="#FF6B00" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+      <div class="flex flex-col items-center gap-6 text-center w-full">
+        <img src="${girlSvg}" alt="Ilustração Salvee" class="w-48 h-48 object-contain" />
         <div>
           <h1 class="text-white text-4xl font-bold mb-2">Olá!</h1>
           <p class="text-white/80 text-base leading-relaxed">
             Ajudar nunca foi tão fácil. Grandes mudanças acontecem com pequenos cliques.
           </p>
         </div>
+        <div id="welcome-actions" class="flex flex-col gap-3 w-full"></div>
       </div>
     </div>
-    <div id="welcome-actions" class="p-6 pb-safe flex flex-col gap-3"></div>
   `
   return el
 }

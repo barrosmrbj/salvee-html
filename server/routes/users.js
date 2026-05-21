@@ -4,25 +4,34 @@ const { authMiddleware } = require('../middleware/auth')
 
 const router = express.Router()
 
-router.get('/profile', authMiddleware, async (req, res) => {
+function formatUser(u) {
+  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatar_url, xp: u.xp, salves: u.salves, level: u.level, createdAt: u.created_at }
+}
+
+async function getUser(req, res) {
   try {
     const user = await db('users').where({ id: req.userId }).first()
     if (!user) return res.status(404).json({ error: 'Usuário não encontrado' })
-    res.json({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url, xp: user.xp, salves: user.salves, level: user.level, createdAt: user.created_at })
+    res.json(formatUser(user))
   } catch (err) {
     res.status(500).json({ error: 'Erro interno' })
   }
-})
+}
 
-router.put('/profile', authMiddleware, async (req, res) => {
+async function updateUser(req, res) {
   try {
     const { name, avatarUrl } = req.body
     await db('users').where({ id: req.userId }).update({ name, avatar_url: avatarUrl })
     const user = await db('users').where({ id: req.userId }).first()
-    res.json({ id: user.id, name: user.name, email: user.email, avatarUrl: user.avatar_url, xp: user.xp, salves: user.salves, level: user.level, createdAt: user.created_at })
+    res.json(formatUser(user))
   } catch (err) {
     res.status(500).json({ error: 'Erro interno' })
   }
-})
+}
+
+router.get('/me', authMiddleware, getUser)
+router.patch('/me', authMiddleware, updateUser)
+router.get('/profile', authMiddleware, getUser)
+router.put('/profile', authMiddleware, updateUser)
 
 module.exports = router

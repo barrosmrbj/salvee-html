@@ -4,6 +4,6 @@ export const feedService = {
         return request(`/feed?page=${page}`);
     },
     async getPostById(id) {
-        return request(`/posts/${id}`);
+        return request(`/feed/${id}`);
     },
 };

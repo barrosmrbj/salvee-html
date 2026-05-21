@@ -26,7 +26,7 @@ export async function request(endpoint, options = {}) {
     });
     const data = await response.json();
     if (!response.ok) {
-        throw new ApiError(response.status, data.message ?? 'Erro desconhecido');
+        throw new ApiError(response.status, data.error ?? data.message ?? 'Erro desconhecido');
     }
     return data;
 }

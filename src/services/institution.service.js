@@ -11,17 +11,23 @@ export const institutionService = {
         return request(`/institutions/search?q=${encodeURIComponent(query)}`);
     },
     async registerStep(payload) {
-        return request('/institutions/register', {
+        return request('/institutions/register/step', {
             method: 'POST',
             body: JSON.stringify(payload),
         });
     },
-    async uploadDocs(institutionId, files) {
+    async uploadFile(file) {
         const token = localStorage.getItem('accessToken');
-        await fetch(`${import.meta.env.VITE_API_URL}/institutions/${institutionId}/docs`, {
+        const form = new FormData();
+        form.append('file', file);
+        const base = import.meta.env.VITE_API_URL ?? '';
+        const res = await fetch(`${base}/upload`, {
             method: 'POST',
             headers: token ? { Authorization: `Bearer ${token}` } : {},
-            body: files,
+            body: form,
         });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error ?? 'Erro no upload');
+        return data.url;
     },
 };

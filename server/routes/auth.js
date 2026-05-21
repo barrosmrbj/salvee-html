@@ -6,6 +6,8 @@ const { signToken, authMiddleware } = require('../middleware/auth')
 
 const router = express.Router()
 
+const phoneCodeStore = new Map()
+
 // POST /auth/register
 router.post('/register', async (req, res) => {
   try {
@@ -21,7 +23,7 @@ router.post('/register', async (req, res) => {
 
     const user = await db('users').where({ id }).first()
     const token = signToken(id)
-    res.status(201).json({ token, user: formatUser(user) })
+    res.status(201).json({ accessToken: token, refreshToken: token, user: formatUser(user) })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -41,7 +43,7 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'E-mail ou senha incorretos' })
 
     const token = signToken(user.id)
-    res.json({ token, user: formatUser(user) })
+    res.json({ accessToken: token, refreshToken: token, user: formatUser(user) })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -71,16 +73,27 @@ router.post('/forgot-password', async (req, res) => {
 
 // POST /auth/send-phone-code
 router.post('/send-phone-code', authMiddleware, async (req, res) => {
+  const { phone } = req.body
+  if (!phone) return res.status(400).json({ error: 'Telefone obrigatório' })
+  const code = String(Math.floor(1000 + Math.random() * 9000))
+  phoneCodeStore.set(phone, code)
+  console.log(`[SMS MOCK] Código para ${phone}: ${code}`)
   res.json({ ok: true })
 })
 
 // POST /auth/verify-phone
 router.post('/verify-phone', authMiddleware, async (req, res) => {
+  const { phone, code } = req.body
+  const stored = phoneCodeStore.get(phone)
+  if (!stored || stored !== String(code)) {
+    return res.status(400).json({ error: 'Código inválido' })
+  }
+  phoneCodeStore.delete(phone)
   res.json({ ok: true })
 })
 
 function formatUser(u) {
-  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatar_url, xp: u.xp, salves: u.salves, level: u.level, createdAt: u.created_at }
+  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatar_url, xp: u.xp, salves: u.salves, level: u.level, role: u.role || 'user', createdAt: u.created_at }
 }
 
 module.exports = router

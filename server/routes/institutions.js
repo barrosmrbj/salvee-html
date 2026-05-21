@@ -14,6 +14,23 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
+router.get('/destaques', authMiddleware, async (req, res) => {
+  try {
+    const list = await db('institutions')
+      .leftJoin('donations', 'institutions.id', 'donations.institution_id')
+      .where('institutions.status', 'approved')
+      .groupBy('institutions.id')
+      .select('institutions.*')
+      .sum({ total_donated: 'donations.amount' })
+      .orderByRaw('total_donated ASC NULLS FIRST')
+      .limit(10)
+    res.json(list.map(i => ({ ...formatInst(i), totalDonated: Number(i.total_donated) || 0 })))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const inst = await db('institutions').where({ id: req.params.id }).first()
@@ -31,7 +48,7 @@ router.post('/register/step', authMiddleware, async (req, res) => {
 
     if (step === 1 || !id) {
       id = uuidv4()
-      await db('institutions').insert({ id, name: data.name || '', status: 'pending', ...flattenStep(step, data) })
+      await db('institutions').insert({ id, name: data.name || '', status: 'pending', responsible_user_id: req.userId, ...flattenStep(step, data) })
     } else {
       await db('institutions').where({ id }).update(flattenStep(step, data))
     }
@@ -45,14 +62,12 @@ router.post('/register/step', authMiddleware, async (req, res) => {
 
 function flattenStep(step, data) {
   const maps = {
-    1: { name: data.name, responsible: data.responsible, contact_email: data.contact_email, contact_phone: data.contact_phone },
-    2: { cnpj: data.cnpj, street: data.street, city: data.city, state: data.state, zip: data.zip },
-    3: { category: data.category, subcategory: data.subcategory, audience: data.audience },
-    4: { logo_url: data.logo_url, photo_url: data.photo_url },
-    5: { mission: data.mission, founded_year: data.founded_year ? Number(data.founded_year) : null, history: data.history },
-    6: {},
+    1: { name: data.name, responsible: data.responsible, contact_email: data.contact_email, contact_phone: data.contact_phone, category: data.category, subcategory: data.subcategory },
+    2: { description: data.description, city: data.city, state: data.state, audience: data.audience, cnpj: data.cnpj, street: data.street, zip: data.zip, mission: data.mission, founded_year: data.founded_year ? Number(data.founded_year) : null },
+    3: { logo_url: data.logo_url, photo_url: data.photo_url, history: data.history },
   }
-  return maps[step] || {}
+  const flat = maps[step] || {}
+  return Object.fromEntries(Object.entries(flat).filter(([, v]) => v !== undefined && v !== null && v !== ''))
 }
 
 function formatInst(i) {

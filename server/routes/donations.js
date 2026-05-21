@@ -31,11 +31,27 @@ router.post('/initiate', authMiddleware, async (req, res) => {
 
 router.get('/history', authMiddleware, async (req, res) => {
   try {
-    const list = await db('donations').where({ user_id: req.userId }).orderBy('created_at', 'desc')
+    const list = await db('donations')
+      .leftJoin('institutions', 'donations.institution_id', 'institutions.id')
+      .where('donations.user_id', req.userId)
+      .orderBy('donations.created_at', 'desc')
+      .select(
+        'donations.id', 'donations.institution_id', 'donations.amount',
+        'donations.payment_method', 'donations.anonymous',
+        'donations.xp_earned', 'donations.salves_earned', 'donations.created_at',
+        'institutions.name as institution_name', 'institutions.logo_url as institution_logo_url'
+      )
     res.json(list.map(d => ({
-      id: d.id, institutionId: d.institution_id, amount: d.amount,
-      paymentMethod: d.payment_method, anonymous: Boolean(d.anonymous),
-      xpEarned: d.xp_earned, salvesEarned: d.salves_earned, createdAt: d.created_at,
+      id: d.id,
+      institutionId: d.institution_id,
+      institutionName: d.institution_name ?? 'Instituição',
+      institutionLogoUrl: d.institution_logo_url ?? null,
+      amount: d.amount,
+      paymentMethod: d.payment_method,
+      anonymous: Boolean(d.anonymous),
+      xpEarned: d.xp_earned,
+      salvesEarned: d.salves_earned,
+      createdAt: d.created_at,
     })))
   } catch (err) {
     res.status(500).json({ error: 'Erro interno' })

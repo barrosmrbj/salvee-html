@@ -1,7 +1,7 @@
 // src/screens/profile.ts
 import { BottomNav, Avatar, Spinner, showToast, Button } from '@/components'
-import { userService, gamificationService } from '@/services'
-import type { User, GameBalance, Reward } from '@/types'
+import { userService, gamificationService, donationService, institutionService } from '@/services'
+import type { User, GameBalance, Reward, Donation, Institution } from '@/types'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -30,13 +30,15 @@ export function mount(): void {
     userService.getProfile().catch(() => getMockUser()),
     gamificationService.getBalance().catch(() => getMockBalance()),
     gamificationService.listRewards().catch(() => getMockRewards()),
-  ]).then(([user, balance, rewards]) => {
+    donationService.getHistory().catch(() => getMockDonations()),
+    institutionService.list().catch(() => []),
+  ]).then(([user, balance, rewards, donations, institutions]) => {
     loadingEl.remove()
-    renderProfile(user, balance, rewards)
+    renderProfile(user, balance, rewards, donations as Donation[], institutions as Institution[])
   })
 }
 
-function renderProfile(user: User, balance: GameBalance, rewards: Reward[]): void {
+function renderProfile(user: User, balance: GameBalance, rewards: Reward[], donations: Donation[], institutions: Institution[]): void {
   const content = document.getElementById('profile-content')!
   content.classList.remove('hidden')
 
@@ -109,37 +111,57 @@ function renderProfile(user: User, balance: GameBalance, rewards: Reward[]): voi
   // Tabs
   const tabBar = document.createElement('div')
   tabBar.className = 'flex border-b border-gray-100 bg-white'
+
+  const activeTabClass = 'flex-1 py-3 text-xs font-semibold text-salvee-orange border-b-2 border-salvee-orange'
+  const inactiveTabClass = 'flex-1 py-3 text-xs font-medium text-gray-400 border-b-2 border-transparent'
+
   const tabAvailable = document.createElement('button')
-  tabAvailable.id = 'tab-available'
-  tabAvailable.className = 'flex-1 py-3 text-sm font-medium text-salvee-orange border-b-2 border-salvee-orange'
-  tabAvailable.textContent = 'Disponível'
+  tabAvailable.className = activeTabClass
+  tabAvailable.textContent = 'Recompensas'
   const tabMy = document.createElement('button')
-  tabMy.id = 'tab-rewards'
-  tabMy.className = 'flex-1 py-3 text-sm font-medium text-gray-400 border-b-2 border-transparent'
-  tabMy.textContent = 'Minhas recompensas'
+  tabMy.className = inactiveTabClass
+  tabMy.textContent = 'Resgatadas'
+  const tabHistory = document.createElement('button')
+  tabHistory.className = inactiveTabClass
+  tabHistory.textContent = 'Histórico'
+
   tabBar.appendChild(tabAvailable)
   tabBar.appendChild(tabMy)
+  tabBar.appendChild(tabHistory)
   content.appendChild(tabBar)
 
-  const rewardsGrid = document.createElement('div')
-  rewardsGrid.id = 'rewards-grid'
-  rewardsGrid.className = 'grid grid-cols-1 gap-3 p-4'
-  content.appendChild(rewardsGrid)
+  const tabContent = document.createElement('div')
+  tabContent.id = 'tab-content'
+  tabContent.className = 'grid grid-cols-1 gap-3 p-4'
+  content.appendChild(tabContent)
 
-  tabAvailable.addEventListener('click', () => renderRewardsList(rewards))
+  const setActive = (active: HTMLButtonElement) => {
+    ;[tabAvailable, tabMy, tabHistory].forEach(t => {
+      t.className = t === active ? activeTabClass : inactiveTabClass
+    })
+  }
+
+  tabAvailable.addEventListener('click', () => {
+    setActive(tabAvailable)
+    tabContent.className = 'grid grid-cols-1 gap-3 p-4'
+    renderRewardsList(rewards)
+  })
   tabMy.addEventListener('click', () => {
-    const empty = document.createElement('p')
-    empty.className = 'text-center text-gray-400 py-8 col-span-full'
-    empty.textContent = 'Nenhuma recompensa resgatada.'
-    rewardsGrid.innerHTML = ''
-    rewardsGrid.appendChild(empty)
+    setActive(tabMy)
+    tabContent.className = 'grid grid-cols-1 gap-3 p-4'
+    tabContent.innerHTML = '<p class="text-center text-gray-400 py-8 col-span-full">Nenhuma recompensa resgatada.</p>'
+  })
+  tabHistory.addEventListener('click', () => {
+    setActive(tabHistory)
+    tabContent.className = 'flex flex-col gap-3 p-4'
+    renderDonationHistory(donations, institutions)
   })
 
   renderRewardsList(rewards)
 }
 
 function renderRewardsList(rewards: Reward[]): void {
-  const grid = document.getElementById('rewards-grid')!
+  const grid = document.getElementById('tab-content')!
   grid.innerHTML = ''
   rewards.forEach(reward => {
     const card = document.createElement('div')
@@ -193,6 +215,93 @@ function renderRewardsList(rewards: Reward[]): void {
     card.appendChild(btnContainer)
     grid.appendChild(card)
   })
+}
+
+function renderDonationHistory(donations: Donation[], _institutions: Institution[]): void {
+  const container = document.getElementById('tab-content')!
+  container.innerHTML = ''
+
+  if (donations.length === 0) {
+    container.innerHTML = '<p class="text-center text-gray-400 py-8">Nenhuma doação ainda.</p>'
+    return
+  }
+
+  const totalDonated = donations.reduce((s, d) => s + (d.amount ?? 0), 0)
+  const totalXp = donations.reduce((s, d) => s + (d.xpEarned ?? 0), 0)
+  const totalSalves = donations.reduce((s, d) => s + (d.salvesEarned ?? 0), 0)
+
+  const summary = document.createElement('div')
+  summary.className = 'bg-salvee-orange rounded-2xl p-4 text-white'
+  summary.innerHTML = `
+    <p class="text-xs font-medium text-white/70 mb-3">Resumo de doações</p>
+    <div class="flex justify-between">
+      <div class="text-center">
+        <p class="text-xl font-bold">R$&nbsp;${totalDonated.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}</p>
+        <p class="text-xs text-white/70 mt-0.5">Total doado</p>
+      </div>
+      <div class="text-center">
+        <p class="text-xl font-bold">+${totalXp}</p>
+        <p class="text-xs text-white/70 mt-0.5">XP ganho</p>
+      </div>
+      <div class="text-center">
+        <p class="text-xl font-bold">+${totalSalves}</p>
+        <p class="text-xs text-white/70 mt-0.5">Salves ganhos</p>
+      </div>
+    </div>
+  `
+  container.appendChild(summary)
+
+  const payIcon: Record<string, string> = { pix: '⚡', paypal: '🅿️', google_pay: 'G', apple_pay: '🍎', card: '💳' }
+
+  donations.forEach(d => {
+    const logoUrl = (d as any).institutionLogoUrl as string | null
+    const card = document.createElement('div')
+    card.className = 'bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3'
+
+    const logoDiv = document.createElement('div')
+    logoDiv.className = 'w-12 h-12 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0 text-xl'
+    if (logoUrl) {
+      const img = document.createElement('img')
+      img.src = logoUrl
+      img.alt = d.institutionName
+      img.className = 'w-full h-full object-cover'
+      logoDiv.appendChild(img)
+    } else {
+      logoDiv.textContent = '🏢'
+    }
+    card.appendChild(logoDiv)
+
+    const info = document.createElement('div')
+    info.className = 'flex-1 min-w-0'
+    const nameP = document.createElement('p')
+    nameP.className = 'font-semibold text-gray-900 text-sm truncate'
+    nameP.textContent = d.institutionName ?? 'Instituição'
+    const metaP = document.createElement('p')
+    metaP.className = 'text-xs text-gray-400 mt-0.5'
+    metaP.textContent = `${payIcon[d.paymentMethod ?? 'pix'] ?? '⚡'} ${(d.paymentMethod ?? 'pix').toUpperCase()} · ${new Date(d.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}`
+    const pointsP = document.createElement('p')
+    pointsP.className = 'text-xs text-salvee-orange font-medium mt-1'
+    pointsP.textContent = `+${d.xpEarned ?? 0} XP · +${d.salvesEarned ?? 0} SLV`
+    info.appendChild(nameP)
+    info.appendChild(metaP)
+    info.appendChild(pointsP)
+    card.appendChild(info)
+
+    const amountP = document.createElement('p')
+    amountP.className = 'font-bold text-gray-900 text-base flex-shrink-0'
+    amountP.textContent = `R$ ${(d.amount ?? 0).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}`
+    card.appendChild(amountP)
+
+    container.appendChild(card)
+  })
+}
+
+function getMockDonations(): Donation[] {
+  return [
+    { id: 'd1', institutionId: 'inst-lar-sao-jose', institutionName: 'Lar São José', amount: 50, paymentMethod: 'pix', anonymous: false, xpEarned: 25, salvesEarned: 12, createdAt: new Date(Date.now() - 86400000).toISOString() },
+    { id: 'd2', institutionId: 'inst-casa-esperanca', institutionName: 'Casa Esperança', amount: 100, paymentMethod: 'pix', anonymous: false, xpEarned: 50, salvesEarned: 25, createdAt: new Date(Date.now() - 86400000 * 3).toISOString() },
+    { id: 'd3', institutionId: 'inst-ong-raizes', institutionName: 'ONG Raízes', amount: 30, paymentMethod: 'pix', anonymous: false, xpEarned: 15, salvesEarned: 7, createdAt: new Date(Date.now() - 86400000 * 7).toISOString() },
+  ]
 }
 
 function getMockUser(): User {

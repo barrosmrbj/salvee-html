@@ -19,6 +19,7 @@ const ROUTES: RouteDefinition[] = [
   { path: '/register', load: () => import('@/screens/auth/register') },
   { path: '/register/institution', load: () => import('@/screens/onboarding/institution-register'), protected: true },
   { path: '/verify-phone', load: () => import('@/screens/onboarding/verify-phone') },
+  { path: '/welcome-success', load: () => import('@/screens/onboarding/welcome-success') },
   { path: '/choose-profile', load: () => import('@/screens/onboarding/choose-profile') },
   { path: '/forgot-password', load: () => import('@/screens/auth/forgot-password') },
   { path: '/feed', load: () => import('@/screens/feed'), protected: true },

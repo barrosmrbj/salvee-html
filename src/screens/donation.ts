@@ -2,6 +2,7 @@
 import { Button, NumericKeyboard, showToast, LoadingOverlay } from '@/components'
 import { donationService, institutionService } from '@/services'
 import type { Institution, PaymentMethod } from '@/types'
+import girlSvg from '../../.Documentacao/ilustracoes_salvee/__girl_salvee_004.svg?url'
 
 type DonationStep = 'amount' | 'payment' | 'summary' | 'success'
 
@@ -381,9 +382,10 @@ function renderSuccessStep(screen: HTMLElement): void {
   const main = document.createElement('div')
   main.className = 'flex flex-col items-center justify-center flex-1 p-6 gap-6 text-center'
 
-  const emoji = document.createElement('div')
-  emoji.className = 'w-32 h-32 bg-salvee-orange-bg rounded-full flex items-center justify-center text-6xl'
-  emoji.textContent = '🎉'
+  const emoji = document.createElement('img')
+  emoji.src = girlSvg
+  emoji.alt = 'Parabéns'
+  emoji.className = 'w-48 h-48 object-contain'
   main.appendChild(emoji)
 
   const textBlock = document.createElement('div')

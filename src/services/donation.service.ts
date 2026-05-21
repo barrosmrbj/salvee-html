@@ -3,7 +3,7 @@ import type { Donation, DonationInitPayload, DonationResult } from '@/types'
 
 export const donationService = {
   async initiate(payload: DonationInitPayload): Promise<DonationResult> {
-    return request<DonationResult>('/donations', {
+    return request<DonationResult>('/donations/initiate', {
       method: 'POST',
       body: JSON.stringify(payload),
     })

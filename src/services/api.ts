@@ -30,7 +30,7 @@ export async function request<T>(
   const data = await response.json()
 
   if (!response.ok) {
-    throw new ApiError(response.status, (data as { message?: string }).message ?? 'Erro desconhecido')
+    throw new ApiError(response.status, (data as { error?: string; message?: string }).error ?? (data as { message?: string }).message ?? 'Erro desconhecido')
   }
 
   return data as T

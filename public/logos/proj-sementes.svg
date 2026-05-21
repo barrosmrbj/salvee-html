@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#8B5CF6"/>
+  <!-- soil mound -->
+  <ellipse cx="100" cy="155" rx="45" ry="12" fill="white" fill-opacity="0.35"/>
+  <!-- stem -->
+  <path d="M100 150 Q100 120 100 95" stroke="white" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <!-- left leaf -->
+  <path d="M100 115 Q75 100 65 75 Q90 72 100 95 Q100 105 100 115" fill="white"/>
+  <!-- right leaf -->
+  <path d="M100 125 Q125 110 135 85 Q110 82 100 105 Q100 115 100 125" fill="white"/>
+  <!-- sprout tip -->
+  <circle cx="100" cy="90" r="8" fill="white"/>
+  <path d="M100 90 Q100 72 95 65 Q105 65 100 90" fill="#8B5CF6" fill-opacity="0.5"/>
+</svg>

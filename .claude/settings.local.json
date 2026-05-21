@@ -4,7 +4,16 @@
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\hkmju\\\\OneDrive\\\\Área de Trabalho\\\\salvee-html\" | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object Name, Attributes)",
       "PowerShell(Get-ChildItem \"C:\\\\Users\\\\hkmju\\\\OneDrive\\\\Área de Trabalho\\\\salvee-html\" -Force | Where-Object { $_.Name -ne \"node_modules\" } | Format-Table Name, Attributes -AutoSize)",
       "Bash(ssh *)",
-      "mcp__plugin_context-mode_context-mode__ctx_fetch_and_index"
+      "mcp__plugin_context-mode_context-mode__ctx_fetch_and_index",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "mcp__plugin_context-mode_context-mode__ctx_search",
+      "mcp__plugin_context-mode_context-mode__ctx_index",
+      "mcp__plugin_context-mode_context-mode__ctx_insight",
+      "Bash(node server/seed-institutions.js)",
+      "Bash(node server/seed-admin.js)",
+      "Bash(find \"C:\\\\\\\\Users\\\\\\\\hkmju\\\\\\\\OneDrive\\\\\\\\Área de Trabalho\\\\\\\\salvee-html\\\\\\\\src\\\\\\\\screens\" -type f -name \"*.ts\" -o -name \"*.tsx\" -o -name \"*.js\" -o -name \"*.jsx\")",
+      "Bash(node -e \"require\\('multer'\\); console.log\\('multer ok'\\)\")",
+      "Bash(npm install *)"
     ]
   }
 }

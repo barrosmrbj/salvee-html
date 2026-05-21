@@ -41,6 +41,8 @@ O sistema opera com dois tipos principais de conta:
 * **Pós-cadastro:** Direcionamento imediato para o Feed.
 
 ### 4.2 Instituição (Fluxo em Etapas)
+> **Qualquer usuário logado pode registrar uma instituição.** O cadastro é independente do perfil do usuário — o responsável pela instituição é definido pelos dados informados no próprio formulário (nome, e-mail e telefone de contato), sem vínculo com a conta que realizou o registro.
+
 1. **Identificação:** Nome da instituição, responsável e contatos.
 2. **Dados Formais:** CNPJ (se houver), endereço completo.
 3. **Atuação:** Categoria, subcategoria e descrição do público atendido.
@@ -50,8 +52,8 @@ O sistema opera com dois tipos principais de conta:
 
 **Estados da Conta Institucional:**
 * `pending`: Em análise (experiência limitada).
-* `approved`: Ativo e público.
-* `rejected`: Reprovado (acesso negado com motivo).
+* `approved`: Ativo e público. Campo `verified = true` ativado automaticamente.
+* `rejected`: Reprovado (acesso negado com motivo armazenado em `rejection_reason`).
 * `needs_revision`: Pendência de correção.
 
 ---
@@ -78,6 +80,11 @@ O sistema opera com dois tipos principais de conta:
 2. **Pagamento (V1):** Prioridade para **PIX** (e PayPal se disponível). *Cartão de Crédito fora da V1*.
 3. **Resumo:** Revisão da instituição, valor e pontuação a ser gerada.
 4. **Confirmação:** Feedback de sucesso/erro e registro de pontos.
+5. **Histórico de Doações** *(implementado)*: Acessível na aba "Histórico" do perfil do usuário.
+   * **Card resumo:** Total doado (R$), XP ganho e Salves ganhos acumulados.
+   * **Lista cronológica:** Cada doação exibe logo + nome da instituição, data, método de pagamento, valor e pontuação obtida (+XP / +SLV).
+   * **Dados:** Backend retorna `institutionName` e `institutionLogoUrl` via JOIN — sem chamadas extras ao frontend.
+   * **Fallback:** Mock de 3 doações exibido quando API indisponível.
 
 ### 5.4 Busca e Descoberta
 * **Barra de Pesquisa:** Busca por nome, categoria ou palavra-chave.
@@ -97,8 +104,30 @@ O sistema opera com dois tipos principais de conta:
 ---
 
 ## 6. Painel Administrativo (Backend/Web)
-Essencial para a governança do app:
-* Gestão de aprovação/rejeição de instituições.
+Essencial para a governança do app.
+
+### 6.1 Perfis com Acesso Administrativo
+Dois perfis têm acesso às funções de gestão de contas institucionais:
+
+| Role | Descrição | Como obter |
+| :--- | :--- | :--- |
+| `admin` | Superusuário. Acesso total. Pode delegar `gestor`. | Criado via seed (`admin@salvee.com`). |
+| `gestor` | Gestor de conta institucional delegado. Pode aprovar/rejeitar instituições. | Delegado pelo `admin` via `PATCH /api/admin/users/:id/role`. |
+
+### 6.2 Endpoints Administrativos
+Todos exigem autenticação (`Bearer token`).
+
+| Método | Rota | Acesso | Descrição |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/admin/users?name=...` | `admin` | Lista todos os usuários com filtro por nome. |
+| `PATCH` | `/api/admin/users/:id/role` | `admin` | Delega ou revoga role `gestor` de um usuário. |
+| `GET` | `/api/admin/institutions?status=&name=` | `admin`, `gestor` | Lista instituições com filtros de status e nome. |
+| `PATCH` | `/api/admin/institutions/:id/status` | `admin`, `gestor` | Altera status: `approved`, `rejected`, `needs_revision`. |
+
+### 6.3 Regras de Negócio
+* A role `admin` nunca pode ser alterada via API (protegida no endpoint).
+* Ao aprovar (`approved`), o campo `verified` é definido como `true` automaticamente.
+* Ao rejeitar, o campo `rejection_reason` é armazenado e visível ao responsável.
 * Moderação de conteúdo e categorias.
 * Monitoramento de campanhas e doações.
 * Gestão de recompensas e parceiros.
