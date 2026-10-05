@@ -1,6 +1,23 @@
 {
-  "versaoAtual": "1.4.0",
+  "versaoAtual": "1.4.1",
   "historico": [
+    {
+      "versao": "1.4.1",
+      "data": "2026-10-05",
+      "tipo": "patch",
+      "titulo": "Build de produção volta a compilar (cadastro de instituição)",
+      "modulos": [
+        "Onboarding",
+        "Sistema"
+      ],
+      "itens": [
+        "Correção: o npm run build falhava no tsc porque o tipo InstitutionRegisterPayload não tinha o campo institutionId, que o cadastro em etapas envia e a API já usa; isso impedia o deploy na Hostinger"
+      ],
+      "fontes": [
+        "src/types/institution.ts",
+        "src/screens/onboarding/institution-register.ts"
+      ]
+    },
     {
       "versao": "1.4.0",
       "data": "2026-10-05",

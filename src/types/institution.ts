@@ -32,4 +32,5 @@ export interface Address {
 export interface InstitutionRegisterPayload {
   step: number
   data: Record<string, unknown>
+  institutionId?: string
 }
