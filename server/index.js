@@ -22,7 +22,9 @@ app.use('/api/admin', require('./routes/admin'))
 app.use('/api/upload', require('./routes/upload'))
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 
-app.get('/api/health', (req, res) => res.json({ ok: true }))
+// versão sincronizada com src/config/versoes.json por `npm run versao:changelog`
+const { version } = require('./package.json')
+app.get('/api/health', (req, res) => res.json({ ok: true, version }))
 
 const PORT = process.env.PORT || 8000
 

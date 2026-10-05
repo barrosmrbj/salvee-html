@@ -7,6 +7,7 @@ export interface User {
   xp: number
   salves: number
   level: number
+  role?: string
   createdAt: string
 }
 

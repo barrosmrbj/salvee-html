@@ -5,7 +5,7 @@ const { authMiddleware } = require('../middleware/auth')
 const router = express.Router()
 
 function formatUser(u) {
-  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatar_url, xp: u.xp, salves: u.salves, level: u.level, createdAt: u.created_at }
+  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatar_url, xp: u.xp, salves: u.salves, level: u.level, role: u.role || 'user', createdAt: u.created_at }
 }
 
 async function getUser(req, res) {

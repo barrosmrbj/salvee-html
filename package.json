@@ -1,19 +1,23 @@
 {
   "name": "salvee-html",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "dev:server": "cd server && node --watch index.js",
-    "build": "tsc --noEmit && vite build",
+    "dev:all": "concurrently -n FRONTEND,BACKEND -c blue,green \"vite\" \"npm run dev --prefix server\"",
+    "build": "node scripts/versao.mjs check && tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "versao:check": "node scripts/versao.mjs check",
+    "versao:changelog": "node scripts/versao.mjs changelog"
   },
   "devDependencies": {
     "@vitest/ui": "^2.1.0",
     "autoprefixer": "^10.5.0",
+    "concurrently": "^10.0.5",
     "jsdom": "^25.0.0",
     "postcss": "^8.5.12",
     "tailwindcss": "^3.4.19",

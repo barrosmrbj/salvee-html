@@ -1,5 +1,6 @@
 // src/screens/settings.ts
 import { authService } from '@/services'
+import versoes from '@/config/versoes.json'
 
 interface SettingItem {
   label: string
@@ -26,7 +27,25 @@ export function render(): HTMLElement {
 
 export function mount(): void {
   document.getElementById('back-btn')!.addEventListener('click', () => history.back())
-  document.getElementById('app-version')!.textContent = 'Versão 1.0.0'
+  document.getElementById('app-version')!.textContent = `Versão ${versoes.versaoAtual}`
+
+  authService.getMe().then(user => {
+    if (user.role === 'admin' || user.role === 'gestor') {
+      const adminItems: SettingItem[] = [
+        { label: 'Aprovar instituições', icon: '🏢', action: () => { window.location.hash = '/admin/institutions' } },
+      ]
+      if (user.role === 'admin') {
+        adminItems.push({ label: 'Gerenciar usuários', icon: '👥', action: () => { window.location.hash = '/admin/users' } })
+      }
+
+      const container = document.getElementById('settings-list')!
+      const adminGroup = buildGroup({ title: 'Administração', items: adminItems })
+      const divider = document.createElement('div')
+      divider.className = 'h-2'
+      container.insertBefore(divider, container.firstChild)
+      container.insertBefore(adminGroup, container.firstChild)
+    }
+  }).catch(() => {})
 
   const groups: Array<{ title?: string; items: SettingItem[] }> = [
     {
@@ -64,44 +83,47 @@ export function mount(): void {
       divider.className = 'h-2'
       container.appendChild(divider)
     }
-
-    const section = document.createElement('div')
-    section.className = 'bg-white rounded-2xl overflow-hidden border border-gray-100'
-
-    if (group.title) {
-      const sectionTitle = document.createElement('p')
-      sectionTitle.className = 'px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100'
-      sectionTitle.textContent = group.title
-      section.appendChild(sectionTitle)
-    }
-
-    group.items.forEach((item, ii) => {
-      const btn = document.createElement('button')
-      btn.className = `w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 transition-colors ${item.destructive ? 'text-red-500' : 'text-gray-700'}`
-      if (ii > 0) btn.className += ' border-t border-gray-50'
-
-      const iconSpan = document.createElement('span')
-      iconSpan.className = 'text-xl w-8 text-center'
-      iconSpan.textContent = item.icon
-
-      const labelSpan = document.createElement('span')
-      labelSpan.className = 'flex-1 text-sm font-medium'
-      labelSpan.textContent = item.label
-
-      const chevron = document.createElement('span')
-      chevron.className = 'text-gray-300'
-      chevron.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
-
-      btn.appendChild(iconSpan)
-      btn.appendChild(labelSpan)
-      if (!item.destructive) btn.appendChild(chevron)
-
-      btn.addEventListener('click', item.action)
-      section.appendChild(btn)
-    })
-
-    container.appendChild(section)
+    container.appendChild(buildGroup(group))
   })
+}
+
+function buildGroup(group: { title?: string; items: SettingItem[] }): HTMLElement {
+  const section = document.createElement('div')
+  section.className = 'bg-white rounded-2xl overflow-hidden border border-gray-100'
+
+  if (group.title) {
+    const sectionTitle = document.createElement('p')
+    sectionTitle.className = 'px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100'
+    sectionTitle.textContent = group.title
+    section.appendChild(sectionTitle)
+  }
+
+  group.items.forEach((item, ii) => {
+    const btn = document.createElement('button')
+    btn.className = `w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-gray-50 transition-colors ${item.destructive ? 'text-red-500' : 'text-gray-700'}`
+    if (ii > 0) btn.className += ' border-t border-gray-50'
+
+    const iconSpan = document.createElement('span')
+    iconSpan.className = 'text-xl w-8 text-center'
+    iconSpan.textContent = item.icon
+
+    const labelSpan = document.createElement('span')
+    labelSpan.className = 'flex-1 text-sm font-medium'
+    labelSpan.textContent = item.label
+
+    const chevron = document.createElement('span')
+    chevron.className = 'text-gray-300'
+    chevron.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
+
+    btn.appendChild(iconSpan)
+    btn.appendChild(labelSpan)
+    if (!item.destructive) btn.appendChild(chevron)
+
+    btn.addEventListener('click', item.action)
+    section.appendChild(btn)
+  })
+
+  return section
 }
 
 export function unmount(): void {

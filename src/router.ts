@@ -29,6 +29,8 @@ const ROUTES: RouteDefinition[] = [
   { path: '/calendar', load: () => import('@/screens/calendar'), protected: true },
   { path: '/profile', load: () => import('@/screens/profile'), protected: true },
   { path: '/settings', load: () => import('@/screens/settings'), protected: true },
+  { path: '/admin/institutions', load: () => import('@/screens/admin/institution-approvals'), protected: true },
+  { path: '/admin/users', load: () => import('@/screens/admin/user-management'), protected: true },
 ]
 
 export function parseParams(

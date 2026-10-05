@@ -1,0 +1,220 @@
+{
+  "versaoAtual": "1.4.0",
+  "historico": [
+    {
+      "versao": "1.4.0",
+      "data": "2026-10-05",
+      "tipo": "marco",
+      "titulo": "Início do controle de versões do Salvee",
+      "modulos": [
+        "Sistema",
+        "Configurações",
+        "Servidor"
+      ],
+      "itens": [
+        "Fonte única de versões em src/config/versoes.json (versão atual + histórico), no mesmo modelo do SIGIS",
+        "Script scripts/versao.mjs: npm run versao:check valida o JSON e npm run versao:changelog gera o CHANGELOG.md e o catálogo do CLAUDE.md",
+        "Tela Configurações mostra a versão real do sistema (antes era o texto fixo \"Versão 1.0.0\")",
+        "/api/health passa a informar a versão do servidor (lida do server/package.json)",
+        "O build valida o versoes.json antes de compilar",
+        "Histórico anterior catalogado retroativamente (0.1.0 → 1.3.0) a partir do git e das sessões de desenvolvimento",
+        "CLAUDE.md criado com a documentação do projeto, deploy na Hostinger e a regra de versionamento"
+      ],
+      "fontes": [
+        "src/config/versoes.json",
+        "scripts/versao.mjs",
+        "src/screens/settings.ts",
+        "server/index.js",
+        "CLAUDE.md"
+      ]
+    },
+    {
+      "versao": "1.3.0",
+      "data": "2026-09-08",
+      "tipo": "minor",
+      "titulo": "Painel administrativo: aprovação de instituições e gestão de usuários",
+      "modulos": [
+        "Admin",
+        "Configurações",
+        "Servidor"
+      ],
+      "itens": [
+        "Nova tela de aprovação de instituições (#/admin/institutions) para admin e gestor: aprovar, reprovar com motivo (rejection_reason) e pedir revisão; aprovar ativa verified = true",
+        "Nova tela de gestão de usuários (#/admin/users), só para admin: busca por nome e troca de papel (user/gestor/admin)",
+        "Botão \"Ver gestores atuais\" lista os usuários com papel gestor (GET /api/admin/users?role=gestor)",
+        "Configurações ganha a seção de administração, visível conforme o papel do usuário",
+        "Correção: GET /api/users/me não devolvia o campo role (o login devolvia); o tipo User agora tem role",
+        "Novos tipos AdminInstitution e AdminUser e o adminService",
+        "Removidos os .js compilados que ficavam ao lado dos .ts em src/ e quebravam os imports no Vite"
+      ],
+      "fontes": [
+        "src/screens/admin/institution-approvals.ts",
+        "src/screens/admin/user-management.ts",
+        "src/services/admin.service.ts",
+        "src/types/admin.ts",
+        "server/routes/admin.js",
+        "server/routes/users.js"
+      ]
+    },
+    {
+      "versao": "1.2.0",
+      "data": "2026-09-08",
+      "tipo": "minor",
+      "titulo": "Calendário com próximas atividades, busca e feed reformulados",
+      "modulos": [
+        "Calendário",
+        "Busca",
+        "Feed",
+        "Configurações"
+      ],
+      "itens": [
+        "Calendário: seção \"Próximas atividades\", faixa de dias com rolagem horizontal e filtro por categoria",
+        "Busca: tocar numa causa abre a instituição correta",
+        "Feed reformulado",
+        "Botão de configurações com o mesmo comportamento no perfil e no feed",
+        "Especificação atualizada: qualquer usuário logado pode registrar uma instituição; estados pending/approved/rejected/needs_revision"
+      ],
+      "fontes": [
+        "src/screens/calendar.ts",
+        "src/screens/search.ts",
+        "src/screens/feed.ts",
+        "src/screens/settings.ts",
+        "server/routes/calendar.js",
+        "salvee_especificacao.md"
+      ]
+    },
+    {
+      "versao": "1.1.0",
+      "data": "2026-05-21",
+      "tipo": "minor",
+      "titulo": "Cadastro de instituição em etapas, feed com destaques e perfil ampliado",
+      "modulos": [
+        "Onboarding",
+        "Feed",
+        "Perfil",
+        "Servidor"
+      ],
+      "itens": [
+        "Cadastro de instituição refeito em etapas, com upload de logo e fotos (POST /api/upload)",
+        "Nova tela de boas-vindas após o cadastro (#/welcome-success)",
+        "Feed com instituições em destaque e banners promocionais (public/logos, public/promos)",
+        "Perfil do usuário ampliado",
+        "Migração de usuários para o MySQL (server/migrate_users.sql) e public/.htaccess para a hospedagem"
+      ],
+      "fontes": [
+        "git:5727dd2",
+        "src/screens/onboarding/institution-register.ts",
+        "src/screens/onboarding/welcome-success.ts",
+        "src/screens/feed.ts",
+        "src/screens/profile.ts"
+      ]
+    },
+    {
+      "versao": "1.0.0",
+      "data": "2026-05-18",
+      "tipo": "major",
+      "titulo": "Primeiro deploy na Hostinger com MySQL",
+      "modulos": [
+        "Servidor",
+        "Sistema"
+      ],
+      "itens": [
+        "Primeira publicação em hostingersite.com",
+        "Backend em produção com MySQL da Hostinger (DB_CLIENT=mysql2, .env.production)",
+        "Splash ajustada para checar a autenticação"
+      ],
+      "fontes": [
+        "git:7cc251c",
+        "git:284e43d",
+        "server/db.js"
+      ]
+    },
+    {
+      "versao": "0.4.0",
+      "data": "2026-04-30",
+      "tipo": "minor",
+      "titulo": "Backend Node.js/Express com SQLite (Knex, pronto para MySQL)",
+      "modulos": [
+        "Servidor"
+      ],
+      "itens": [
+        "API Express em server/ com rotas de auth, feed, instituições, busca, doações, gamificação, calendário e usuários",
+        "Banco via Knex: SQLite em desenvolvimento e MySQL em produção, com tabelas criadas no initDb()",
+        "Login com JWT e senha com bcrypt; scripts de seed"
+      ],
+      "fontes": [
+        "git:6884882"
+      ]
+    },
+    {
+      "versao": "0.3.0",
+      "data": "2026-04-29",
+      "tipo": "minor",
+      "titulo": "Feed, busca, perfil da instituição, doação, calendário, perfil e configurações",
+      "modulos": [
+        "Feed",
+        "Busca",
+        "Instituição",
+        "Doação",
+        "Calendário",
+        "Perfil",
+        "Configurações"
+      ],
+      "itens": [
+        "Telas de feed e busca",
+        "Perfil da instituição com abas",
+        "Fluxo de doação em 4 etapas",
+        "Telas de calendário, perfil e configurações"
+      ],
+      "fontes": [
+        "git:c23c355",
+        "git:ec23b10",
+        "git:9ec3c2b",
+        "git:d0af516"
+      ]
+    },
+    {
+      "versao": "0.2.0",
+      "data": "2026-04-29",
+      "tipo": "minor",
+      "titulo": "Telas de entrada, autenticação e onboarding",
+      "modulos": [
+        "Autenticação",
+        "Onboarding"
+      ],
+      "itens": [
+        "Splash e boas-vindas",
+        "Login, cadastro e esqueci a senha",
+        "Onboarding: escolha de perfil, verificação de telefone e cadastro de instituição"
+      ],
+      "fontes": [
+        "git:978f145",
+        "git:4ffaced",
+        "git:9d0b50c"
+      ]
+    },
+    {
+      "versao": "0.1.0",
+      "data": "2026-04-29",
+      "tipo": "minor",
+      "titulo": "Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "Estrutura Vite + TypeScript, Vitest e Tailwind com as cores do Salvee",
+        "Tipos de domínio e camada de serviços (api.ts com BASE_URL, auth e demais serviços) com testes",
+        "Router por hash (#/...) com rotas protegidas",
+        "Componentes: Button, Input, Spinner, Toast, Card, Avatar, Badge, BottomNav, ProgressBar, BottomSheet, NumericKeyboard",
+        "Correção de XSS nos componentes Toast e Input"
+      ],
+      "fontes": [
+        "git:c2ac4d2",
+        "git:11678ac",
+        "git:43c7124",
+        "git:e92cd67",
+        "git:a990ec3"
+      ]
+    }
+  ]
+}

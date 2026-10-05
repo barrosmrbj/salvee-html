@@ -29,4 +29,6 @@ export interface CalendarEvent {
   date: string
   location: string
   registered: boolean
+  category?: string | null
+  imageUrl?: string | null
 }

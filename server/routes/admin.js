@@ -20,12 +20,15 @@ async function requireGestor(req, res, next) {
   next()
 }
 
-// GET /admin/users?name=...
+// GET /admin/users?name=...&role=...
 router.get('/users', authMiddleware, requireAdmin, async (req, res) => {
   try {
     let query = db('users').select('id', 'name', 'email', 'role', 'xp', 'salves', 'level', 'created_at')
     if (req.query.name) {
       query = query.where('name', 'like', `%${req.query.name}%`)
+    }
+    if (req.query.role) {
+      query = query.where('role', req.query.role)
     }
     const users = await query.orderBy('name')
     res.json(users)

@@ -12,13 +12,14 @@ router.get('/my-events', authMiddleware, async (req, res) => {
       .join('institutions', 'posts.institution_id', 'institutions.id')
       .where('calendar_registrations.user_id', req.userId)
       .where('posts.type', 'event')
-      .select('posts.*', 'institutions.name as institution_name')
+      .select('posts.*', 'institutions.name as institution_name', 'institutions.category as category')
       .orderBy('posts.event_date')
 
     res.json(regs.map(p => ({
       id: p.id, institutionId: p.institution_id, institutionName: p.institution_name,
       title: p.content.slice(0, 60), date: p.event_date || p.created_at,
       location: p.event_location || '', registered: true,
+      category: p.category || null, imageUrl: p.image_url || null,
     })))
   } catch (err) {
     res.status(500).json({ error: 'Erro interno' })
