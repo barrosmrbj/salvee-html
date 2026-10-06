@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.4.3**
+**Versão atual: 1.5.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.5.0** | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
 | **1.4.3** | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |
 | **1.4.2** | 05/10/2026 | Patch | Deploy na Hostinger com build automático (corrige tela branca) | Sistema |
 | **1.4.1** | 05/10/2026 | Patch | Build de produção volta a compilar (cadastro de instituição) | Onboarding, Sistema |
@@ -33,6 +34,21 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.5.0 — MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App
+
+*05/10/2026 · Minor · Servidor, Banco de dados*
+
+- API preparada para rodar como Node.js App separado na Hostinger (raiz server/): CORS restrito por CORS_ORIGIN, trust proxy, better-sqlite3 opcional, engines Node >= 20
+- Em produção, o servidor não sobe sem JWT_SECRET (antes usava um segredo padrão) e falha de conexão com o banco aparece no log
+- Upload devolve URL absoluta (PUBLIC_URL ou host da requisição), para as imagens abrirem com frontend e API em domínios diferentes
+- Novo script server/scripts/exportar-mysql.js (npm run exportar:mysql no server/) que gera server/export/salvee-mysql.sql para importar no phpMyAdmin
+- Cria as tabelas que faltarem no formato do initDb() e adiciona colunas ausentes (ex.: users.role, que o migrate_users.sql antigo não tinha), em SQL compatível com MySQL e MariaDB
+- Copia todas as linhas com upsert: o dado local sobrescreve o mesmo id (em users, o mesmo e-mail, mantendo o id da produção); nada da produção é apagado; pode ser reimportado
+- Datas ISO do SQLite convertidas para o formato DATETIME do MySQL
+- server/export/ fora do git (contém e-mails e hashes de senha)
+
+Fontes: `server/scripts/exportar-mysql.js` · `server/index.js` · `server/routes/upload.js` · `server/package.json` · `.gitignore` · `CLAUDE.md`
 
 ### 1.4.3 — Deploy só pela master: build versionado em dist/ servido pelo .htaccess
 

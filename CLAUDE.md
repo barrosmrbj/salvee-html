@@ -30,6 +30,7 @@ npm run versao:changelog   # sincroniza package.json, gera CHANGELOG.md e o cat�
 node server/seed.js              # dados de exemplo
 node server/seed-institutions.js # instituições de exemplo
 node server/seed-admin.js        # cria/promove admin@salvee.com (senha Salvee@2025, trocar em produção)
+node server/scripts/exportar-mysql.js  # SQLite local → server/export/salvee-mysql.sql (importar no phpMyAdmin)
 ```
 
 ## Estrutura
@@ -77,7 +78,7 @@ public/                   # logos, promos, .htaccess
 
 ## Ambiente
 
-- Raiz: `.env` (`VITE_API_URL=http://localhost:8000/api`) e `.env.production` (`VITE_API_URL=https://<domínio>/api`). Vite injeta no **build**: mudou o domínio, refazer o build.
+- Raiz: `.env` (`VITE_API_URL=http://localhost:8000/api`) e `.env.production` (`VITE_API_URL=https://darkblue-rook-985577.hostingersite.com/api`). Vite injeta no **build**: mudou o domínio, refazer o build.
 - `server/.env` (dev, SQLite) e `server/.env.production` (MySQL: `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET`, `PORT`). `index.js` carrega `.env.production` quando `NODE_ENV=production`.
 - Nunca commitar `.env*` nem `server/salvee.db`.
 
@@ -87,7 +88,8 @@ public/                   # logos, promos, .htaccess
 - `server/salvee.db` está no `.gitignore` mas ainda é rastreado pelo git: rodar `git rm --cached server/salvee.db`.
 - Arquivo `nul` na raiz é lixo de redirecionamento no Windows: apagar.
 - `server/uploads/` fica em disco; um redeploy na Hostinger pode apagar. Fazer backup.
-- `cors()` está aberto para qualquer origem; restringir ao domínio em produção.
+- CORS fica aberto para qualquer origem se `CORS_ORIGIN` não estiver definido; em produção, definir com a URL do frontend.
+- Registros antigos com imagem em caminho relativo (`/uploads/...`) não abrem quando frontend e API estão em domínios diferentes; uploads novos já gravam a URL absoluta.
 
 ## Fluxo de trabalho: localhost primeiro, Hostinger depois
 
@@ -105,6 +107,7 @@ Regras:
 - Não fazer push de algo não testado em localhost. Trabalho em andamento fica só local (sem commit, ou commit sem push); se não ficar bom, desfazer localmente (`git restore`, `git reset`).
 - Nunca editar arquivos direto no `public_html` / Gerenciador de Arquivos da Hostinger: o próximo deploy sobrescreve.
 - Dados de dev (SQLite) e de produção (MySQL) são bancos separados. Mudança de schema vai no `initDb()` e é aplicada sozinha na subida do servidor nos dois.
+- **Levar dados do local para a produção:** `node server/scripts/exportar-mysql.js` gera `server/export/salvee-mysql.sql` (fora do git). Importar no hPanel → Bancos de dados → phpMyAdmin → `u526770669_salvee` → **Importar**. O SQL cria tabelas/colunas que faltarem e faz *upsert*: o dado local sobrescreve o registro de mesmo `id` (ou, em `users`, de mesmo e-mail, mantendo o id da produção); nada que só existe na produção é apagado. Pode ser importado de novo. Fazer backup do banco antes (hPanel → Backups). Imagens em `server/uploads/` não vão junto.
 
 ## Deploy na Hostinger (resumo)
 
@@ -117,11 +120,15 @@ Regras:
 
 **Backend (Node):**
 
-1. `npm run build` (gera `dist/` com o `VITE_API_URL` de produção).
-2. Hostinger hPanel → Node.js App com entrada `server/index.js`, Node 20/22, variáveis do `server/.env.production` no painel, `NODE_ENV=production`.
-3. Para um app único (API + frontend), o Express precisa servir `../dist` (`express.static`). Alternativa já existente: `public/.htaccess` faz proxy de `/api/*` para `localhost:8000`.
-4. `better-sqlite3` é nativo e pode falhar na instalação compartilhada; em produção só o `mysql2` é usado.
-5. Testar `https://<domínio>/api/health` → `{ "ok": true, "version": "x.y.z" }`. Rodar `seed-admin.js` via SSH e trocar a senha.
+A API roda como um **site separado do tipo Node.js App** no hPanel (plano Business), ligado ao mesmo repositório/`master`, com **diretório raiz `server`**. O site estático continua servindo o frontend; o frontend chama a API pelo endereço absoluto em `VITE_API_URL`.
+
+- Configuração do app: Node 20/22, entrada `index.js`, instalação `npm install`, start `npm start` (`NODE_ENV=production node index.js`).
+- Variáveis de ambiente (no painel do app, nunca no git): `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `CORS_ORIGIN` (URL do site estático), `PUBLIC_URL` (URL da própria API). `PORT` é definido pela Hostinger.
+- Em produção sem `JWT_SECRET` o servidor não sobe; falha de conexão com o MySQL aparece no log como "Falha ao conectar/preparar o banco".
+- `better-sqlite3` está em `optionalDependencies`: se não compilar na Hostinger, a instalação segue (produção usa só `mysql2`).
+- Uploads retornam URL absoluta (`PUBLIC_URL` ou host da requisição). Os arquivos ficam no disco do app e **podem sumir num redeploy**.
+- Teste: `https://darkblue-rook-985577.hostingersite.com/api/health` → `{ "ok": true, "version": "x.y.z" }` com a mesma versão do app.
+- Endereço da API: `https://darkblue-rook-985577.hostingersite.com/api` (já é o `VITE_API_URL` do `.env.production`; `PUBLIC_URL=https://darkblue-rook-985577.hostingersite.com`). Mudou o endereço: atualizar o `.env.production`, `npm run build`, commit e push.
 
 ## Controle de versão do Salvee (obrigatório a cada mudança)
 
@@ -154,10 +161,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.4.3** · 12 versões
+Versão atual: **1.5.0** · 13 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.5.0 | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
 | 1.4.3 | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |
 | 1.4.2 | 05/10/2026 | Patch | Deploy na Hostinger com build automático (corrige tela branca) | Sistema |
 | 1.4.1 | 05/10/2026 | Patch | Build de produção volta a compilar (cadastro de instituição) | Onboarding, Sistema |

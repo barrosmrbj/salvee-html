@@ -1,6 +1,34 @@
 {
-  "versaoAtual": "1.4.3",
+  "versaoAtual": "1.5.0",
   "historico": [
+    {
+      "versao": "1.5.0",
+      "data": "2026-10-05",
+      "tipo": "minor",
+      "titulo": "MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App",
+      "modulos": [
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "API preparada para rodar como Node.js App separado na Hostinger (raiz server/): CORS restrito por CORS_ORIGIN, trust proxy, better-sqlite3 opcional, engines Node >= 20",
+        "Em produção, o servidor não sobe sem JWT_SECRET (antes usava um segredo padrão) e falha de conexão com o banco aparece no log",
+        "Upload devolve URL absoluta (PUBLIC_URL ou host da requisição), para as imagens abrirem com frontend e API em domínios diferentes",
+        "Novo script server/scripts/exportar-mysql.js (npm run exportar:mysql no server/) que gera server/export/salvee-mysql.sql para importar no phpMyAdmin",
+        "Cria as tabelas que faltarem no formato do initDb() e adiciona colunas ausentes (ex.: users.role, que o migrate_users.sql antigo não tinha), em SQL compatível com MySQL e MariaDB",
+        "Copia todas as linhas com upsert: o dado local sobrescreve o mesmo id (em users, o mesmo e-mail, mantendo o id da produção); nada da produção é apagado; pode ser reimportado",
+        "Datas ISO do SQLite convertidas para o formato DATETIME do MySQL",
+        "server/export/ fora do git (contém e-mails e hashes de senha)"
+      ],
+      "fontes": [
+        "server/scripts/exportar-mysql.js",
+        "server/index.js",
+        "server/routes/upload.js",
+        "server/package.json",
+        ".gitignore",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.4.3",
       "data": "2026-10-05",

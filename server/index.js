@@ -5,9 +5,20 @@ const cors = require('cors')
 const path = require('path')
 const { initDb } = require('./db')
 
+const isProduction = process.env.NODE_ENV === 'production'
+if (isProduction && !process.env.JWT_SECRET) {
+  console.error('JWT_SECRET não definido — configure nas variáveis de ambiente do app na Hostinger.')
+  process.exit(1)
+}
+
 const app = express()
 
-app.use(cors())
+// atrás do proxy da Hostinger: req.protocol passa a refletir o https original
+app.set('trust proxy', 1)
+
+// CORS_ORIGIN: domínios do frontend separados por vírgula (vazio = qualquer origem, como em dev)
+const corsOrigins = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean)
+app.use(cors(corsOrigins.length ? { origin: corsOrigins } : undefined))
 app.use(express.json())
 
 app.use('/api/auth', require('./routes/auth'))
@@ -28,6 +39,11 @@ app.get('/api/health', (req, res) => res.json({ ok: true, version }))
 
 const PORT = process.env.PORT || 8000
 
-initDb().then(() => {
-  app.listen(PORT, () => console.log(`Salvee API running on http://localhost:${PORT}`))
-})
+initDb()
+  .then(() => {
+    app.listen(PORT, () => console.log(`Salvee API ${version} running on port ${PORT} (${process.env.DB_CLIENT || 'sqlite'})`))
+  })
+  .catch(err => {
+    console.error('Falha ao conectar/preparar o banco:', err.message)
+    process.exit(1)
+  })

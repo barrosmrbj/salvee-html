@@ -30,7 +30,10 @@ const upload = multer({
 
 router.post('/', authMiddleware, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo recebido' })
-  const url = `/uploads/${req.file.filename}`
+  // URL absoluta: o frontend roda em outro domínio/porta e um caminho relativo apontaria para ele.
+  // PUBLIC_URL (ex.: https://api.dominio.com) tem prioridade; senão usa o host da requisição.
+  const base = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`
+  const url = `${base.replace(/\/$/, '')}/uploads/${req.file.filename}`
   res.json({ url })
 })
 

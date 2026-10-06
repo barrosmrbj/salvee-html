@@ -35,3 +35,5 @@ dist-ssr/
 server/.env
 server/.env.production
 server/salvee.db
+# SQL gerado por server/scripts/exportar-mysql.js (contém e-mails e hashes de senha)
+server/export/
