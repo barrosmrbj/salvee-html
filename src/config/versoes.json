@@ -1,6 +1,22 @@
 {
-  "versaoAtual": "1.4.1",
+  "versaoAtual": "1.4.2",
   "historico": [
+    {
+      "versao": "1.4.2",
+      "data": "2026-10-05",
+      "tipo": "patch",
+      "titulo": "Deploy na Hostinger com build automático (corrige tela branca)",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "Correção: a Hostinger copiava o repositório sem build para o public_html e o index.html carregava /src/main.ts (TypeScript), servido como text/plain, deixando a tela branca",
+        "GitHub Action (.github/workflows/deploy-hostinger.yml) roda npm run build a cada push na master e publica o dist/ na branch hostinger, que é a branch que a Hostinger deve implantar"
+      ],
+      "fontes": [
+        ".github/workflows/deploy-hostinger.yml"
+      ]
+    },
     {
       "versao": "1.4.1",
       "data": "2026-10-05",
