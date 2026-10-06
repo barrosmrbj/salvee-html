@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.4.2**
+**Versão atual: 1.4.3**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.4.3** | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |
 | **1.4.2** | 05/10/2026 | Patch | Deploy na Hostinger com build automático (corrige tela branca) | Sistema |
 | **1.4.1** | 05/10/2026 | Patch | Build de produção volta a compilar (cadastro de instituição) | Onboarding, Sistema |
 | **1.4.0** | 05/10/2026 | Marco | Início do controle de versões do Salvee | Sistema, Configurações, Servidor |
@@ -32,6 +33,17 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.4.3 — Deploy só pela master: build versionado em dist/ servido pelo .htaccess
+
+*05/10/2026 · Patch · Sistema*
+
+- Fluxo com uma única branch (master): a Hostinger implanta a master sem build, então o dist/ passa a ser versionado e o .htaccess da raiz serve tudo a partir dele (corrige de vez a tela branca)
+- O .htaccess também bloqueia o acesso pela web ao código-fonte (src/, server/ etc.)
+- Removidos a GitHub Action e a branch hostinger criadas na 1.4.2
+- CLAUDE.md: rodar npm run build antes de cada push; para desfazer em produção, git revert + push
+
+Fontes: `.htaccess` · `.gitignore` · `dist/` · `CLAUDE.md`
 
 ### 1.4.2 — Deploy na Hostinger com build automático (corrige tela branca)
 

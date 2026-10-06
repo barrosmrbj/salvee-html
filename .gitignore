@@ -9,7 +9,7 @@ node_modules/
 .pnp.js
 
 # Build output
-dist/
+# dist/ é versionado: a Hostinger implanta a master sem build (ver .htaccess da raiz)
 dist-ssr/
 
 # Environment variables

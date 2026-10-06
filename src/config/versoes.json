@@ -1,6 +1,27 @@
 {
-  "versaoAtual": "1.4.2",
+  "versaoAtual": "1.4.3",
   "historico": [
+    {
+      "versao": "1.4.3",
+      "data": "2026-10-05",
+      "tipo": "patch",
+      "titulo": "Deploy só pela master: build versionado em dist/ servido pelo .htaccess",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "Fluxo com uma única branch (master): a Hostinger implanta a master sem build, então o dist/ passa a ser versionado e o .htaccess da raiz serve tudo a partir dele (corrige de vez a tela branca)",
+        "O .htaccess também bloqueia o acesso pela web ao código-fonte (src/, server/ etc.)",
+        "Removidos a GitHub Action e a branch hostinger criadas na 1.4.2",
+        "CLAUDE.md: rodar npm run build antes de cada push; para desfazer em produção, git revert + push"
+      ],
+      "fontes": [
+        ".htaccess",
+        ".gitignore",
+        "dist/",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.4.2",
       "data": "2026-10-05",

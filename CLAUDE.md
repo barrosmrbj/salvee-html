@@ -94,21 +94,25 @@ public/                   # logos, promos, .htaccess
 Todo ajuste e módulo novo é feito e testado **em localhost**. Só depois sobe para a Hostinger.
 
 1. **Desenvolver local:** `npm run dev:all` (frontend em http://localhost:5173 + API em :8000 com SQLite `server/salvee.db`). Usa o `.env` da raiz (`VITE_API_URL=http://localhost:8000/api`) e o `server/.env`.
-2. **Testar local:** conferir no navegador, `npx tsc --noEmit`, `npm test` e **`npm run build`**. O build tem que passar, senão o deploy falha.
-3. **Versionar:** registrar a versão (ver "Controle de versão") e fazer o commit.
-4. **Subir:** `git push` na `master`. **Push na `master` = publicar em produção**: a Action gera o build e atualiza a branch `hostinger`, que a Hostinger implanta.
+2. **Testar local:** conferir no navegador, `npx tsc --noEmit`, `npm test`.
+3. **Versionar:** registrar a versão (ver "Controle de versão").
+4. **Gerar o build:** `npm run build` → atualiza `dist/`. **Sempre antes do commit que vai subir**; sem isso a Hostinger publica o build antigo. Conferir o site de produção localmente com `npm run preview`, se quiser.
+5. **Commit** (código + `dist/` + arquivos de versão) **e `git push` na `master`**. A Hostinger implanta a `master` automaticamente. **Push na `master` = publicar em produção.**
+6. **Deu errado em produção?** `git revert <commit>` + `git push` (volta o site ao estado anterior, inclusive o `dist/`).
 
 Regras:
-- Não fazer push na `master` de algo não testado em localhost. Trabalho em andamento fica local ou numa branch própria (branches que não são `master` não disparam o deploy).
+- **Só existe a branch `master`.** Não criar outras branches nem branch de deploy.
+- Não fazer push de algo não testado em localhost. Trabalho em andamento fica só local (sem commit, ou commit sem push); se não ficar bom, desfazer localmente (`git restore`, `git reset`).
 - Nunca editar arquivos direto no `public_html` / Gerenciador de Arquivos da Hostinger: o próximo deploy sobrescreve.
 - Dados de dev (SQLite) e de produção (MySQL) são bancos separados. Mudança de schema vai no `initDb()` e é aplicada sozinha na subida do servidor nos dois.
 
 ## Deploy na Hostinger (resumo)
 
-**Frontend (como está hoje):** o site `darkblue-rook-985577.hostingersite.com` (Business Web Hosting) é implantado pelo Git da Hostinger direto no `public_html`, **sem build**. Por isso:
+**Frontend:** o site `darkblue-rook-985577.hostingersite.com` (Business Web Hosting) é implantado pelo Git da Hostinger: a cada push, a **`master`** inteira é copiada para o `public_html`, **sem build**. Por isso:
 
-- `.github/workflows/deploy-hostinger.yml` roda `npm run build` a cada push na `master` e publica o conteúdo de `dist/` na branch **`hostinger`** (órfã, só com o build).
-- No hPanel, o site deve implantar a branch `hostinger`, **nunca a `master`**. A `master` tem o `index.html` de desenvolvimento (`/src/main.ts`), o que resulta em tela branca com o erro "MIME type text/plain".
+- **`dist/` é versionado** (não está no `.gitignore`) e precisa ser regerado com `npm run build` antes de cada push.
+- O **`.htaccess` da raiz** reescreve toda requisição para `dist/`. O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`); servido direto, dá tela branca com o erro "MIME type text/plain". O `.htaccess` também deixa `src/`, `server/` etc. inacessíveis pela web.
+- `dist/.htaccess` vem de `public/.htaccess` (fallback para `index.html` e proxy de `/api`).
 - O `VITE_API_URL` do build vem do `.env.production` da raiz (versionado, só contém a URL pública).
 
 **Backend (Node):**
@@ -150,10 +154,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.4.2** · 11 versões
+Versão atual: **1.4.3** · 12 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.4.3 | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |
 | 1.4.2 | 05/10/2026 | Patch | Deploy na Hostinger com build automático (corrige tela branca) | Sistema |
 | 1.4.1 | 05/10/2026 | Patch | Build de produção volta a compilar (cadastro de instituição) | Onboarding, Sistema |
 | 1.4.0 | 05/10/2026 | Marco | Início do controle de versões do Salvee | Sistema, Configurações, Servidor |

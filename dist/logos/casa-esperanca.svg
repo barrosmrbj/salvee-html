@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#F59E0B"/>
+  <!-- heart -->
+  <path d="M100 150 Q50 115 50 80 Q50 55 70 52 Q85 50 100 68 Q115 50 130 52 Q150 55 150 80 Q150 115 100 150Z" fill="white"/>
+  <!-- small star inside -->
+  <polygon points="100,75 104,87 117,87 107,94 111,107 100,100 89,107 93,94 83,87 96,87" fill="#F59E0B" fill-opacity="0.6"/>
+</svg>
