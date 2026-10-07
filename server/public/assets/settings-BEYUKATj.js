@@ -1,4 +1,4 @@
-import{a as r}from"./index-CNxEfz6J.js";const d="1.6.1",m={versaoAtual:d};function p(){const n=document.createElement("div");return n.className="screen bg-gray-50",n.innerHTML=`
+import{a as r}from"./index-CHmYf8PL.js";const d="1.6.2",m={versaoAtual:d};function p(){const n=document.createElement("div");return n.className="screen bg-gray-50",n.innerHTML=`
     <div class="flex items-center gap-3 p-4 bg-white border-b border-gray-100">
       <button id="back-btn" class="w-10 h-10 flex items-center justify-center text-gray-600">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>

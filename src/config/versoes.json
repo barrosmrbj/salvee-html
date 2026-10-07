@@ -1,6 +1,22 @@
 {
-  "versaoAtual": "1.6.1",
+  "versaoAtual": "1.6.2",
   "historico": [
+    {
+      "versao": "1.6.2",
+      "data": "2026-10-07",
+      "tipo": "patch",
+      "titulo": "Instalação na Hostinger sempre traz as dependências da API",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "O postinstall da raiz passa a instalar as dependências de server/ sempre, e não só com NODE_ENV=production: na Hostinger o NODE_ENV pode não estar definido durante a instalação, e a API subiria sem express/knex"
+      ],
+      "fontes": [
+        "package.json",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.6.1",
       "data": "2026-10-07",

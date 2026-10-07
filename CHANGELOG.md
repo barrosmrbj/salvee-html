@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.6.1**
+**Versão atual: 1.6.2**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.6.2** | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |
 | **1.6.1** | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |
 | **1.6.0** | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
 | **1.5.0** | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
@@ -36,6 +37,14 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.6.2 — Instalação na Hostinger sempre traz as dependências da API
+
+*07/10/2026 · Patch · Sistema*
+
+- O postinstall da raiz passa a instalar as dependências de server/ sempre, e não só com NODE_ENV=production: na Hostinger o NODE_ENV pode não estar definido durante a instalação, e a API subiria sem express/knex
+
+Fontes: `package.json` · `CLAUDE.md`
 
 ### 1.6.1 — Node.js App da Hostinger: variáveis fora do repositório e start pela raiz
 

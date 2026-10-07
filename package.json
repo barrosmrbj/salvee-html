@@ -1,7 +1,7 @@
 {
   "name": "salvee-html",
   "private": true,
-  "version": "1.6.1",
+  "version": "1.6.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,7 @@
     "versao:check": "node scripts/versao.mjs check",
     "versao:changelog": "node scripts/versao.mjs changelog",
     "start": "node server/index.js",
-    "postinstall": "node -e \"if(process.env.NODE_ENV==='production')require('child_process').execSync('npm install --prefix server --omit=dev',{stdio:'inherit'})\""
+    "postinstall": "npm install --prefix server --omit=dev"
   },
   "engines": {
     "node": ">=20"

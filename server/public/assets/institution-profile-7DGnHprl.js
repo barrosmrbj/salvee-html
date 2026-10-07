@@ -1,4 +1,4 @@
-import{B as E}from"./Button-kVf4TgMB.js";import{S as N}from"./Spinner-u1aW0YGE.js";import{i as w}from"./institution.service-D7jLmXM_.js";import"./index-CNxEfz6J.js";let i="mural";function L(e){const a=document.createElement("div");return a.className="screen bg-white",a.dataset.institutionId=(e==null?void 0:e.id)??"",a.innerHTML=`
+import{B as E}from"./Button-kVf4TgMB.js";import{S as N}from"./Spinner-u1aW0YGE.js";import{i as w}from"./institution.service-D3KpkPW0.js";import"./index-CHmYf8PL.js";let i="mural";function L(e){const a=document.createElement("div");return a.className="screen bg-white",a.dataset.institutionId=(e==null?void 0:e.id)??"",a.innerHTML=`
     <div class="flex items-center gap-3 p-4 border-b border-gray-100">
       <button id="back-btn" class="w-10 h-10 flex items-center justify-center text-gray-600">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>

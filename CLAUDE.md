@@ -111,7 +111,7 @@ Regras:
 
 ## Deploy na Hostinger (resumo)
 
-**Arquitetura:** um único **Node.js App** (Express) serve frontend + API no domínio `darkblue-rook-985577.hostingersite.com`. O app é ligado ao repositório/`master` (implantação automática a cada push). Funciona com a raiz do repositório (start `npm start` → `node server/index.js`; o `postinstall` instala as dependências de `server/` quando `NODE_ENV=production`) ou com diretório raiz `server`.
+**Arquitetura:** um único **Node.js App** (Express) serve frontend + API no domínio `darkblue-rook-985577.hostingersite.com`. O app é ligado ao repositório/`master` (implantação automática a cada push). Funciona com a raiz do repositório (start `npm start` → `node server/index.js`; o `postinstall` instala as dependências de `server/`) ou com diretório raiz `server`.
 - **Como a Hostinger roda Node (visto no SSH):** Phusion Passenger, configurado pelo `.htaccess` gerado em `public_html` (`PassengerAppRoot …/hbuilds/current/nodejs`, `PassengerStartupFile`). Cada deploy recria `hbuilds/versions/<id>/`: arquivo criado à mão dentro do app some no próximo push. O SSH não deixa abrir porta (ECONNREFUSED), então teste de API só pelo domínio.
 
 - O build do Vite vai para `server/public/` (`vite.config.ts` → `build.outDir`), que é **versionado** e precisa ser regerado com `npm run build` antes de cada push. O Express serve essa pasta e devolve `index.html` para qualquer GET fora de `/api` e `/uploads`; rota `/api` inexistente responde 404 em JSON.
@@ -156,10 +156,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.6.1** · 15 versões
+Versão atual: **1.6.2** · 16 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.6.2 | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |
 | 1.6.1 | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |
 | 1.6.0 | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
 | 1.5.0 | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
