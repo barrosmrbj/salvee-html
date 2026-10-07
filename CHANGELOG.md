@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.6.2**
+**Versão atual: 1.6.3**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.6.3** | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
 | **1.6.2** | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |
 | **1.6.1** | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |
 | **1.6.0** | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
@@ -37,6 +38,16 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.6.3 — Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona
+
+*07/10/2026 · Patch · Sistema, Servidor*
+
+- Frontend e API em produção no Node.js App da Hostinger em skyblue-hedgehog-581364.hostingersite.com (Express, master, Node 22, entrada server/index.js, variáveis no painel)
+- O site estático antigo darkblue-rook-985577 passa a redirecionar tudo para o novo domínio pelo .htaccess da raiz
+- CLAUDE.md e server/.env.example atualizados com o novo domínio e a configuração do app
+
+Fontes: `.htaccess` · `CLAUDE.md` · `server/.env.example`
 
 ### 1.6.2 — Instalação na Hostinger sempre traz as dependências da API
 

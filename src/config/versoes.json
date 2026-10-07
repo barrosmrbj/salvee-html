@@ -1,6 +1,26 @@
 {
-  "versaoAtual": "1.6.2",
+  "versaoAtual": "1.6.3",
   "historico": [
+    {
+      "versao": "1.6.3",
+      "data": "2026-10-07",
+      "tipo": "patch",
+      "titulo": "Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona",
+      "modulos": [
+        "Sistema",
+        "Servidor"
+      ],
+      "itens": [
+        "Frontend e API em produção no Node.js App da Hostinger em skyblue-hedgehog-581364.hostingersite.com (Express, master, Node 22, entrada server/index.js, variáveis no painel)",
+        "O site estático antigo darkblue-rook-985577 passa a redirecionar tudo para o novo domínio pelo .htaccess da raiz",
+        "CLAUDE.md e server/.env.example atualizados com o novo domínio e a configuração do app"
+      ],
+      "fontes": [
+        ".htaccess",
+        "CLAUDE.md",
+        "server/.env.example"
+      ]
+    },
     {
       "versao": "1.6.2",
       "data": "2026-10-07",

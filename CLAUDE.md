@@ -8,7 +8,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 - **Frontend:** Vite 6 + TypeScript (vanilla, sem framework) + Tailwind 3, em `src/`.
 - **Backend:** Node.js + Express 4 (CommonJS) em `server/`, banco via Knex (SQLite em dev, MySQL em produção).
-- **Produção:** Hostinger (hPanel), domínio `darkblue-rook-985577.hostingersite.com`, MySQL `u526770669_salvee`.
+- **Produção:** Hostinger (hPanel), domínio `skyblue-hedgehog-581364.hostingersite.com`, MySQL `u526770669_salvee`.
 - Idioma da interface, dos commits e da documentação: **português (pt-BR)**.
 
 ## Comandos
@@ -111,19 +111,19 @@ Regras:
 
 ## Deploy na Hostinger (resumo)
 
-**Arquitetura:** um único **Node.js App** (Express) serve frontend + API no domínio `darkblue-rook-985577.hostingersite.com`. O app é ligado ao repositório/`master` (implantação automática a cada push). Funciona com a raiz do repositório (start `npm start` → `node server/index.js`; o `postinstall` instala as dependências de `server/`) ou com diretório raiz `server`.
+**Arquitetura:** um único **Node.js App** (Express) serve frontend + API no domínio `skyblue-hedgehog-581364.hostingersite.com`. O app é ligado ao repositório/`master` (implantação automática a cada push). **Configuração em uso no hPanel:** predefinição Express, branch `master`, Node 22.x, diretório raiz `./`, gerenciador npm, arquivo de entrada `server/index.js`, variáveis no painel do app. Funciona com a raiz do repositório (start `npm start` → `node server/index.js`; o `postinstall` instala as dependências de `server/`) ou com diretório raiz `server`.
 - **Como a Hostinger roda Node (visto no SSH):** Phusion Passenger, configurado pelo `.htaccess` gerado em `public_html` (`PassengerAppRoot …/hbuilds/current/nodejs`, `PassengerStartupFile`). Cada deploy recria `hbuilds/versions/<id>/`: arquivo criado à mão dentro do app some no próximo push. O SSH não deixa abrir porta (ECONNREFUSED), então teste de API só pelo domínio.
 
 - O build do Vite vai para `server/public/` (`vite.config.ts` → `build.outDir`), que é **versionado** e precisa ser regerado com `npm run build` antes de cada push. O Express serve essa pasta e devolve `index.html` para qualquer GET fora de `/api` e `/uploads`; rota `/api` inexistente responde 404 em JSON.
 - `VITE_API_URL=/api` (relativo) no `.env.production`: sem CORS e sem depender do domínio.
 - Configuração do app: Node 20/22, instalação `npm install`, start `npm start`; entrada `server/index.js` (raiz do repo) ou `index.js` (raiz `server`).
-- Variáveis de ambiente (no painel do app ou, se o painel não tiver a tela, em `~/salvee.env.production` na home do SSH, fora do repositório e preservado nos redeploys; nunca no git). Ordem: painel > `server/.env(.production)` > `~/salvee.env.production`: `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://darkblue-rook-985577.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. `PORT` é definido pela Hostinger.
+- Variáveis de ambiente (no painel do app ou, se o painel não tiver a tela, em `~/salvee.env.production` na home do SSH, fora do repositório e preservado nos redeploys; nunca no git). Ordem: painel > `server/.env(.production)` > `~/salvee.env.production`: `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://skyblue-hedgehog-581364.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. `PORT` é definido pela Hostinger.
 - Em produção sem `JWT_SECRET` o servidor não sobe; falha de conexão com o MySQL aparece no log como "Falha ao conectar/preparar o banco".
 - `better-sqlite3` está em `optionalDependencies`: se não compilar na Hostinger, a instalação segue (produção usa só `mysql2`).
 - Uploads retornam URL absoluta (`PUBLIC_URL` ou host da requisição). Os arquivos ficam no disco do app e **podem sumir num redeploy**.
-- Teste: `https://darkblue-rook-985577.hostingersite.com/api/health` → `{ "ok": true, "version": "x.y.z" }` com a mesma versão mostrada em Configurações.
+- Teste: `https://skyblue-hedgehog-581364.hostingersite.com/api/health` → `{ "ok": true, "version": "x.y.z" }` com a mesma versão mostrada em Configurações.
 
-**Transição / fallback:** enquanto o domínio estiver no site estático antigo (Git → `public_html`), o **`.htaccess` da raiz** reescreve tudo para `server/public/`, então o frontend continua no ar (sem API). O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`); servido direto dá tela branca com "MIME type text/plain".
+**Domínio antigo:** o site estático `darkblue-rook-985577.hostingersite.com` (Git → `public_html`) continua recebendo a `master`; o **`.htaccess` da raiz** redireciona tudo (302) para o domínio de produção e impede que o código do repositório seja servido. O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`).
 
 ## Controle de versão do Salvee (obrigatório a cada mudança)
 
@@ -156,10 +156,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.6.2** · 16 versões
+Versão atual: **1.6.3** · 17 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.6.3 | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
 | 1.6.2 | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |
 | 1.6.1 | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |
 | 1.6.0 | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
