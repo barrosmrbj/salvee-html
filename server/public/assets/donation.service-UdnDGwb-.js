@@ -1,1 +1,0 @@
-import{r as n}from"./index-P7BUHYx0.js";const i={async initiate(t){return n("/donations/initiate",{method:"POST",body:JSON.stringify(t)})},async confirm(t){return n(`/donations/${t}/confirm`,{method:"POST"})},async getHistory(){return n("/donations/history")}};export{i as d};

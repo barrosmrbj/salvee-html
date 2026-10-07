@@ -111,12 +111,13 @@ Regras:
 
 ## Deploy na Hostinger (resumo)
 
-**Arquitetura:** um único **Node.js App** (Express) serve frontend + API no domínio `darkblue-rook-985577.hostingersite.com`. O app é ligado ao repositório/`master` (implantação automática a cada push) com **diretório raiz `server`**.
+**Arquitetura:** um único **Node.js App** (Express) serve frontend + API no domínio `darkblue-rook-985577.hostingersite.com`. O app é ligado ao repositório/`master` (implantação automática a cada push). Funciona com a raiz do repositório (start `npm start` → `node server/index.js`; o `postinstall` instala as dependências de `server/` quando `NODE_ENV=production`) ou com diretório raiz `server`.
+- **Como a Hostinger roda Node (visto no SSH):** Phusion Passenger, configurado pelo `.htaccess` gerado em `public_html` (`PassengerAppRoot …/hbuilds/current/nodejs`, `PassengerStartupFile`). Cada deploy recria `hbuilds/versions/<id>/`: arquivo criado à mão dentro do app some no próximo push. O SSH não deixa abrir porta (ECONNREFUSED), então teste de API só pelo domínio.
 
 - O build do Vite vai para `server/public/` (`vite.config.ts` → `build.outDir`), que é **versionado** e precisa ser regerado com `npm run build` antes de cada push. O Express serve essa pasta e devolve `index.html` para qualquer GET fora de `/api` e `/uploads`; rota `/api` inexistente responde 404 em JSON.
 - `VITE_API_URL=/api` (relativo) no `.env.production`: sem CORS e sem depender do domínio.
-- Configuração do app: Node 20/22, entrada `index.js`, instalação `npm install`, start `npm start` (`NODE_ENV=production node index.js`).
-- Variáveis de ambiente (no painel do app, nunca no git): `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://darkblue-rook-985577.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. `PORT` é definido pela Hostinger.
+- Configuração do app: Node 20/22, instalação `npm install`, start `npm start`; entrada `server/index.js` (raiz do repo) ou `index.js` (raiz `server`).
+- Variáveis de ambiente (no painel do app ou, se o painel não tiver a tela, em `~/salvee.env.production` na home do SSH, fora do repositório e preservado nos redeploys; nunca no git). Ordem: painel > `server/.env(.production)` > `~/salvee.env.production`: `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://darkblue-rook-985577.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. `PORT` é definido pela Hostinger.
 - Em produção sem `JWT_SECRET` o servidor não sobe; falha de conexão com o MySQL aparece no log como "Falha ao conectar/preparar o banco".
 - `better-sqlite3` está em `optionalDependencies`: se não compilar na Hostinger, a instalação segue (produção usa só `mysql2`).
 - Uploads retornam URL absoluta (`PUBLIC_URL` ou host da requisição). Os arquivos ficam no disco do app e **podem sumir num redeploy**.
@@ -155,10 +156,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.6.0** · 14 versões
+Versão atual: **1.6.1** · 15 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.6.1 | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |
 | 1.6.0 | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
 | 1.5.0 | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
 | 1.4.3 | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |

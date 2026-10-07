@@ -1,6 +1,26 @@
 {
-  "versaoAtual": "1.6.0",
+  "versaoAtual": "1.6.1",
   "historico": [
+    {
+      "versao": "1.6.1",
+      "data": "2026-10-07",
+      "tipo": "patch",
+      "titulo": "Node.js App da Hostinger: variáveis fora do repositório e start pela raiz",
+      "modulos": [
+        "Servidor",
+        "Sistema"
+      ],
+      "itens": [
+        "O servidor carrega as variáveis de server/.env(.production) pelo caminho do próprio arquivo (antes dependia da pasta de onde era iniciado) e também de ~/salvee.env.production, fora do repositório, que sobrevive aos redeploys da Hostinger",
+        "package.json da raiz ganha start (node server/index.js) e postinstall que instala as dependências de server/ em produção: o app funciona com a raiz do repositório ou com a pasta server",
+        "CLAUDE.md documenta como a Hostinger roda Node (Passenger via .htaccess, pasta hbuilds recriada a cada deploy)"
+      ],
+      "fontes": [
+        "server/index.js",
+        "package.json",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.6.0",
       "data": "2026-10-05",

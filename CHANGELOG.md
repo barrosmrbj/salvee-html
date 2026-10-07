@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.6.0**
+**Versão atual: 1.6.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.6.1** | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |
 | **1.6.0** | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
 | **1.5.0** | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
 | **1.4.3** | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |
@@ -35,6 +36,16 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.6.1 — Node.js App da Hostinger: variáveis fora do repositório e start pela raiz
+
+*07/10/2026 · Patch · Servidor, Sistema*
+
+- O servidor carrega as variáveis de server/.env(.production) pelo caminho do próprio arquivo (antes dependia da pasta de onde era iniciado) e também de ~/salvee.env.production, fora do repositório, que sobrevive aos redeploys da Hostinger
+- package.json da raiz ganha start (node server/index.js) e postinstall que instala as dependências de server/ em produção: o app funciona com a raiz do repositório ou com a pasta server
+- CLAUDE.md documenta como a Hostinger roda Node (Passenger via .htaccess, pasta hbuilds recriada a cada deploy)
+
+Fontes: `server/index.js` · `package.json` · `CLAUDE.md`
 
 ### 1.6.0 — Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio
 

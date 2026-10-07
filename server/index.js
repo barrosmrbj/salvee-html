@@ -1,8 +1,12 @@
+const path = require('path')
+const os = require('os')
+// Ordem (o dotenv não sobrescreve o que já foi definido): variáveis do painel > server/.env(.production)
+// > ~/salvee.env.production. Este último fica fora do repositório e sobrevive aos redeploys da
+// Hostinger, que recria a pasta do app a cada push.
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env'
-require('dotenv').config({ path: envFile })
+require('dotenv').config({ path: [path.join(__dirname, envFile), path.join(os.homedir(), 'salvee.env.production')], quiet: true })
 const express = require('express')
 const cors = require('cors')
-const path = require('path')
 const { initDb } = require('./db')
 
 const isProduction = process.env.NODE_ENV === 'production'
