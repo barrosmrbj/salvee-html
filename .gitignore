@@ -9,7 +9,8 @@ node_modules/
 .pnp.js
 
 # Build output
-# dist/ é versionado: a Hostinger implanta a master sem build (ver .htaccess da raiz)
+# o build vai para server/public/ (versionado: a Hostinger implanta a master sem build)
+dist/
 dist-ssr/
 
 # Environment variables
@@ -35,5 +36,7 @@ dist-ssr/
 server/.env
 server/.env.production
 server/salvee.db
+# imagens enviadas em dev (as já versionadas continuam no git)
+server/uploads/*
 # SQL gerado por server/scripts/exportar-mysql.js (contém e-mails e hashes de senha)
 server/export/

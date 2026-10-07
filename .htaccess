@@ -1,10 +1,10 @@
-# Hostinger: o Git implanta a master inteira no public_html (sem build).
-# O site publicado é o build em dist/ (gerado com `npm run build` e commitado).
-# Toda requisição é servida de dist/ — o index.html da raiz (dev, carrega /src/main.ts)
-# e o código-fonte (src/, server/ etc.) ficam inacessíveis pela web.
+# Site estático da Hostinger (Git → public_html, sem build): serve o build do frontend
+# em server/public/ (gerado com `npm run build` e commitado). O index.html da raiz (dev,
+# carrega /src/main.ts) e o código-fonte ficam inacessíveis pela web.
+# No Node.js App este arquivo não é usado: o Express serve server/public/.
 Options -Indexes -MultiViews
 DirectoryIndex index.html
 
 RewriteEngine On
-RewriteCond %{REQUEST_URI} !^/dist/
-RewriteRule ^(.*)$ dist/$1 [L]
+RewriteCond %{REQUEST_URI} !^/server/public/
+RewriteRule ^(.*)$ server/public/$1 [L]

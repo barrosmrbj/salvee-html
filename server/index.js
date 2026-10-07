@@ -37,6 +37,17 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
 const { version } = require('./package.json')
 app.get('/api/health', (req, res) => res.json({ ok: true, version }))
 
+// rota de API inexistente responde JSON (não cai no index.html do frontend)
+app.use('/api', (req, res) => res.status(404).json({ error: 'Rota não encontrada' }))
+
+// frontend: build do Vite em server/public (npm run build na raiz). O router é por hash (#/...),
+// então qualquer outro GET devolve o index.html.
+const PUBLIC_DIR = path.join(__dirname, 'public')
+app.use(express.static(PUBLIC_DIR))
+app.get('*', (req, res, next) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'), err => err && next())
+})
+
 const PORT = process.env.PORT || 8000
 
 initDb()

@@ -1,6 +1,32 @@
 {
-  "versaoAtual": "1.5.0",
+  "versaoAtual": "1.6.0",
   "historico": [
+    {
+      "versao": "1.6.0",
+      "data": "2026-10-05",
+      "tipo": "minor",
+      "titulo": "Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio",
+      "modulos": [
+        "Servidor",
+        "Sistema"
+      ],
+      "itens": [
+        "O build do Vite passa a sair em server/public/ (antes dist/); o Express serve essa pasta e devolve o index.html para as demais rotas, então um único Node.js App (raiz server/) publica frontend + API",
+        "VITE_API_URL de produção agora é relativo (/api): sem CORS e sem depender do domínio",
+        "Rota /api inexistente responde 404 em JSON em vez da página do app",
+        "O .htaccess da raiz passa a servir server/public/, mantendo o site estático no ar durante a troca; dist/ sai do git",
+        "Para ver localmente como em produção: npm run build e node server/index.js → http://localhost:8000",
+        "Limpeza do repositório: server/salvee.db deixa de ser rastreado pelo git, uploads novos de dev ficam fora do git e o arquivo nul foi removido"
+      ],
+      "fontes": [
+        "vite.config.ts",
+        "server/index.js",
+        ".htaccess",
+        ".env.production",
+        ".gitignore",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.5.0",
       "data": "2026-10-05",

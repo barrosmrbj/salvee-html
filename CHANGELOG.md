@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.5.0**
+**Versão atual: 1.6.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.6.0** | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
 | **1.5.0** | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
 | **1.4.3** | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |
 | **1.4.2** | 05/10/2026 | Patch | Deploy na Hostinger com build automático (corrige tela branca) | Sistema |
@@ -34,6 +35,19 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.6.0 — Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio
+
+*05/10/2026 · Minor · Servidor, Sistema*
+
+- O build do Vite passa a sair em server/public/ (antes dist/); o Express serve essa pasta e devolve o index.html para as demais rotas, então um único Node.js App (raiz server/) publica frontend + API
+- VITE_API_URL de produção agora é relativo (/api): sem CORS e sem depender do domínio
+- Rota /api inexistente responde 404 em JSON em vez da página do app
+- O .htaccess da raiz passa a servir server/public/, mantendo o site estático no ar durante a troca; dist/ sai do git
+- Para ver localmente como em produção: npm run build e node server/index.js → http://localhost:8000
+- Limpeza do repositório: server/salvee.db deixa de ser rastreado pelo git, uploads novos de dev ficam fora do git e o arquivo nul foi removido
+
+Fontes: `vite.config.ts` · `server/index.js` · `.htaccess` · `.env.production` · `.gitignore` · `CLAUDE.md`
 
 ### 1.5.0 — MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App
 

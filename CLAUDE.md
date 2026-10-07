@@ -20,7 +20,7 @@ npm run dev:all        # frontend (Vite, :5173) + backend (:8000) juntos
 npm run dev            # só frontend
 npm run dev:server     # só backend (node --watch)
 
-npm run build          # valida versoes.json + tsc --noEmit + vite build → dist/
+npm run build          # valida versoes.json + tsc --noEmit + vite build → server/public/
 npm test               # vitest (jsdom)
 npx tsc --noEmit       # checagem de tipos
 
@@ -48,13 +48,15 @@ src/
   services/               # api.ts (request<T>, BASE_URL = VITE_API_URL) + um service por domínio, exportados em index.ts
   types/                  # tipos de domínio, exportados em index.ts
 server/
-  index.js                # Express, monta /api/*, /uploads estático, /api/health (com version)
+  index.js                # Express: /api/*, /api/health (com version), /uploads e o frontend (server/public, fallback index.html)
   db.js                   # conexão Knex + initDb() (cria tabelas e colunas novas na subida)
   middleware/auth.js      # JWT (Bearer), req.userId
   routes/                 # auth, feed, institutions, search, donations, gamification, calendar, users, admin, upload
+  public/                 # BUILD do frontend (npm run build) — gerado, versionado, não editar à mão
   uploads/                # imagens enviadas (disco local)
 scripts/versao.mjs        # controle de versão
-public/                   # logos, promos, .htaccess
+public/                   # arquivos estáticos de origem do Vite (logos, promos, .htaccess) — copiados para server/public no build
+.htaccess                 # site estático da Hostinger: serve server/public/
 ```
 
 ### Rotas do frontend (`src/router.ts`)
@@ -78,18 +80,16 @@ public/                   # logos, promos, .htaccess
 
 ## Ambiente
 
-- Raiz: `.env` (`VITE_API_URL=http://localhost:8000/api`) e `.env.production` (`VITE_API_URL=https://darkblue-rook-985577.hostingersite.com/api`). Vite injeta no **build**: mudou o domínio, refazer o build.
+- Raiz: `.env` (`VITE_API_URL=http://localhost:8000/api`) e `.env.production` (`VITE_API_URL=/api`, relativo: frontend e API no mesmo domínio). Vite injeta no **build**: mudou o domínio, refazer o build.
 - `server/.env` (dev, SQLite) e `server/.env.production` (MySQL: `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `JWT_SECRET`, `PORT`). `index.js` carrega `.env.production` quando `NODE_ENV=production`.
-- Nunca commitar `.env*` nem `server/salvee.db`.
+- Nunca commitar `.env*` nem `server/salvee.db`. Exceção: o `.env.production` da raiz é versionado (só tem `VITE_API_URL=/api`, sem segredos, e o build precisa dele).
 
 ## Armadilhas conhecidas
 
 - **Não deixar `.js` compilados em `src/`** ao lado dos `.ts` (ex.: `src/services/index.js`). O Vite resolve o `.js` antigo e os imports novos quebram (ex.: `adminService` "não exportado"). O projeto roda `.ts` direto; `tsc` é só `--noEmit`.
-- `server/salvee.db` está no `.gitignore` mas ainda é rastreado pelo git: rodar `git rm --cached server/salvee.db`.
-- Arquivo `nul` na raiz é lixo de redirecionamento no Windows: apagar.
-- `server/uploads/` fica em disco; um redeploy na Hostinger pode apagar. Fazer backup.
+- `server/uploads/` fica em disco; um redeploy na Hostinger pode apagar. Fazer backup. Uploads novos de dev não entram no git (`.gitignore`).
 - CORS fica aberto para qualquer origem se `CORS_ORIGIN` não estiver definido; em produção, definir com a URL do frontend.
-- Registros antigos com imagem em caminho relativo (`/uploads/...`) não abrem quando frontend e API estão em domínios diferentes; uploads novos já gravam a URL absoluta.
+- `server/public/` é gerado pelo build: não editar à mão. Arquivo estático novo vai em `public/` (raiz) e entra no próximo build.
 
 ## Fluxo de trabalho: localhost primeiro, Hostinger depois
 
@@ -98,9 +98,9 @@ Todo ajuste e módulo novo é feito e testado **em localhost**. Só depois sobe 
 1. **Desenvolver local:** `npm run dev:all` (frontend em http://localhost:5173 + API em :8000 com SQLite `server/salvee.db`). Usa o `.env` da raiz (`VITE_API_URL=http://localhost:8000/api`) e o `server/.env`.
 2. **Testar local:** conferir no navegador, `npx tsc --noEmit`, `npm test`.
 3. **Versionar:** registrar a versão (ver "Controle de versão").
-4. **Gerar o build:** `npm run build` → atualiza `dist/`. **Sempre antes do commit que vai subir**; sem isso a Hostinger publica o build antigo. Conferir o site de produção localmente com `npm run preview`, se quiser.
-5. **Commit** (código + `dist/` + arquivos de versão) **e `git push` na `master`**. A Hostinger implanta a `master` automaticamente. **Push na `master` = publicar em produção.**
-6. **Deu errado em produção?** `git revert <commit>` + `git push` (volta o site ao estado anterior, inclusive o `dist/`).
+4. **Gerar o build:** `npm run build` → atualiza `server/public/`. **Sempre antes do commit que vai subir**; sem isso a Hostinger publica o build antigo. Para ver localmente como fica em produção (frontend + API num endereço só): `npm run build` e `node server/index.js` → http://localhost:8000.
+5. **Commit** (código + `server/public/` + arquivos de versão) **e `git push` na `master`**. A Hostinger implanta a `master` automaticamente. **Push na `master` = publicar em produção.**
+6. **Deu errado em produção?** `git revert <commit>` + `git push` (volta o site ao estado anterior, inclusive o build).
 
 Regras:
 - **Só existe a branch `master`.** Não criar outras branches nem branch de deploy.
@@ -111,24 +111,18 @@ Regras:
 
 ## Deploy na Hostinger (resumo)
 
-**Frontend:** o site `darkblue-rook-985577.hostingersite.com` (Business Web Hosting) é implantado pelo Git da Hostinger: a cada push, a **`master`** inteira é copiada para o `public_html`, **sem build**. Por isso:
+**Arquitetura:** um único **Node.js App** (Express) serve frontend + API no domínio `darkblue-rook-985577.hostingersite.com`. O app é ligado ao repositório/`master` (implantação automática a cada push) com **diretório raiz `server`**.
 
-- **`dist/` é versionado** (não está no `.gitignore`) e precisa ser regerado com `npm run build` antes de cada push.
-- O **`.htaccess` da raiz** reescreve toda requisição para `dist/`. O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`); servido direto, dá tela branca com o erro "MIME type text/plain". O `.htaccess` também deixa `src/`, `server/` etc. inacessíveis pela web.
-- `dist/.htaccess` vem de `public/.htaccess` (fallback para `index.html` e proxy de `/api`).
-- O `VITE_API_URL` do build vem do `.env.production` da raiz (versionado, só contém a URL pública).
-
-**Backend (Node):**
-
-A API roda como um **site separado do tipo Node.js App** no hPanel (plano Business), ligado ao mesmo repositório/`master`, com **diretório raiz `server`**. O site estático continua servindo o frontend; o frontend chama a API pelo endereço absoluto em `VITE_API_URL`.
-
+- O build do Vite vai para `server/public/` (`vite.config.ts` → `build.outDir`), que é **versionado** e precisa ser regerado com `npm run build` antes de cada push. O Express serve essa pasta e devolve `index.html` para qualquer GET fora de `/api` e `/uploads`; rota `/api` inexistente responde 404 em JSON.
+- `VITE_API_URL=/api` (relativo) no `.env.production`: sem CORS e sem depender do domínio.
 - Configuração do app: Node 20/22, entrada `index.js`, instalação `npm install`, start `npm start` (`NODE_ENV=production node index.js`).
-- Variáveis de ambiente (no painel do app, nunca no git): `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `CORS_ORIGIN` (URL do site estático), `PUBLIC_URL` (URL da própria API). `PORT` é definido pela Hostinger.
+- Variáveis de ambiente (no painel do app, nunca no git): `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://darkblue-rook-985577.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. `PORT` é definido pela Hostinger.
 - Em produção sem `JWT_SECRET` o servidor não sobe; falha de conexão com o MySQL aparece no log como "Falha ao conectar/preparar o banco".
 - `better-sqlite3` está em `optionalDependencies`: se não compilar na Hostinger, a instalação segue (produção usa só `mysql2`).
 - Uploads retornam URL absoluta (`PUBLIC_URL` ou host da requisição). Os arquivos ficam no disco do app e **podem sumir num redeploy**.
-- Teste: `https://darkblue-rook-985577.hostingersite.com/api/health` → `{ "ok": true, "version": "x.y.z" }` com a mesma versão do app.
-- Endereço da API: `https://darkblue-rook-985577.hostingersite.com/api` (já é o `VITE_API_URL` do `.env.production`; `PUBLIC_URL=https://darkblue-rook-985577.hostingersite.com`). Mudou o endereço: atualizar o `.env.production`, `npm run build`, commit e push.
+- Teste: `https://darkblue-rook-985577.hostingersite.com/api/health` → `{ "ok": true, "version": "x.y.z" }` com a mesma versão mostrada em Configurações.
+
+**Transição / fallback:** enquanto o domínio estiver no site estático antigo (Git → `public_html`), o **`.htaccess` da raiz** reescreve tudo para `server/public/`, então o frontend continua no ar (sem API). O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`); servido direto dá tela branca com "MIME type text/plain".
 
 ## Controle de versão do Salvee (obrigatório a cada mudança)
 
@@ -161,10 +155,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.5.0** · 13 versões
+Versão atual: **1.6.0** · 14 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.6.0 | 05/10/2026 | Minor | Um só app na Hostinger: o Express serve o frontend e a API no mesmo domínio | Servidor, Sistema |
 | 1.5.0 | 05/10/2026 | Minor | MySQL e API prontos para a Hostinger: exportação do banco local e API como Node.js App | Servidor, Banco de dados |
 | 1.4.3 | 05/10/2026 | Patch | Deploy só pela master: build versionado em dist/ servido pelo .htaccess | Sistema |
 | 1.4.2 | 05/10/2026 | Patch | Deploy na Hostinger com build automático (corrige tela branca) | Sistema |

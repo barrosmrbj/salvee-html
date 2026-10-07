@@ -7,6 +7,12 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // o build vai para dentro do server/: o Express (Node.js App na Hostinger) serve o frontend
+  // junto com a API, e o .htaccess da raiz serve a mesma pasta no site estático
+  build: {
+    outDir: 'server/public',
+    emptyOutDir: true,
+  },
   test: {
     environment: 'jsdom',
   },
