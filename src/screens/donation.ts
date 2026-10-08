@@ -10,7 +10,6 @@ let step: DonationStep = 'amount'
 let amount = 0
 let message = ''
 let paymentMethod: PaymentMethod = 'pix'
-let anonymous = false
 let institution: Institution | null = null
 let xpEarned = 0
 let salvesEarned = 0
@@ -184,12 +183,9 @@ function renderAmountStep(container: HTMLElement): void {
 }
 
 function renderPaymentStep(container: HTMLElement): void {
+  // só métodos que funcionam de verdade (spec 14.5 e 27.4). PayPal/cartão voltam quando estiverem integrados.
   const methods: Array<{ id: PaymentMethod; label: string; icon: string }> = [
-    { id: 'paypal', label: 'PayPal', icon: '🅿️' },
-    { id: 'google_pay', label: 'Google Pay', icon: 'G' },
-    { id: 'apple_pay', label: 'Apple Pay', icon: '🍎' },
-    { id: 'pix', label: 'Pix código', icon: '⚡' },
-    { id: 'card', label: 'Cartão', icon: '💳' },
+    { id: 'pix', label: 'Pix', icon: '⚡' },
   ]
 
   const list = document.createElement('div')
@@ -300,26 +296,7 @@ function renderSummaryStep(container: HTMLElement): void {
   if (message) addRow('Mensagem', message)
   wrapper.appendChild(details)
 
-  // Anonymous toggle
-  const anonRow = document.createElement('div')
-  anonRow.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-2xl'
-  const anonLabel = document.createElement('span')
-  anonLabel.className = 'text-gray-700 font-medium'
-  anonLabel.textContent = 'Doação anônima'
-  const toggleLabel = document.createElement('label')
-  toggleLabel.className = 'relative inline-flex items-center cursor-pointer'
-  const toggleInput = document.createElement('input')
-  toggleInput.type = 'checkbox'
-  toggleInput.className = 'sr-only peer'
-  if (anonymous) toggleInput.checked = true
-  toggleInput.addEventListener('change', () => { anonymous = toggleInput.checked })
-  const toggleDiv = document.createElement('div')
-  toggleDiv.className = "w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-salvee-orange"
-  toggleLabel.appendChild(toggleInput)
-  toggleLabel.appendChild(toggleDiv)
-  anonRow.appendChild(anonLabel)
-  anonRow.appendChild(toggleLabel)
-  wrapper.appendChild(anonRow)
+  // Doação anônima fica fora da V1 (spec 14.10): sem opção na tela; a API grava sempre como não anônima.
 
   // Payment method row
   const paymentIconMap: Record<PaymentMethod, string> = { pix: '⚡', paypal: '🅿️', google_pay: 'G', apple_pay: '🍎', card: '💳' }
@@ -359,7 +336,7 @@ function renderSummaryStep(container: HTMLElement): void {
             amount,
             message,
             paymentMethod,
-            anonymous,
+            anonymous: false,
           })
           xpEarned = result.xpEarned
           salvesEarned = result.salvesEarned
@@ -448,7 +425,6 @@ export function unmount(): void {
   amount = 0
   message = ''
   paymentMethod = 'pix'
-  anonymous = false
   institution = null
   xpEarned = 0
   salvesEarned = 0

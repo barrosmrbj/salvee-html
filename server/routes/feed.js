@@ -13,6 +13,8 @@ router.get('/', authMiddleware, async (req, res) => {
 
     const posts = await db('posts')
       .join('institutions', 'posts.institution_id', 'institutions.id')
+      // só instituições aprovadas aparecem publicamente (spec 4.3 e 11.10)
+      .where('institutions.status', 'approved')
       .select(
         'posts.*',
         'institutions.name as institution_name',
@@ -42,6 +44,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
         'institutions.logo_url as institution_logo_url'
       )
       .where('posts.id', req.params.id)
+      .where('institutions.status', 'approved')
       .first()
 
     if (!post) return res.status(404).json({ error: 'Post não encontrado' })

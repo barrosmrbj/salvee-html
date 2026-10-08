@@ -4,7 +4,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 ## Visão geral
 
-**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). Especificação funcional: `salvee_especificacao.md`. **Pendências e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`.
+**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). **Especificação oficial: `.Documentacao/Especificação SALVEE.pdf`** (37 páginas; em caso de conflito, vale o PDF). `salvee_especificacao.md` é um resumo antigo e marca como "(implementado)" partes incompletas: não usar como referência de status. **Pendências, comparação com o PDF e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`.
 
 - **Frontend:** Vite 6 + TypeScript (vanilla, sem framework) + Tailwind 3, em `src/`.
 - **Backend:** Node.js + Express 4 (CommonJS) em `server/`, banco via Knex (SQLite em dev, MySQL em produção).
@@ -39,21 +39,28 @@ node server/scripts/exportar-mysql.js  # SQLite local → server/export/salvee-m
 src/
   main.ts, router.ts      # router por HASH (#/rota), rotas com `protected: true` exigem token
   config/versoes.json     # fonte única de versões (ver "Controle de versão")
-  components/             # Button, Input, Toast, Card, Avatar, Badge, BottomNav, BottomSheet, ProgressBar, NumericKeyboard, Spinner
+  components/             # Button, Input (senha com botão de olho), Toast, Card, Avatar, Badge, BottomNav, BottomSheet, ProgressBar, NumericKeyboard, Spinner, SocialLogin
   screens/                # cada tela exporta render(): HTMLElement, mount(), unmount()
-    auth/                 # login, register, forgot-password
-    onboarding/           # choose-profile, verify-phone, institution-register, welcome-success
-    admin/                # institution-approvals, user-management
+    auth/                 # login, register, forgot-password, reset-password, verify-email, oauth (retorno do login social)
+    onboarding/           # choose-profile, verify-phone (sem uso no fluxo atual), institution-register, welcome-success
+    admin/                # institution-approvals, user-management, donation-approvals
     feed, search, calendar, profile, settings, donation, institution-profile, splash, welcome
   services/               # api.ts (request<T>, BASE_URL = VITE_API_URL) + um service por domínio, exportados em index.ts
   types/                  # tipos de domínio, exportados em index.ts
+  tests/                  # vitest (jsdom)
 server/
   index.js                # Express: /api/*, /api/health (com version), /uploads e o frontend (server/public, fallback index.html)
-  db.js                   # conexão Knex + initDb() (cria tabelas e colunas novas na subida)
+  db.js                   # conexão Knex + initDb() (cria tabelas e colunas novas na subida, normaliza links de imagem)
+  mailer.js               # envio de e-mail (SMTP da Hostinger) e layout dos e-mails
+  uploads.js              # pasta das imagens (UPLOAD_DIR ou server/uploads)
   middleware/auth.js      # JWT (Bearer), req.userId
-  routes/                 # auth, feed, institutions, search, donations, gamification, calendar, users, admin, upload
+  routes/                 # auth, oauth, feed, institutions, search, donations, gamification, calendar, users, admin, upload
+  scripts/                # exportar-mysql.js (SQLite local → SQL para o phpMyAdmin)
+  seed*.js                # dados de exemplo e criação do admin
   public/                 # BUILD do frontend (npm run build) — gerado, versionado, não editar à mão
-  uploads/                # imagens enviadas (disco local)
+  uploads/                # imagens versionadas / pasta padrão em dev (produção usa UPLOAD_DIR)
+docs/                     # PENDENCIAS.md, configuracao/ (email.md, login-social.md), superpowers/ (design original)
+.Documentacao/            # especificação oficial (PDF), logos, ilustrações e mockups
 scripts/versao.mjs        # controle de versão
 public/                   # arquivos estáticos de origem do Vite (logos, promos, .htaccess) — copiados para server/public no build
 .htaccess                 # site estático da Hostinger: serve server/public/
@@ -79,6 +86,16 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - Qualquer usuário logado pode cadastrar uma instituição. Ela nasce `pending`; admin/gestor aprova (`approved` → `verified = true`), reprova (`rejected` + `rejection_reason`) ou pede revisão (`needs_revision`).
 - Doação nasce `pending` (`donations.status`): aparece no histórico, mas **não credita XP/Salves**. Admin/gestor confirma em Configurações → Confirmar doações (`confirmed` → credita uma única vez, protegido contra confirmação em dobro) ou cancela (`cancelled`). Doações anteriores à coluna ficaram `confirmed`. Quando houver PIX real, o webhook do provedor substitui a confirmação manual.
 - Tabelas: `users`, `institutions`, `posts`, `donations`, `calendar_registrations`, `rewards`, `email_tokens`. Coluna nova = adicionar `hasColumn`/`alterTable` no fim de `initDb()` (vale para SQLite e MySQL).
+- **Instituição não aprovada não aparece publicamente** (spec 4.3/11.10): feed, busca, destaques e lista filtram `status = 'approved'`; `GET /institutions/:id` de não aprovada só para o responsável e admin/gestor. Só o responsável (ou admin/gestor) altera os dados (`POST /institutions/register/step` confere `responsible_user_id`).
+- **Doação na V1** (spec 14.5/14.10/27.4): só **PIX** aparece e a API grava sempre `payment_method = 'pix'` e `anonymous = 0`. Não mostrar meio de pagamento que não funciona nem doação anônima.
+- SQL tem que rodar em **SQLite e MySQL**: nada de `NULLS FIRST/LAST` (usar `COALESCE`), cuidado com funções só de um banco.
+
+### Diferenças conscientes em relação ao PDF
+- Papel **`gestor`** (não existe no PDF): ajuda o admin a aprovar instituições e confirmar doações.
+- **Confirmação de cadastro por e-mail** no lugar do SMS (o PDF trata telefone como opcional/futuro).
+- **Confirmação manual de doações** por admin/gestor até haver PIX real com webhook.
+- Navegação inferior hoje: Feed, Buscar, Agenda, Perfil (gamificação dentro do Perfil). O PDF pede **Feed, Busca, Gamificação, Calendário** + Configurações no topo — pendente.
+- O que ainda falta do PDF está em `docs/PENDENCIAS.md` (seção "Comparação com a especificação").
 
 ## Ambiente
 
@@ -160,10 +177,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.9.0** · 21 versões
+Versão atual: **1.9.1** · 22 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.9.1 | 07/10/2026 | Patch | Correções de segurança e ajustes à especificação oficial (PDF) | Instituição, Feed, Busca, Doação, Servidor, Sistema |
 | 1.9.0 | 07/10/2026 | Minor | E-mail pela Hostinger: recuperar senha e confirmar cadastro | Autenticação, Onboarding, Servidor, Banco de dados |
 | 1.8.1 | 07/10/2026 | Patch | Botão de mostrar senha e verificação por SMS sem travar o cadastro | Autenticação, Onboarding, Servidor |
 | 1.8.0 | 07/10/2026 | Minor | Login social com Google, Facebook e Apple e logos oficiais nos botões | Autenticação, Servidor, Banco de dados |

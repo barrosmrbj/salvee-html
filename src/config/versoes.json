@@ -1,6 +1,35 @@
 {
-  "versaoAtual": "1.9.0",
+  "versaoAtual": "1.9.1",
   "historico": [
+    {
+      "versao": "1.9.1",
+      "data": "2026-10-07",
+      "tipo": "patch",
+      "titulo": "Correções de segurança e ajustes à especificação oficial (PDF)",
+      "modulos": [
+        "Instituição",
+        "Feed",
+        "Busca",
+        "Doação",
+        "Servidor",
+        "Sistema"
+      ],
+      "itens": [
+        "Segurança: só o responsável pela instituição (ou admin/gestor) pode alterar os dados dela nas etapas do cadastro; antes qualquer usuário logado conseguia, enviando o id",
+        "Feed (lista e detalhe) mostra só publicações de instituições aprovadas; perfil de instituição não aprovada só abre para o responsável e admin/gestor (spec 4.3 e 11.10)",
+        "Destaques da busca: ordenação compatível com MySQL (o NULLS FIRST quebrava a consulta em produção e a tela caía nos dados de exemplo)",
+        "Doação: só o PIX aparece como forma de pagamento e saiu a opção de doação anônima, que fica fora da V1 (spec 14.5, 14.10 e 27.4); a API grava sempre PIX e não anônima",
+        "CLAUDE.md aponta para a especificação oficial em PDF, árvore de pastas atualizada e diferenças conscientes registradas; comparação completa com o PDF em docs/PENDENCIAS.md"
+      ],
+      "fontes": [
+        "server/routes/institutions.js",
+        "server/routes/feed.js",
+        "server/routes/donations.js",
+        "src/screens/donation.ts",
+        "CLAUDE.md",
+        "docs/PENDENCIAS.md"
+      ]
+    },
     {
       "versao": "1.9.0",
       "data": "2026-10-07",

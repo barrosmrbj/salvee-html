@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.9.0**
+**Versão atual: 1.9.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.9.1** | 07/10/2026 | Patch | Correções de segurança e ajustes à especificação oficial (PDF) | Instituição, Feed, Busca, Doação, Servidor, Sistema |
 | **1.9.0** | 07/10/2026 | Minor | E-mail pela Hostinger: recuperar senha e confirmar cadastro | Autenticação, Onboarding, Servidor, Banco de dados |
 | **1.8.1** | 07/10/2026 | Patch | Botão de mostrar senha e verificação por SMS sem travar o cadastro | Autenticação, Onboarding, Servidor |
 | **1.8.0** | 07/10/2026 | Minor | Login social com Google, Facebook e Apple e logos oficiais nos botões | Autenticação, Servidor, Banco de dados |
@@ -42,6 +43,18 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.9.1 — Correções de segurança e ajustes à especificação oficial (PDF)
+
+*07/10/2026 · Patch · Instituição, Feed, Busca, Doação, Servidor, Sistema*
+
+- Segurança: só o responsável pela instituição (ou admin/gestor) pode alterar os dados dela nas etapas do cadastro; antes qualquer usuário logado conseguia, enviando o id
+- Feed (lista e detalhe) mostra só publicações de instituições aprovadas; perfil de instituição não aprovada só abre para o responsável e admin/gestor (spec 4.3 e 11.10)
+- Destaques da busca: ordenação compatível com MySQL (o NULLS FIRST quebrava a consulta em produção e a tela caía nos dados de exemplo)
+- Doação: só o PIX aparece como forma de pagamento e saiu a opção de doação anônima, que fica fora da V1 (spec 14.5, 14.10 e 27.4); a API grava sempre PIX e não anônima
+- CLAUDE.md aponta para a especificação oficial em PDF, árvore de pastas atualizada e diferenças conscientes registradas; comparação completa com o PDF em docs/PENDENCIAS.md
+
+Fontes: `server/routes/institutions.js` · `server/routes/feed.js` · `server/routes/donations.js` · `src/screens/donation.ts` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.9.0 — E-mail pela Hostinger: recuperar senha e confirmar cadastro
 

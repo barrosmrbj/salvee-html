@@ -22,7 +22,8 @@ router.get('/destaques', authMiddleware, async (req, res) => {
       .groupBy('institutions.id')
       .select('institutions.*')
       .sum({ total_donated: 'donations.amount' })
-      .orderByRaw('total_donated ASC NULLS FIRST')
+      // COALESCE no lugar de NULLS FIRST, que o MySQL não aceita (quem nunca recebeu vem primeiro)
+      .orderByRaw('COALESCE(SUM(donations.amount), 0) ASC')
       .limit(10)
     res.json(list.map(i => ({ ...formatInst(i), totalDonated: Number(i.total_donated) || 0 })))
   } catch (err) {
@@ -35,6 +36,10 @@ router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const inst = await db('institutions').where({ id: req.params.id }).first()
     if (!inst) return res.status(404).json({ error: 'Instituição não encontrada' })
+    // não aprovada só é visível para o responsável e para admin/gestor (spec 4.3)
+    if (inst.status !== 'approved' && !(await canManage(req.userId, inst))) {
+      return res.status(404).json({ error: 'Instituição não encontrada' })
+    }
     res.json(formatInst(inst))
   } catch (err) {
     res.status(500).json({ error: 'Erro interno' })
@@ -50,6 +55,10 @@ router.post('/register/step', authMiddleware, async (req, res) => {
       id = uuidv4()
       await db('institutions').insert({ id, name: data.name || '', status: 'pending', responsible_user_id: req.userId, ...flattenStep(step, data) })
     } else {
+      // só o responsável (ou admin/gestor) altera os dados da instituição
+      const inst = await db('institutions').where({ id }).first()
+      if (!inst) return res.status(404).json({ error: 'Instituição não encontrada' })
+      if (!(await canManage(req.userId, inst))) return res.status(403).json({ error: 'Você não pode alterar esta instituição' })
       await db('institutions').where({ id }).update(flattenStep(step, data))
     }
 
@@ -59,6 +68,12 @@ router.post('/register/step', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Erro interno' })
   }
 })
+
+async function canManage(userId, inst) {
+  if (inst.responsible_user_id && inst.responsible_user_id === userId) return true
+  const user = await db('users').where({ id: userId }).first()
+  return Boolean(user && ['admin', 'gestor'].includes(user.role))
+}
 
 function flattenStep(step, data) {
   const maps = {

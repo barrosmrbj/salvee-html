@@ -7,7 +7,7 @@ const router = express.Router()
 
 router.post('/initiate', authMiddleware, async (req, res) => {
   try {
-    const { institutionId, amount, message, paymentMethod, anonymous } = req.body
+    const { institutionId, amount, message } = req.body
     if (!institutionId || !amount) return res.status(400).json({ error: 'Campos obrigatórios' })
 
     const value = Number(amount)
@@ -21,8 +21,9 @@ router.post('/initiate', authMiddleware, async (req, res) => {
 
     await db('donations').insert({
       id, user_id: req.userId, institution_id: institutionId,
-      amount: value, payment_method: paymentMethod || 'pix',
-      anonymous: anonymous ? 1 : 0, message, xp_earned: xpEarned, salves_earned: salvesEarned,
+      amount: value, payment_method: 'pix', // único método ativo na V1 (spec 14.5)
+      anonymous: 0, // doação anônima fora da V1 (spec 14.10)
+      message, xp_earned: xpEarned, salves_earned: salvesEarned,
       status: 'pending',
     })
 
