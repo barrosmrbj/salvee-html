@@ -147,10 +147,21 @@ function renderInstitutionCard(inst: AdminInstitution): HTMLElement {
   `
   card.appendChild(responsible)
 
+  if (inst.documentsUrl) {
+    const doc = document.createElement('a')
+    doc.href = inst.documentsUrl
+    doc.target = '_blank'
+    doc.rel = 'noopener'
+    doc.className = 'mt-2 inline-flex items-center gap-1 text-xs font-semibold text-salvee-orange'
+    doc.textContent = '📎 Ver documento enviado'
+    card.appendChild(doc)
+  }
+
   if (inst.rejectionReason) {
     const reasonP = document.createElement('p')
-    reasonP.className = 'mt-2 text-xs text-red-500 bg-red-50 rounded-lg px-2 py-1.5'
-    reasonP.textContent = `Motivo: ${inst.rejectionReason}`
+    const revision = inst.status === 'needs_revision'
+    reasonP.className = `mt-2 text-xs rounded-lg px-2 py-1.5 whitespace-pre-line ${revision ? 'text-blue-600 bg-blue-50' : 'text-red-500 bg-red-50'}`
+    reasonP.textContent = `${revision ? 'Pedido de correção' : 'Motivo'}: ${inst.rejectionReason}`
     card.appendChild(reasonP)
   }
 
@@ -163,12 +174,18 @@ function renderInstitutionCard(inst: AdminInstitution): HTMLElement {
     approveBtn.textContent = 'Aprovar'
     approveBtn.addEventListener('click', () => updateStatus(inst.id, 'approved', undefined, card))
 
+    const revisionBtn = document.createElement('button')
+    revisionBtn.className = 'flex-1 py-2 rounded-xl border border-blue-300 text-blue-600 text-xs font-semibold active:scale-95 transition-transform'
+    revisionBtn.textContent = 'Pedir revisão'
+    revisionBtn.addEventListener('click', () => toggleReasonForm(card, inst.id, 'needs_revision'))
+
     const rejectBtn = document.createElement('button')
     rejectBtn.className = 'flex-1 py-2 rounded-xl border border-red-300 text-red-500 text-xs font-semibold active:scale-95 transition-transform'
     rejectBtn.textContent = 'Rejeitar'
-    rejectBtn.addEventListener('click', () => toggleRejectForm(card, inst.id))
+    rejectBtn.addEventListener('click', () => toggleReasonForm(card, inst.id, 'rejected'))
 
     actions.appendChild(approveBtn)
+    actions.appendChild(revisionBtn)
     actions.appendChild(rejectBtn)
     card.appendChild(actions)
   }
@@ -176,24 +193,37 @@ function renderInstitutionCard(inst: AdminInstitution): HTMLElement {
   return card
 }
 
-function toggleRejectForm(card: HTMLElement, institutionId: string): void {
-  const existing = card.querySelector('.reject-form')
-  if (existing) { existing.remove(); return }
+// Rejeitar (motivo opcional) ou Pedir revisão (o que corrigir é obrigatório; uma linha por item,
+// a instituição vê como lista na tela de status)
+function toggleReasonForm(card: HTMLElement, institutionId: string, mode: 'rejected' | 'needs_revision'): void {
+  const existing = card.querySelector('.reason-form') as HTMLElement | null
+  if (existing) {
+    const same = existing.dataset['mode'] === mode
+    existing.remove()
+    if (same) return
+  }
+  const revision = mode === 'needs_revision'
 
   const form = document.createElement('div')
-  form.className = 'reject-form mt-3 flex flex-col gap-2'
-  form.innerHTML = `
-    <textarea class="w-full text-xs border border-gray-200 rounded-lg p-2 outline-none focus:border-red-300" rows="2" placeholder="Motivo da rejeição (opcional)"></textarea>
-  `
+  form.className = 'reason-form mt-3 flex flex-col gap-2'
+  form.dataset['mode'] = mode
+  const textarea = document.createElement('textarea')
+  textarea.className = `w-full text-xs border border-gray-200 rounded-lg p-2 outline-none ${revision ? 'focus:border-blue-300' : 'focus:border-red-300'}`
+  textarea.rows = revision ? 3 : 2
+  textarea.placeholder = revision
+    ? 'O que a instituição precisa corrigir (um item por linha). Ex.:\nEnviar o CNPJ\nTrocar a foto do local'
+    : 'Motivo da rejeição (opcional)'
+  form.appendChild(textarea)
   const confirmRow = document.createElement('div')
   confirmRow.className = 'flex gap-2'
 
   const confirmBtn = document.createElement('button')
-  confirmBtn.className = 'flex-1 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold active:scale-95 transition-transform'
-  confirmBtn.textContent = 'Confirmar rejeição'
+  confirmBtn.className = `flex-1 py-2 rounded-xl text-white text-xs font-semibold active:scale-95 transition-transform ${revision ? 'bg-blue-500' : 'bg-red-500'}`
+  confirmBtn.textContent = revision ? 'Enviar pedido de correção' : 'Confirmar rejeição'
   confirmBtn.addEventListener('click', () => {
-    const reason = (form.querySelector('textarea') as HTMLTextAreaElement).value.trim()
-    updateStatus(institutionId, 'rejected', reason || undefined, card)
+    const reason = textarea.value.trim()
+    if (revision && !reason) { showToast('Escreva o que precisa ser corrigido', 'error'); return }
+    updateStatus(institutionId, mode, reason || undefined, card)
   })
 
   const cancelBtn = document.createElement('button')
@@ -212,7 +242,7 @@ async function updateStatus(institutionId: string, status: InstitutionStatus, re
   card.style.pointerEvents = 'none'
   try {
     await adminService.updateInstitutionStatus(institutionId, status, reason)
-    showToast(status === 'approved' ? 'Instituição aprovada' : 'Instituição rejeitada', 'success')
+    showToast(status === 'approved' ? 'Instituição aprovada' : status === 'needs_revision' ? 'Pedido de correção enviado' : 'Instituição rejeitada', 'success')
     loadInstitutions()
   } catch {
     card.style.opacity = '1'

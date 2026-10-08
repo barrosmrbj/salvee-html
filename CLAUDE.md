@@ -68,14 +68,14 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### Rotas do frontend (`src/router.ts`)
 
-`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`*, `/post/new?tipo=common|event|campaign`*, `/post/:id`* (detalhe + comentários), `/post/:id/edit`*, `/donate/:id?campanha=<postId>`* (* = protegida).
+`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`* (`?corrigir=<id>` = corrigir e reenviar), `/institution-status`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`*, `/post/new?tipo=common|event|campaign`*, `/post/:id`* (detalhe + comentários), `/post/:id/edit`*, `/donate/:id?campanha=<postId>`* (* = protegida).
 
 ### API (`server/routes/`, prefixo `/api`)
 
 - `auth`: register (envia "confirme seu e-mail"), login, logout, me (inclui `emailVerified`), forgot-password (link por e-mail, 1 h), reset-password, verify-email, resend-verification, mail-status, send-phone-code, verify-phone. E-mail: `server/mailer.js` (SMTP da Hostinger; sem `SMTP_USER`/`SMTP_PASS`, em dev o e-mail sai no log e em produção as rotas respondem 503 e o cadastro pula a confirmação). Links em `email_tokens` (só o hash). Como configurar: `docs/configuracao/email.md`. A tela `/verify-phone` continua no código, mas o cadastro agora vai para `/verify-email`. SMS ainda sem provedor: em dev o código sai no log do servidor; em produção `send-phone-code` responde 503 e a tela oferece "Pular por enquanto"
 - `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e **o botão não aparece** (sem nenhum configurado, a seção "ou entre com" fica oculta: logos de Google/Apple/Facebook sem login real fizeram o Google Safe Browsing marcar o site como "Perigoso"). Como criar as credenciais: `docs/configuracao/login-social.md` (pendente: o cliente ainda não tem o e-mail do projeto).
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
-- `institutions`: lista, `/destaques`, `/mine` (instituições do usuário, qualquer status), `/:id`, `POST /register/step`
+- `institutions`: lista, `/destaques`, `/mine` (instituições do usuário, qualquer status, com motivo), `/mine/:id` (dados completos para corrigir, só responsável/admin/gestor), `/:id`, `POST /register/step` (etapa com `institutionId` atualiza, nunca duplica; etapa vazia é ignorada), `POST /:id/resubmit` (needs_revision → pending)
 - `feed` (`routes/feed.js`): `GET /?page=&institutionId=` (feed ou mural da instituição; cada post traz `images[]`, `registered`, `canEdit`), `GET /:id`, `POST /` (cria post comum, evento ou campanha), `PATCH /:id`, `DELETE /:id`; curtidas `POST|DELETE /:id/like`; comentários `GET|POST /:id/comments` e `DELETE /comments/:commentId` (apagam: autor, instituição dona do post, admin/gestor). Cada post traz também `liked`, `likeCount`, `commentCount`. Só o **responsável por instituição aprovada** cria/edita; excluir também admin/gestor (moderação). Imagens: até 5, só links `/uploads/...`
 - `search` (+ `/categories`), `donations` (`/initiate` com `postId` opcional da campanha, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
 - `upload`: POST multipart → pasta `UPLOAD_DIR` (padrão `server/uploads/`); devolve URL **relativa** `/uploads/<arquivo>`
@@ -84,7 +84,8 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 ### Papéis e regras
 
 - `users.role`: `user` (padrão), `gestor`, `admin`. A seção de administração em Configurações aparece conforme o papel.
-- Qualquer usuário logado pode cadastrar uma instituição. Ela nasce `pending`; admin/gestor aprova (`approved` → `verified = true`), reprova (`rejected` + `rejection_reason`) ou pede revisão (`needs_revision`).
+- Qualquer usuário logado pode cadastrar uma instituição. Ela nasce `pending`; admin/gestor aprova (`approved` → `verified = true`), reprova (`rejected` + `rejection_reason`) ou pede revisão (`needs_revision`, **motivo obrigatório**, uma linha por item a corrigir). O motivo fica em `rejection_reason` e some ao aprovar. Documento da última etapa em `institutions.documents_url` (link no admin).
+- **Instituição em validação** (spec 9.4/10): depois do login (`screens/auth/after-login.ts`), quem é responsável por instituição não aprovada vai para `#/institution-status` (Em análise / Correção necessária / Não aprovada / Aprovada). Não bloqueia o resto do app (a pessoa também é doadora); o feed mostra um aviso no topo e Configurações tem o atalho "Minha instituição". Corrigir = `#/register/institution?corrigir=<id>` com os dados já preenchidos → reenviar volta a `pending`.
 - Doação nasce `pending` (`donations.status`): aparece no histórico, mas **não credita XP/Salves**. Admin/gestor confirma em Configurações → Confirmar doações (`confirmed` → credita uma única vez, protegido contra confirmação em dobro) ou cancela (`cancelled`). Doações anteriores à coluna ficaram `confirmed`. Quando houver PIX real, o webhook do provedor substitui a confirmação manual.
 - Tabelas: `users`, `institutions`, `posts`, `post_likes`, `post_comments`, `donations`, `calendar_registrations`, `rewards`, `email_tokens`. Coluna nova = adicionar `hasColumn`/`alterTable` no fim de `initDb()` (vale para SQLite e MySQL).
 - **Instituição não aprovada não aparece publicamente** (spec 4.3/11.10): feed, busca, destaques e lista filtram `status = 'approved'`; `GET /institutions/:id` de não aprovada só para o responsável e admin/gestor. Só o responsável (ou admin/gestor) altera os dados (`POST /institutions/register/step` confere `responsible_user_id`).
@@ -180,10 +181,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.11.0** · 26 versões
+Versão atual: **1.12.0** · 27 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.12.0 | 08/10/2026 | Minor | Situação da instituição no login, pedido de revisão e reenvio de correções | Onboarding, Instituição, Admin, Autenticação, Feed, Configurações, Servidor, Banco de dados |
 | 1.11.0 | 08/10/2026 | Minor | Curtir e comentar publicações, com tela de detalhe do post | Feed, Servidor, Banco de dados |
 | 1.10.1 | 08/10/2026 | Patch | Admin volta a listar instituições e cadastro de instituição sem erro na última etapa | Admin, Instituição, Banco de dados, Servidor |
 | 1.10.0 | 07/10/2026 | Minor | Instituição publica no feed: posts, eventos e campanhas | Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados |

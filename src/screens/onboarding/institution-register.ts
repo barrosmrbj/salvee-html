@@ -1,6 +1,7 @@
 import { Button, Input, showToast, LoadingOverlay } from '@/components'
 import { institutionService, authService } from '@/services'
 import { ApiError } from '@/services/api'
+import { getHashQuery } from '@/router'
 
 const TOTAL_STEPS = 3
 const STEP_TITLES = ['Identificação', 'Localização & Missão', 'Identidade Visual']
@@ -9,6 +10,16 @@ const SESSION_KEY = 'salvee_inst_id'
 
 let currentStep = 1
 let prefillData: { name?: string; email?: string; phone?: string } = {}
+// modo "Corrigir cadastro" (#/register/institution?corrigir=<id>): dados já enviados e status
+let editId: string | null = null
+let editStatus: string | null = null
+let editData: Record<string, string | number | null> | null = null
+
+// valor já salvo do campo (modo correção)
+function saved(id: string): string | undefined {
+  const v = editData?.[id]
+  return v === null || v === undefined || v === '' ? undefined : String(v)
+}
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -40,6 +51,21 @@ export function mount(): void {
     else history.back()
   })
 
+  editId = getHashQuery().get('corrigir')
+  if (editId) {
+    institutionService.getMineForEdit(editId).then(inst => {
+      editStatus = inst.status
+      editData = inst.data
+      // as etapas atualizam esta instituição (e não criam outra)
+      sessionStorage.setItem(SESSION_KEY, inst.id)
+      renderStep()
+    }).catch(() => {
+      showToast('Não foi possível carregar o cadastro para corrigir', 'error')
+      window.location.hash = '/institution-status'
+    })
+    return
+  }
+
   authService.getMe().then(user => {
     prefillData = { name: user.name, email: user.email, phone: (user as { phone?: string }).phone ?? '' }
     renderStep()
@@ -66,7 +92,7 @@ function renderStep(): void {
   const isLast = currentStep === TOTAL_STEPS
 
   actions.appendChild(Button({
-    label: isLast ? 'Enviar para análise' : 'Avançar',
+    label: isLast ? (editId ? 'Reenviar para análise' : 'Enviar para análise') : 'Avançar',
     variant: 'primary',
     fullWidth: true,
     onClick: () => void handleAdvance(),
@@ -93,9 +119,9 @@ function renderStep1(container: HTMLElement): void {
   container.appendChild(intro)
 
   appendInput(container, { id: 'name', label: 'Nome da instituição', placeholder: 'Nome oficial', required: true })
-  appendInput(container, { id: 'responsible', label: 'Nome do responsável', placeholder: 'Seu nome completo', required: true, prefill: prefillData.name })
-  appendInput(container, { id: 'contact_email', label: 'E-mail de contato', type: 'email', placeholder: 'contato@ong.org', required: true, prefill: prefillData.email })
-  appendInput(container, { id: 'contact_phone', label: 'Telefone', type: 'tel', placeholder: '(92) 99999-9999', required: true, prefill: prefillData.phone })
+  appendInput(container, { id: 'responsible', label: 'Nome do responsável', placeholder: 'Seu nome completo', required: true, prefill: saved('responsible') ?? prefillData.name })
+  appendInput(container, { id: 'contact_email', label: 'E-mail de contato', type: 'email', placeholder: 'contato@ong.org', required: true, prefill: saved('contact_email') ?? prefillData.email })
+  appendInput(container, { id: 'contact_phone', label: 'Telefone', type: 'tel', placeholder: '(92) 99999-9999', required: true, prefill: saved('contact_phone') ?? prefillData.phone })
 
   // Category select
   const catWrapper = document.createElement('div')
@@ -109,6 +135,8 @@ function renderStep1(container: HTMLElement): void {
     <span id="category-error" class="text-xs text-red-500 hidden">Selecione uma categoria</span>
   `
   container.appendChild(catWrapper)
+  const savedCategory = saved('category')
+  if (savedCategory) (catWrapper.querySelector('select') as HTMLSelectElement).value = savedCategory
 
   appendInput(container, { id: 'subcategory', label: 'Subcategoria (opcional)', placeholder: 'Ex: Abrigo, Alimentação' })
 }
@@ -127,6 +155,8 @@ function renderStep2(container: HTMLElement): void {
   appendInput(container, { id: 'audience', label: 'Público atendido (opcional)', placeholder: 'Ex: Crianças de 5 a 12 anos' })
   appendInput(container, { id: 'cnpj', label: 'CNPJ (opcional)', placeholder: '00.000.000/0000-00' })
   appendInput(container, { id: 'street', label: 'Endereço (opcional)', placeholder: 'Rua das Flores, 123' })
+  appendInput(container, { id: 'city', label: 'Cidade (opcional)', placeholder: 'Manaus' })
+  appendInput(container, { id: 'state', label: 'Estado (opcional)', placeholder: 'AM' })
   appendInput(container, { id: 'zip', label: 'CEP (opcional)', placeholder: '69000-000' })
   appendTextarea(container, { id: 'mission', label: 'Missão (opcional)', placeholder: 'Nossa missão é...' })
   appendInput(container, { id: 'founded_year', label: 'Ano de fundação (opcional)', type: 'number', placeholder: '2010' })
@@ -155,7 +185,8 @@ function appendInput(container: HTMLElement, opts: { id: string; label: string; 
   w.appendChild(Input({ id: opts.id, label: opts.label, type: opts.type, placeholder: opts.placeholder, required: opts.required }))
 
   const inp = w.querySelector('input') as HTMLInputElement
-  if (opts.prefill && inp) inp.value = opts.prefill
+  const value = opts.prefill ?? saved(opts.id)
+  if (value && inp) inp.value = value
 
   if (opts.required && inp) {
     inp.addEventListener('blur', () => validateRequired(inp))
@@ -178,12 +209,13 @@ function appendTextarea(container: HTMLElement, opts: { id: string; label: strin
   ta.placeholder = opts.placeholder ?? ''
   ta.rows = 3
   if (opts.maxLength) ta.maxLength = opts.maxLength
+  ta.value = saved(opts.id) ?? ''
   ta.className = 'w-full px-4 py-3 rounded-xl border border-gray-200 text-gray-700 text-sm resize-none outline-none focus:border-salvee-orange'
 
   if (opts.maxLength) {
     const counter = document.createElement('span')
     counter.className = 'text-xs text-gray-400 text-right'
-    counter.textContent = `0/${opts.maxLength}`
+    counter.textContent = `${ta.value.length}/${opts.maxLength}`
     ta.addEventListener('input', () => { counter.textContent = `${ta.value.length}/${opts.maxLength}` })
     w.appendChild(ta)
     w.appendChild(counter)
@@ -218,6 +250,9 @@ function appendFileInput(container: HTMLElement, opts: { id: string; label: stri
     <span id="${opts.id}-error" class="text-xs text-red-500 hidden"></span>
     <div id="${opts.id}-preview" class="hidden mt-1"></div>
   `
+
+  const already = saved({ logo: 'logo_url', photo: 'photo_url', docs: 'documents_url' }[opts.id] ?? '')
+  if (already) (w.querySelector(`#${opts.id}-name`) as HTMLElement).textContent = 'Já enviado · toque para trocar'
 
   const fileInput = w.querySelector(`#${opts.id}-file`) as HTMLInputElement
   fileInput.addEventListener('change', () => {
@@ -265,7 +300,7 @@ function validateRequired(el: HTMLInputElement | HTMLTextAreaElement): boolean {
 
 async function handleSkip(): Promise<void> {
   if (currentStep < TOTAL_STEPS) { currentStep++; renderStep() }
-  else finish()
+  else await finish()
 }
 
 async function handleAdvance(): Promise<void> {
@@ -282,7 +317,7 @@ async function handleAdvance(): Promise<void> {
       currentStep++
       renderStep()
     } else {
-      finish()
+      await finish()
     }
   } catch (err) {
     showToast(err instanceof ApiError ? err.message : 'Erro ao salvar. Tente novamente.', 'error')
@@ -325,7 +360,7 @@ async function submitStep1(): Promise<void> {
 
 async function submitStep2(): Promise<void> {
   const data: Record<string, string> = {}
-  ;['description', 'audience', 'cnpj', 'street', 'zip', 'mission', 'founded_year'].forEach(id => {
+  ;['description', 'audience', 'cnpj', 'street', 'city', 'state', 'zip', 'mission', 'founded_year'].forEach(id => {
     const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement
     if (el?.value) data[id] = el.value
   })
@@ -348,23 +383,38 @@ async function submitStep3(): Promise<void> {
     }
   }
 
-  // upload docs separately (no URL storage needed for analysis)
+  // documento para a análise: o link fica na instituição e aparece para o admin
   const docsInput = document.getElementById('docs-file') as HTMLInputElement
   if (docsInput?.files?.[0]) {
-    await institutionService.uploadFile(docsInput.files[0])
+    data['documents_url'] = await institutionService.uploadFile(docsInput.files[0])
   }
 
   const instId = sessionStorage.getItem(SESSION_KEY) ?? undefined
   await institutionService.registerStep({ step: 3, data, institutionId: instId })
 }
 
-function finish(): void {
+async function finish(): Promise<void> {
+  const instId = sessionStorage.getItem(SESSION_KEY)
   sessionStorage.removeItem(SESSION_KEY)
-  showToast('Cadastro enviado para análise!', 'success')
-  setTimeout(() => { window.location.hash = '/feed' }, 1800)
+  if (editId && editStatus === 'needs_revision' && instId) {
+    try {
+      await institutionService.resubmit(instId)
+      showToast('Correções enviadas para análise!', 'success')
+    } catch (err) {
+      showToast(err instanceof ApiError ? err.message : 'Erro ao reenviar. Tente novamente.', 'error')
+      return
+    }
+  } else {
+    showToast(editId ? 'Cadastro atualizado!' : 'Cadastro enviado para análise!', 'success')
+  }
+  // mostra a situação (Em análise) em vez de voltar direto ao feed
+  window.location.hash = '/institution-status'
 }
 
 export function unmount(): void {
   currentStep = 1
   prefillData = {}
+  editId = null
+  editStatus = null
+  editData = null
 }

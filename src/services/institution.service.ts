@@ -1,10 +1,20 @@
 import { request } from './api'
-import type { Institution, InstitutionRegisterPayload, MyInstitution } from '@/types'
+import type { Institution, InstitutionRegisterPayload, MyInstitution, MyInstitutionForEdit } from '@/types'
 
 export const institutionService = {
   /** instituições pelas quais o usuário é responsável (qualquer status) */
   async listMine(): Promise<MyInstitution[]> {
     return request<MyInstitution[]>('/institutions/mine')
+  },
+
+  /** dados completos para corrigir o cadastro (só o responsável) */
+  async getMineForEdit(id: string): Promise<MyInstitutionForEdit> {
+    return request<MyInstitutionForEdit>(`/institutions/mine/${id}`)
+  },
+
+  /** depois de corrigir: volta para análise (needs_revision → pending) */
+  async resubmit(id: string): Promise<void> {
+    await request<void>(`/institutions/${id}/resubmit`, { method: 'POST' })
   },
 
   async getById(id: string): Promise<Institution> {

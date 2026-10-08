@@ -22,6 +22,7 @@ export interface AdminInstitution {
   responsibleUserName: string | null
   responsibleUserEmail: string | null
   rejectionReason: string | null
+  documentsUrl: string | null
   city?: string
   state?: string
   createdAt: string

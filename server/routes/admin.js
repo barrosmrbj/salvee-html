@@ -87,10 +87,16 @@ router.patch('/institutions/:id/status', authMiddleware, requireGestor, async (r
     const inst = await db('institutions').where({ id: req.params.id }).first()
     if (!inst) return res.status(404).json({ error: 'Instituição não encontrada' })
 
-    const update = { status, updated_at: new Date().toISOString() }
-    if (status === 'approved') update.verified = true
-    if (status !== 'approved') update.verified = false
-    if (reason) update.rejection_reason = reason
+    const text = typeof reason === 'string' ? reason.trim() : ''
+    // pedir revisão sem dizer o que corrigir deixa a instituição sem saída (spec 10.2)
+    if (status === 'needs_revision' && !text) {
+      return res.status(400).json({ error: 'Informe o que a instituição precisa corrigir' })
+    }
+
+    const update = { status, updated_at: new Date(), verified: status === 'approved' }
+    // aprovada: some o motivo antigo; rejeitada/revisão: guarda o novo (ou mantém o anterior)
+    if (status === 'approved') update.rejection_reason = null
+    else if (text) update.rejection_reason = text
 
     await db('institutions').where({ id: req.params.id }).update(update)
     res.json({ ok: true, institutionId: req.params.id, status })
@@ -184,6 +190,7 @@ function formatAdminInst(i) {
     responsibleUserName: i.responsible_user_name || i.responsible || null,
     responsibleUserEmail: i.responsible_user_email || i.contact_email || null,
     rejectionReason: i.rejection_reason || null,
+    documentsUrl: i.documents_url || null,
     city: i.city,
     state: i.state,
     createdAt: i.created_at,

@@ -17,6 +17,7 @@ const ROUTES: RouteDefinition[] = [
   { path: '/welcome', load: () => import('@/screens/welcome') },
   { path: '/login', load: () => import('@/screens/auth/login') },
   { path: '/register', load: () => import('@/screens/auth/register') },
+  { path: '/institution-status', load: () => import('@/screens/onboarding/institution-status'), protected: true },
   { path: '/register/institution', load: () => import('@/screens/onboarding/institution-register'), protected: true },
   { path: '/verify-phone', load: () => import('@/screens/onboarding/verify-phone') },
   { path: '/welcome-success', load: () => import('@/screens/onboarding/welcome-success') },

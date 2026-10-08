@@ -2,6 +2,7 @@ import { Button, Input, getInputValue, showToast, LoadingOverlay, SocialLogin } 
 import { authService } from '@/services'
 import { ApiError } from '@/services/api'
 import { getHashQuery } from '@/router'
+import { goAfterLogin } from './after-login'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -73,7 +74,7 @@ export function mount(): void {
     document.body.appendChild(overlay)
     try {
       await authService.login({ email, password })
-      window.location.hash = '/feed'
+      await goAfterLogin()
     } catch (err) {
       showToast(err instanceof ApiError ? err.message : 'Erro ao entrar', 'error')
     } finally {

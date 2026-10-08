@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 08/10/2026 (v1.11.0). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 08/10/2026 (v1.12.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -40,10 +40,10 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 | 6.1 Splash | ✅ | — |
 | 6.2/6.3 Boas-vindas e tipo de conta | 🟡 | "Comece aqui" deve ir para a escolha Usuário/Instituição **antes** do cadastro, e a escolha deve ser gravada na conta. |
 | 7 Cadastro de usuário | 🟡 | Validar tamanho mínimo de senha e formato do e-mail no cadastro. Login social ✅ (sem duplicar por e-mail). |
-| 8 Cadastro de instituição | 🟡 | 3 etapas (PDF sugere 6). Faltam horários de funcionamento, **várias fotos** (só 1) e **salvar os documentos** (o campo existe, o arquivo não é gravado). |
-| 8.6/8.7 Status | 🟡 | Botão "Pedir revisão" no admin e a instituição poder **reenviar correções**. |
+| 8 Cadastro de instituição | 🟡 | 3 etapas (PDF sugere 6). Documento salvo e visível no admin, cidade/estado e etapa 1 sem duplicar ✅ (v1.12.0). Faltam horários de funcionamento e **várias fotos** (só 1). |
+| 8.6/8.7 Status | ✅ | "Pedir revisão" no admin (com o que corrigir) e a instituição corrige e reenvia (v1.12.0). |
 | 9.3 Recuperar senha | ✅ | Falta só o e-mail do cliente (SMTP). |
-| 9.4/10 Login de instituição por status | ❌ | Telas "Em análise", "Correção necessária", "Rejeitado". |
+| 9.4/10 Login de instituição por status | ✅ | Tela de situação depois do login, aviso no feed e atalho em Configurações (v1.12.0). Falta avisar por e-mail/notificação quando o status muda (21). |
 | 11 Feed | 🟡 | Botões Ajudar / Doar / Participar ✅ e tipo visível ✅ (v1.10.0); **curtir, comentar** e tela de detalhe do post ✅ (v1.11.0). Faltam **seguir** instituições e algoritmo com impulsionamento (hoje só por data). |
 | 11.6 Mídia | 🟡 | Carrossel de até 5 imagens ✅ (v1.10.0). Falta vídeo. |
 | 12 Criação de conteúdo | ✅ | Post, evento e campanha; editar/excluir (v1.10.0). Falta vídeo. |
@@ -56,7 +56,7 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 | 19 Calendário | 🟡 | Tela de detalhe com mapa, rota e cancelar participação. |
 | 20 Configurações | 🟡 | Maioria dos itens sem ação: editar perfil (API existe), alterar senha, notificações, ajuda, termos e privacidade. |
 | 21 Notificações | ❌ | Nenhuma. |
-| 22 Painel admin | 🟡 | Aprovar/rejeitar ✅, confirmar doações ✅, papéis ✅. Faltam: pedir revisão, moderar conteúdo, categorias, recompensas/parceiros, acompanhar campanhas. |
+| 22 Painel admin | 🟡 | Aprovar/rejeitar/pedir revisão ✅, confirmar doações ✅, papéis ✅, excluir publicações e comentários ✅. Faltam: tela de moderação de conteúdo, categorias, recompensas/parceiros, acompanhar campanhas. |
 | 24 Estados | ✅/🟡 | Várias telas mostram dados de exemplo quando a API falha (pode esconder erros). |
 | 27.1 Selo | ✅ | — |
 
@@ -64,7 +64,7 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 - [x] Criação de conteúdo, mural, botões Doar/Participar/Ajudar (v1.10.0).
 - [x] Curtir, comentar e tela de detalhe do post (v1.11.0).
 - [ ] **Tela de detalhe da campanha** (15.4); vídeo nas publicações (11.6); **seguir** instituições (23.1).
-- [ ] **Telas de status** da instituição no login e reenvio de correções (9.4, 10, 8.7).
+- [x] Telas de status da instituição no login, pedir revisão e reenviar correções (v1.12.0).
 - [ ] **Recompensas com QR Code** de uso único e "Minhas recompensas"; XP/Salves configurável (18).
 - [ ] **PIX real**: integrar provedor (Mercado Pago, Asaas, Efí…); o webhook substitui a confirmação manual de doações.
 - [ ] Navegação com aba de **Gamificação** (5); escolha do tipo de conta antes do cadastro (6.3).

@@ -1,6 +1,50 @@
 {
-  "versaoAtual": "1.11.0",
+  "versaoAtual": "1.12.0",
   "historico": [
+    {
+      "versao": "1.12.0",
+      "data": "2026-10-08",
+      "tipo": "minor",
+      "titulo": "Situação da instituição no login, pedido de revisão e reenvio de correções",
+      "modulos": [
+        "Onboarding",
+        "Instituição",
+        "Admin",
+        "Autenticação",
+        "Feed",
+        "Configurações",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Nova tela \"Minha instituição\" (#/institution-status): Em análise, Correção necessária (com a lista do que corrigir), Não aprovada (com o motivo) ou Aprovada (spec 9.4 e 10)",
+        "Depois do login (e-mail/senha ou social), quem é responsável por instituição ainda não aprovada vê primeiro essa tela; o app continua liberado para usar como doador, com aviso no topo do feed e atalho em Configurações",
+        "Admin ganha o botão \"Pedir revisão\", com o que corrigir obrigatório (um item por linha); aprovar limpa o motivo anterior (spec 8.6 e 22.1)",
+        "Corrigir cadastro: o formulário da instituição abre com os dados já enviados (#/register/institution?corrigir=<id>) e, ao final, reenvia para análise (needs_revision → pending) (spec 8.7)",
+        "Documento enviado na última etapa passa a ser guardado (institutions.documents_url) e aparece no admin como \"Ver documento enviado\"; antes era enviado e perdido",
+        "Cadastro de instituição: voltar à etapa 1 e avançar de novo não cria mais outra instituição; campos de cidade e estado na etapa 2",
+        "Rotas GET /api/institutions/mine/:id e POST /api/institutions/:id/resubmit; /mine traz motivo e datas"
+      ],
+      "fontes": [
+        "src/screens/onboarding/institution-status.ts",
+        "src/screens/onboarding/institution-register.ts",
+        "src/screens/auth/after-login.ts",
+        "src/screens/auth/login.ts",
+        "src/screens/auth/oauth.ts",
+        "src/screens/admin/institution-approvals.ts",
+        "src/screens/feed.ts",
+        "src/screens/settings.ts",
+        "src/services/institution.service.ts",
+        "src/types/post.ts",
+        "src/types/admin.ts",
+        "src/router.ts",
+        "server/routes/institutions.js",
+        "server/routes/admin.js",
+        "server/db.js",
+        "CLAUDE.md",
+        "docs/PENDENCIAS.md"
+      ]
+    },
     {
       "versao": "1.11.0",
       "data": "2026-10-08",

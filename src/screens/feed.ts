@@ -36,7 +36,11 @@ export function mount(): void {
   loadFeedPosts()
   // botão "+" só para o responsável por instituição aprovada (spec 5 e 12.2)
   institutionService.listMine()
-    .then(list => { if (list.some(i => i.status === 'approved')) buildFab() })
+    .then(list => {
+      if (list.some(i => i.status === 'approved')) buildFab()
+      const waiting = list.find(i => i.status !== 'approved')
+      if (waiting) showInstitutionBanner(waiting.status)
+    })
     .catch(() => {})
 
   document.getElementById('settings-btn')!.addEventListener('click', () => { window.location.hash = '/settings' })
@@ -66,6 +70,29 @@ function loadFeedPosts(): void {
     spinner.remove()
     showEmpty(container, 'Não foi possível carregar o feed. Verifique sua conexão.')
   })
+}
+
+// experiência limitada da instituição em validação (spec 9.4): aviso fixo no topo do feed
+function showInstitutionBanner(status: string): void {
+  const text: Record<string, string> = {
+    pending: '⏳ Sua instituição está em análise',
+    needs_revision: '✏️ Sua instituição precisa de correções',
+    rejected: '❌ Sua instituição não foi aprovada',
+  }
+  if (!text[status]) return
+  const banner = document.createElement('button')
+  banner.type = 'button'
+  banner.className = `w-full mb-4 flex items-center justify-between gap-2 rounded-2xl px-4 py-3 text-left text-sm font-semibold ${
+    status === 'needs_revision' ? 'bg-blue-50 text-blue-700' : status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700'
+  }`
+  const label = document.createElement('span')
+  label.textContent = text[status]
+  const more = document.createElement('span')
+  more.className = 'text-xs font-medium underline flex-shrink-0'
+  more.textContent = 'Ver situação'
+  banner.append(label, more)
+  banner.addEventListener('click', () => { window.location.hash = '/institution-status' })
+  document.getElementById('feed-list')?.before(banner)
 }
 
 function showEmpty(container: HTMLElement, text: string): void {

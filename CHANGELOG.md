@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.11.0**
+**Versão atual: 1.12.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.12.0** | 08/10/2026 | Minor | Situação da instituição no login, pedido de revisão e reenvio de correções | Onboarding, Instituição, Admin, Autenticação, Feed, Configurações, Servidor, Banco de dados |
 | **1.11.0** | 08/10/2026 | Minor | Curtir e comentar publicações, com tela de detalhe do post | Feed, Servidor, Banco de dados |
 | **1.10.1** | 08/10/2026 | Patch | Admin volta a listar instituições e cadastro de instituição sem erro na última etapa | Admin, Instituição, Banco de dados, Servidor |
 | **1.10.0** | 07/10/2026 | Minor | Instituição publica no feed: posts, eventos e campanhas | Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados |
@@ -47,6 +48,20 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.12.0 — Situação da instituição no login, pedido de revisão e reenvio de correções
+
+*08/10/2026 · Minor · Onboarding, Instituição, Admin, Autenticação, Feed, Configurações, Servidor, Banco de dados*
+
+- Nova tela "Minha instituição" (#/institution-status): Em análise, Correção necessária (com a lista do que corrigir), Não aprovada (com o motivo) ou Aprovada (spec 9.4 e 10)
+- Depois do login (e-mail/senha ou social), quem é responsável por instituição ainda não aprovada vê primeiro essa tela; o app continua liberado para usar como doador, com aviso no topo do feed e atalho em Configurações
+- Admin ganha o botão "Pedir revisão", com o que corrigir obrigatório (um item por linha); aprovar limpa o motivo anterior (spec 8.6 e 22.1)
+- Corrigir cadastro: o formulário da instituição abre com os dados já enviados (#/register/institution?corrigir=<id>) e, ao final, reenvia para análise (needs_revision → pending) (spec 8.7)
+- Documento enviado na última etapa passa a ser guardado (institutions.documents_url) e aparece no admin como "Ver documento enviado"; antes era enviado e perdido
+- Cadastro de instituição: voltar à etapa 1 e avançar de novo não cria mais outra instituição; campos de cidade e estado na etapa 2
+- Rotas GET /api/institutions/mine/:id e POST /api/institutions/:id/resubmit; /mine traz motivo e datas
+
+Fontes: `src/screens/onboarding/institution-status.ts` · `src/screens/onboarding/institution-register.ts` · `src/screens/auth/after-login.ts` · `src/screens/auth/login.ts` · `src/screens/auth/oauth.ts` · `src/screens/admin/institution-approvals.ts` · `src/screens/feed.ts` · `src/screens/settings.ts` · `src/services/institution.service.ts` · `src/types/post.ts` · `src/types/admin.ts` · `src/router.ts` · `server/routes/institutions.js` · `server/routes/admin.js` · `server/db.js` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.11.0 — Curtir e comentar publicações, com tela de detalhe do post
 

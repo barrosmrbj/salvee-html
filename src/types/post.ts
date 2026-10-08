@@ -62,4 +62,16 @@ export interface MyInstitution {
   name: string
   status: 'pending' | 'approved' | 'rejected' | 'needs_revision'
   logoUrl: string | null
+  /** motivo da reprovação ou o que corrigir (needs_revision) */
+  rejectionReason: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+/** GET /institutions/mine/:id — dados para o responsável corrigir o cadastro */
+export interface MyInstitutionForEdit {
+  id: string
+  status: MyInstitution['status']
+  rejectionReason: string | null
+  data: Record<string, string | number | null>
 }

@@ -36,7 +36,41 @@ router.get('/destaques', authMiddleware, async (req, res) => {
 router.get('/mine', authMiddleware, async (req, res) => {
   try {
     const list = await db('institutions').where({ responsible_user_id: req.userId }).orderBy('name')
-    res.json(list.map(i => ({ id: i.id, name: i.name, status: i.status, logoUrl: i.logo_url || null })))
+    res.json(list.map(i => ({
+      id: i.id, name: i.name, status: i.status, logoUrl: i.logo_url || null,
+      rejectionReason: i.rejection_reason || null, createdAt: i.created_at, updatedAt: i.updated_at,
+    })))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// GET /institutions/mine/:id — dados completos para o responsável corrigir o cadastro
+router.get('/mine/:id', authMiddleware, async (req, res) => {
+  try {
+    const inst = await db('institutions').where({ id: req.params.id }).first()
+    if (!inst || !(await canManage(req.userId, inst))) return res.status(404).json({ error: 'Instituição não encontrada' })
+    const fields = ['name', 'responsible', 'contact_email', 'contact_phone', 'category', 'subcategory', 'description',
+      'audience', 'cnpj', 'street', 'city', 'state', 'zip', 'mission', 'founded_year', 'history', 'logo_url', 'photo_url', 'documents_url']
+    res.json({
+      id: inst.id, status: inst.status, rejectionReason: inst.rejection_reason || null,
+      data: Object.fromEntries(fields.map(f => [f, inst[f] ?? null])),
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// POST /institutions/:id/resubmit — depois de corrigir, volta para análise (spec 8.7 needs_revision)
+router.post('/:id/resubmit', authMiddleware, async (req, res) => {
+  try {
+    const inst = await db('institutions').where({ id: req.params.id }).first()
+    if (!inst || inst.responsible_user_id !== req.userId) return res.status(404).json({ error: 'Instituição não encontrada' })
+    if (inst.status !== 'needs_revision') return res.status(409).json({ error: 'Esta instituição não está aguardando correção' })
+    await db('institutions').where({ id: inst.id }).update({ status: 'pending', rejection_reason: null, updated_at: new Date() })
+    res.json({ ok: true, status: 'pending' })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -62,7 +96,7 @@ router.post('/register/step', authMiddleware, async (req, res) => {
     const { step, data, institutionId } = req.body
     let id = institutionId
 
-    if (step === 1 || !id) {
+    if (!id) {
       id = uuidv4()
       await db('institutions').insert({ id, name: data.name || '', status: 'pending', responsible_user_id: req.userId, ...flattenStep(step, data) })
     } else {
@@ -92,7 +126,7 @@ function flattenStep(step, data) {
   const maps = {
     1: { name: data.name, responsible: data.responsible, contact_email: data.contact_email, contact_phone: data.contact_phone, category: data.category, subcategory: data.subcategory },
     2: { description: data.description, city: data.city, state: data.state, audience: data.audience, cnpj: data.cnpj, street: data.street, zip: data.zip, mission: data.mission, founded_year: data.founded_year ? Number(data.founded_year) : null },
-    3: { logo_url: data.logo_url, photo_url: data.photo_url, history: data.history },
+    3: { logo_url: data.logo_url, photo_url: data.photo_url, history: data.history, documents_url: data.documents_url },
   }
   const flat = maps[step] || {}
   return Object.fromEntries(Object.entries(flat).filter(([, v]) => v !== undefined && v !== null && v !== ''))
