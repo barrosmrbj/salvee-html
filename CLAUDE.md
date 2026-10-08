@@ -4,7 +4,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 ## Visão geral
 
-**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). Especificação funcional: `salvee_especificacao.md`. Design e planos originais: `docs/superpowers/`.
+**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). Especificação funcional: `salvee_especificacao.md`. **Pendências e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`.
 
 - **Frontend:** Vite 6 + TypeScript (vanilla, sem framework) + Tailwind 3, em `src/`.
 - **Backend:** Node.js + Express 4 (CommonJS) em `server/`, banco via Knex (SQLite em dev, MySQL em produção).
