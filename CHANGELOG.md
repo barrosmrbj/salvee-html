@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.8.1**
+**Versão atual: 1.9.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.9.0** | 07/10/2026 | Minor | E-mail pela Hostinger: recuperar senha e confirmar cadastro | Autenticação, Onboarding, Servidor, Banco de dados |
 | **1.8.1** | 07/10/2026 | Patch | Botão de mostrar senha e verificação por SMS sem travar o cadastro | Autenticação, Onboarding, Servidor |
 | **1.8.0** | 07/10/2026 | Minor | Login social com Google, Facebook e Apple e logos oficiais nos botões | Autenticação, Servidor, Banco de dados |
 | **1.7.0** | 07/10/2026 | Minor | Doação só credita pontos após confirmação; fotos fora da pasta do app | Doação, Admin, Perfil, Configurações, Servidor, Banco de dados |
@@ -41,6 +42,19 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.9.0 — E-mail pela Hostinger: recuperar senha e confirmar cadastro
+
+*07/10/2026 · Minor · Autenticação, Onboarding, Servidor, Banco de dados*
+
+- Envio de e-mail pelo SMTP da Hostinger (nodemailer), ligado pelas variáveis SMTP_USER e SMTP_PASS; sem elas, em dev o e-mail sai no log e em produção os recursos avisam que ainda não estão disponíveis
+- Esqueci minha senha passa a funcionar: link por e-mail (1 hora, uso único) e nova tela #/reset-password; a resposta não revela se o e-mail tem conta
+- Confirmação de cadastro por e-mail no lugar do SMS: nova tela #/verify-email (aviso, reenviar e confirmação pelo link de 3 dias), sem bloquear o uso do app; coluna users.email_verified (contas antigas e login social já ficam confirmados)
+- Links guardados só como hash na nova tabela email_tokens; no máximo um e-mail de cada tipo por minuto; rotas POST /auth/reset-password, /auth/verify-email, /auth/resend-verification e GET /auth/mail-status
+- E-mails com o visual do Salvee (botão laranja e link por extenso), nome escapado no HTML
+- Passo a passo para criar a caixa de envio na Hostinger em docs/configuracao/email.md
+
+Fontes: `server/mailer.js` · `server/routes/auth.js` · `server/routes/oauth.js` · `server/routes/users.js` · `server/db.js` · `server/package.json` · `src/screens/auth/reset-password.ts` · `src/screens/auth/verify-email.ts` · `src/screens/auth/register.ts` · `src/screens/auth/forgot-password.ts` · `src/services/auth.service.ts` · `src/router.ts` · `src/types/user.ts` · `docs/configuracao/email.md` · `CLAUDE.md`
 
 ### 1.8.1 — Botão de mostrar senha e verificação por SMS sem travar o cadastro
 

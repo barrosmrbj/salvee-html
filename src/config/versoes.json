@@ -1,6 +1,43 @@
 {
-  "versaoAtual": "1.8.1",
+  "versaoAtual": "1.9.0",
   "historico": [
+    {
+      "versao": "1.9.0",
+      "data": "2026-10-07",
+      "tipo": "minor",
+      "titulo": "E-mail pela Hostinger: recuperar senha e confirmar cadastro",
+      "modulos": [
+        "Autenticação",
+        "Onboarding",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Envio de e-mail pelo SMTP da Hostinger (nodemailer), ligado pelas variáveis SMTP_USER e SMTP_PASS; sem elas, em dev o e-mail sai no log e em produção os recursos avisam que ainda não estão disponíveis",
+        "Esqueci minha senha passa a funcionar: link por e-mail (1 hora, uso único) e nova tela #/reset-password; a resposta não revela se o e-mail tem conta",
+        "Confirmação de cadastro por e-mail no lugar do SMS: nova tela #/verify-email (aviso, reenviar e confirmação pelo link de 3 dias), sem bloquear o uso do app; coluna users.email_verified (contas antigas e login social já ficam confirmados)",
+        "Links guardados só como hash na nova tabela email_tokens; no máximo um e-mail de cada tipo por minuto; rotas POST /auth/reset-password, /auth/verify-email, /auth/resend-verification e GET /auth/mail-status",
+        "E-mails com o visual do Salvee (botão laranja e link por extenso), nome escapado no HTML",
+        "Passo a passo para criar a caixa de envio na Hostinger em docs/configuracao/email.md"
+      ],
+      "fontes": [
+        "server/mailer.js",
+        "server/routes/auth.js",
+        "server/routes/oauth.js",
+        "server/routes/users.js",
+        "server/db.js",
+        "server/package.json",
+        "src/screens/auth/reset-password.ts",
+        "src/screens/auth/verify-email.ts",
+        "src/screens/auth/register.ts",
+        "src/screens/auth/forgot-password.ts",
+        "src/services/auth.service.ts",
+        "src/router.ts",
+        "src/types/user.ts",
+        "docs/configuracao/email.md",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.8.1",
       "data": "2026-10-07",

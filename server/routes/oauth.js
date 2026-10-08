@@ -242,7 +242,7 @@ async function findOrCreateUser(provider, profile) {
       err.userMessage = 'Este e-mail já tem conta no Salvee. Entre com e-mail e senha.'
       throw err
     }
-    const update = { [idColumn]: profile.id, updated_at: new Date() }
+    const update = { [idColumn]: profile.id, email_verified: true, updated_at: new Date() }
     if (!existing.avatar_url && profile.avatarUrl) update.avatar_url = profile.avatarUrl
     await db('users').where({ id: existing.id }).update(update)
     return existing
@@ -255,6 +255,7 @@ async function findOrCreateUser(provider, profile) {
     email,
     password_hash: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10),
     avatar_url: profile.avatarUrl || null,
+    email_verified: Boolean(profile.emailVerified),
     [idColumn]: profile.id,
   })
   return db('users').where({ id }).first()

@@ -69,7 +69,8 @@ export function mount(): void {
     document.body.appendChild(overlay)
     try {
       await authService.register({ name, email, password })
-      window.location.hash = '/verify-phone'
+      // confirmação por e-mail (SMS fica para quando houver provedor; tela /verify-phone mantida)
+      window.location.hash = '/verify-email'
     } catch (err) {
       showToast(err instanceof ApiError ? err.message : 'Erro no cadastro', 'error')
     } finally {

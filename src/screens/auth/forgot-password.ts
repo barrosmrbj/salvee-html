@@ -44,8 +44,8 @@ export function mount(): void {
     document.body.appendChild(overlay)
     try {
       await authService.forgotPassword(email)
-      showToast('Link enviado! Verifique seu e-mail.', 'success')
-      setTimeout(() => { window.location.hash = '/login' }, 2000)
+      showToast('Se o e-mail estiver cadastrado, enviamos um link. Veja também a caixa de spam.', 'success', 5000)
+      setTimeout(() => { window.location.hash = '/login' }, 3000)
     } catch (err) {
       showToast(err instanceof ApiError ? err.message : 'Erro ao enviar. Tente novamente.', 'error')
     } finally {

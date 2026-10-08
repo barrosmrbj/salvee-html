@@ -29,6 +29,29 @@ export const authService = {
     })
   },
 
+  async resetPassword(token: string, password: string): Promise<void> {
+    await request('/auth/reset-password', {
+      method: 'POST',
+      body: JSON.stringify({ token, password }),
+    })
+  },
+
+  async verifyEmail(token: string): Promise<void> {
+    await request('/auth/verify-email', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    })
+  },
+
+  async resendVerification(): Promise<{ ok: boolean; alreadyVerified?: boolean }> {
+    return request('/auth/resend-verification', { method: 'POST' })
+  },
+
+  // false em produção enquanto o SMTP da Hostinger não estiver configurado
+  async mailStatus(): Promise<{ enabled: boolean }> {
+    return request('/auth/mail-status')
+  },
+
   async verifyPhone(phone: string, code: string): Promise<void> {
     await request('/auth/verify-phone', {
       method: 'POST',

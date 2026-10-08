@@ -153,6 +153,25 @@ async function initDb() {
     }
   }
 
+  // e-mail confirmado: contas criadas antes desta coluna ficam como confirmadas (não pedimos de novo)
+  if (!(await db.schema.hasColumn('users', 'email_verified'))) {
+    await db.schema.alterTable('users', t => t.boolean('email_verified').defaultTo(false))
+    await db('users').update({ email_verified: true })
+  }
+
+  // links enviados por e-mail (recuperar senha, confirmar e-mail). Guarda só o hash do token.
+  if (!(await db.schema.hasTable('email_tokens'))) {
+    await db.schema.createTable('email_tokens', t => {
+      t.string('id').primary()
+      t.string('user_id').notNullable().index()
+      t.string('type').notNullable() // reset | verify
+      t.string('token_hash').notNullable().unique()
+      t.timestamp('expires_at').notNullable()
+      t.timestamp('used_at').nullable()
+      t.timestamps(true, true)
+    })
+  }
+
   await normalizeUploadUrls()
 
   console.log('Database ready')

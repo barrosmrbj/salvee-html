@@ -8,6 +8,7 @@ export interface User {
   salves: number
   level: number
   role?: string
+  emailVerified?: boolean
   createdAt: string
 }
 
