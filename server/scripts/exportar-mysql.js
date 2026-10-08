@@ -22,7 +22,8 @@ const sqlite = knex({
 // só para montar o SQL com o escape do MySQL (não conecta)
 const mysql = knex({ client: 'mysql2' })
 
-// ordem de importação (tabelas referenciadas primeiro)
+// ordem de importação (tabelas referenciadas primeiro). post_likes/post_comments ficam de fora:
+// em dev são dados de teste, e os ids de usuário locais não batem com os da produção.
 const TABELAS = ['users', 'institutions', 'posts', 'rewards', 'donations', 'calendar_registrations']
 const UNICOS = {
   users: [['email']],
@@ -81,7 +82,7 @@ async function main() {
       defs.push(`UNIQUE KEY \`${tabela}_${unico.join('_')}_unique\` (${unico.map(c => `\`${c}\``).join(', ')})`)
     }
     saida.push(`-- ${tabela}`)
-    saida.push(`CREATE TABLE IF NOT EXISTS \`${tabela}\` (\n  ${defs.join(',\n  ')}\n) DEFAULT CHARSET=utf8mb4;`)
+    saida.push(`CREATE TABLE IF NOT EXISTS \`${tabela}\` (\n  ${defs.join(',\n  ')}\n) DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;`)
 
     // 2. colunas que faltarem (funciona em MySQL e MariaDB, sem ADD COLUMN IF NOT EXISTS)
     for (const col of colunas) {

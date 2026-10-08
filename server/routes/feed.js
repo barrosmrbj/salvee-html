@@ -22,13 +22,28 @@ function postsQuery() {
     )
 }
 
-// ids dos eventos (entre os posts dados) em que o usuário confirmou presença
-async function registeredIds(userId, posts) {
+// Dados do usuário e contagens para os posts dados: eventos em que confirmou presença,
+// posts que curtiu, total de curtidas e de comentários.
+async function postStats(userId, posts) {
+  const ids = posts.map(p => p.id)
+  const stats = { registered: new Set(), liked: new Set(), likes: new Map(), comments: new Map() }
+  if (!ids.length) return stats
   const eventIds = posts.filter(p => p.type === 'event').map(p => p.id)
-  if (!eventIds.length) return new Set()
-  const rows = await db('calendar_registrations').where({ user_id: userId }).whereIn('post_id', eventIds).select('post_id')
-  return new Set(rows.map(r => r.post_id))
+  const [regs, mine, likeCounts, commentCounts] = await Promise.all([
+    eventIds.length ? db('calendar_registrations').where({ user_id: userId }).whereIn('post_id', eventIds).select('post_id') : [],
+    db('post_likes').where({ user_id: userId }).whereIn('post_id', ids).select('post_id'),
+    db('post_likes').whereIn('post_id', ids).groupBy('post_id').select('post_id').count({ n: '*' }),
+    db('post_comments').whereIn('post_id', ids).groupBy('post_id').select('post_id').count({ n: '*' }),
+  ])
+  regs.forEach(r => stats.registered.add(r.post_id))
+  mine.forEach(r => stats.liked.add(r.post_id))
+  likeCounts.forEach(r => stats.likes.set(r.post_id, Number(r.n)))
+  commentCounts.forEach(r => stats.comments.set(r.post_id, Number(r.n)))
+  return stats
 }
+
+// post visível (instituição aprovada) ou undefined
+const visiblePost = id => postsQuery().where('posts.id', id).first()
 
 // GET /api/feed?page=1&institutionId=... (institutionId = mural do perfil da instituição)
 router.get('/', authMiddleware, async (req, res) => {
@@ -38,8 +53,8 @@ router.get('/', authMiddleware, async (req, res) => {
     let query = postsQuery()
     if (req.query.institutionId) query = query.where('posts.institution_id', String(req.query.institutionId))
     const posts = await query.orderBy('posts.created_at', 'desc').limit(limit).offset((page - 1) * limit)
-    const registered = await registeredIds(req.userId, posts)
-    res.json(posts.map(p => formatPost(p, req.userId, registered)))
+    const stats = await postStats(req.userId, posts)
+    res.json(posts.map(p => formatPost(p, req.userId, stats)))
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -49,9 +64,9 @@ router.get('/', authMiddleware, async (req, res) => {
 // GET /api/feed/:id
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
-    const post = await postsQuery().where('posts.id', req.params.id).first()
+    const post = await visiblePost(req.params.id)
     if (!post) return res.status(404).json({ error: 'Post não encontrado' })
-    res.json(formatPost(post, req.userId, await registeredIds(req.userId, [post])))
+    res.json(formatPost(post, req.userId, await postStats(req.userId, [post])))
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -129,7 +144,7 @@ router.post('/', authMiddleware, async (req, res) => {
     const id = uuidv4()
     await db('posts').insert({ id, institution_id: inst.id, type, created_by: req.userId, campaign_current: 0, ...parsed.fields })
     const post = await postsQuery().where('posts.id', id).first()
-    res.status(201).json(formatPost(post, req.userId, new Set()))
+    res.status(201).json(formatPost(post, req.userId, await postStats(req.userId, [post])))
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -148,7 +163,7 @@ router.patch('/:id', authMiddleware, async (req, res) => {
 
     await db('posts').where({ id: current.id }).update({ ...parsed.fields, updated_at: new Date() })
     const post = await postsQuery().where('posts.id', current.id).first()
-    res.json(formatPost(post, req.userId, await registeredIds(req.userId, [post])))
+    res.json(formatPost(post, req.userId, await postStats(req.userId, [post])))
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -168,8 +183,121 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     }
     await db.transaction(async trx => {
       await trx('calendar_registrations').where({ post_id: post.id }).delete()
+      await trx('post_likes').where({ post_id: post.id }).delete()
+      await trx('post_comments').where({ post_id: post.id }).delete()
       await trx('posts').where({ id: post.id }).delete()
     })
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// ---- curtidas (spec 11.8) ----
+
+async function likeCount(postId) {
+  const row = await db('post_likes').where({ post_id: postId }).count({ n: '*' }).first()
+  return Number(row?.n || 0)
+}
+
+// POST /api/feed/:id/like — curtir (repetir não duplica)
+router.post('/:id/like', authMiddleware, async (req, res) => {
+  try {
+    if (!(await visiblePost(req.params.id))) return res.status(404).json({ error: 'Post não encontrado' })
+    const exists = await db('post_likes').where({ post_id: req.params.id, user_id: req.userId }).first()
+    if (!exists) {
+      await db('post_likes').insert({ id: uuidv4(), post_id: req.params.id, user_id: req.userId })
+        .catch(err => { if (!/unique|duplicate/i.test(err.message)) throw err }) // dois toques ao mesmo tempo
+    }
+    res.json({ liked: true, likeCount: await likeCount(req.params.id) })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// DELETE /api/feed/:id/like — desfazer a curtida
+router.delete('/:id/like', authMiddleware, async (req, res) => {
+  try {
+    await db('post_likes').where({ post_id: req.params.id, user_id: req.userId }).delete()
+    res.json({ liked: false, likeCount: await likeCount(req.params.id) })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// ---- comentários (spec 11.8) ----
+const MAX_COMMENT = 500
+
+// pode apagar: o autor do comentário, o responsável pela instituição do post e admin/gestor (moderação)
+function canDeleteComment(userId, comment, post, user) {
+  if (comment.user_id === userId) return true
+  if (post && post.institution_responsible_user_id === userId) return true
+  return Boolean(user && ['admin', 'gestor'].includes(user.role))
+}
+
+function formatComment(c, canDelete) {
+  return {
+    id: c.id,
+    postId: c.post_id,
+    userId: c.user_id,
+    userName: c.user_name || 'Usuário',
+    userAvatarUrl: c.user_avatar_url || null,
+    content: c.content,
+    createdAt: c.created_at,
+    canDelete,
+  }
+}
+
+const commentsQuery = () => db('post_comments')
+  .leftJoin('users', 'post_comments.user_id', 'users.id')
+  .select('post_comments.*', 'users.name as user_name', 'users.avatar_url as user_avatar_url')
+
+// GET /api/feed/:id/comments — do mais antigo para o mais novo
+router.get('/:id/comments', authMiddleware, async (req, res) => {
+  try {
+    const post = await visiblePost(req.params.id)
+    if (!post) return res.status(404).json({ error: 'Post não encontrado' })
+    const user = await db('users').where({ id: req.userId }).first()
+    const rows = await commentsQuery().where('post_comments.post_id', post.id).orderBy('post_comments.created_at', 'asc')
+    res.json(rows.map(c => formatComment(c, canDeleteComment(req.userId, c, post, user))))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// POST /api/feed/:id/comments  { content }
+router.post('/:id/comments', authMiddleware, async (req, res) => {
+  try {
+    const content = typeof req.body.content === 'string' ? req.body.content.trim() : ''
+    if (!content) return res.status(400).json({ error: 'Escreva o comentário' })
+    if (content.length > MAX_COMMENT) return res.status(400).json({ error: 'Comentário muito longo (máximo ' + MAX_COMMENT + ' caracteres)' })
+    const post = await visiblePost(req.params.id)
+    if (!post) return res.status(404).json({ error: 'Post não encontrado' })
+    const id = uuidv4()
+    await db('post_comments').insert({ id, post_id: post.id, user_id: req.userId, content })
+    const c = await commentsQuery().where('post_comments.id', id).first()
+    res.status(201).json(formatComment(c, true))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// DELETE /api/feed/comments/:commentId
+router.delete('/comments/:commentId', authMiddleware, async (req, res) => {
+  try {
+    const comment = await db('post_comments').where({ id: req.params.commentId }).first()
+    if (!comment) return res.status(404).json({ error: 'Comentário não encontrado' })
+    const post = await postsQuery().where('posts.id', comment.post_id).first()
+    const user = await db('users').where({ id: req.userId }).first()
+    if (!canDeleteComment(req.userId, comment, post, user)) {
+      return res.status(403).json({ error: 'Você não pode apagar este comentário' })
+    }
+    await db('post_comments').where({ id: comment.id }).delete()
     res.json({ ok: true })
   } catch (err) {
     console.error(err)
@@ -185,7 +313,7 @@ function parseImages(p) {
   return p.image_url ? [p.image_url] : []
 }
 
-function formatPost(p, userId, registered) {
+function formatPost(p, userId, stats) {
   return {
     id: p.id,
     institutionId: p.institution_id,
@@ -203,7 +331,10 @@ function formatPost(p, userId, registered) {
     eventDate: p.event_date,
     eventLocation: p.event_location,
     eventInstructions: p.event_instructions || null,
-    registered: registered.has(p.id),
+    registered: stats.registered.has(p.id),
+    liked: stats.liked.has(p.id),
+    likeCount: stats.likes.get(p.id) || 0,
+    commentCount: stats.comments.get(p.id) || 0,
     canEdit: Boolean(userId && p.institution_responsible_user_id === userId),
     createdAt: p.created_at,
   }

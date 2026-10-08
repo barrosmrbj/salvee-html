@@ -68,7 +68,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### Rotas do frontend (`src/router.ts`)
 
-`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`*, `/post/new?tipo=common|event|campaign`*, `/post/:id/edit`*, `/donate/:id?campanha=<postId>`* (* = protegida).
+`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`*, `/post/new?tipo=common|event|campaign`*, `/post/:id`* (detalhe + comentários), `/post/:id/edit`*, `/donate/:id?campanha=<postId>`* (* = protegida).
 
 ### API (`server/routes/`, prefixo `/api`)
 
@@ -76,7 +76,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e **o botão não aparece** (sem nenhum configurado, a seção "ou entre com" fica oculta: logos de Google/Apple/Facebook sem login real fizeram o Google Safe Browsing marcar o site como "Perigoso"). Como criar as credenciais: `docs/configuracao/login-social.md` (pendente: o cliente ainda não tem o e-mail do projeto).
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
 - `institutions`: lista, `/destaques`, `/mine` (instituições do usuário, qualquer status), `/:id`, `POST /register/step`
-- `feed` (`routes/feed.js`): `GET /?page=&institutionId=` (feed ou mural da instituição; cada post traz `images[]`, `registered`, `canEdit`), `GET /:id`, `POST /` (cria post comum, evento ou campanha), `PATCH /:id`, `DELETE /:id`. Só o **responsável por instituição aprovada** cria/edita; excluir também admin/gestor (moderação). Imagens: até 5, só links `/uploads/...`
+- `feed` (`routes/feed.js`): `GET /?page=&institutionId=` (feed ou mural da instituição; cada post traz `images[]`, `registered`, `canEdit`), `GET /:id`, `POST /` (cria post comum, evento ou campanha), `PATCH /:id`, `DELETE /:id`; curtidas `POST|DELETE /:id/like`; comentários `GET|POST /:id/comments` e `DELETE /comments/:commentId` (apagam: autor, instituição dona do post, admin/gestor). Cada post traz também `liked`, `likeCount`, `commentCount`. Só o **responsável por instituição aprovada** cria/edita; excluir também admin/gestor (moderação). Imagens: até 5, só links `/uploads/...`
 - `search` (+ `/categories`), `donations` (`/initiate` com `postId` opcional da campanha, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
 - `upload`: POST multipart → pasta `UPLOAD_DIR` (padrão `server/uploads/`); devolve URL **relativa** `/uploads/<arquivo>`
 - `admin`: `GET /users?name=&role=` e `PATCH /users/:id/role` (só **admin**); `GET /institutions`, `PATCH /institutions/:id/status`, `GET /donations?status=` e `PATCH /donations/:id/status` (**admin** ou **gestor**)
@@ -86,12 +86,12 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - `users.role`: `user` (padrão), `gestor`, `admin`. A seção de administração em Configurações aparece conforme o papel.
 - Qualquer usuário logado pode cadastrar uma instituição. Ela nasce `pending`; admin/gestor aprova (`approved` → `verified = true`), reprova (`rejected` + `rejection_reason`) ou pede revisão (`needs_revision`).
 - Doação nasce `pending` (`donations.status`): aparece no histórico, mas **não credita XP/Salves**. Admin/gestor confirma em Configurações → Confirmar doações (`confirmed` → credita uma única vez, protegido contra confirmação em dobro) ou cancela (`cancelled`). Doações anteriores à coluna ficaram `confirmed`. Quando houver PIX real, o webhook do provedor substitui a confirmação manual.
-- Tabelas: `users`, `institutions`, `posts`, `donations`, `calendar_registrations`, `rewards`, `email_tokens`. Coluna nova = adicionar `hasColumn`/`alterTable` no fim de `initDb()` (vale para SQLite e MySQL).
+- Tabelas: `users`, `institutions`, `posts`, `post_likes`, `post_comments`, `donations`, `calendar_registrations`, `rewards`, `email_tokens`. Coluna nova = adicionar `hasColumn`/`alterTable` no fim de `initDb()` (vale para SQLite e MySQL).
 - **Instituição não aprovada não aparece publicamente** (spec 4.3/11.10): feed, busca, destaques e lista filtram `status = 'approved'`; `GET /institutions/:id` de não aprovada só para o responsável e admin/gestor. Só o responsável (ou admin/gestor) altera os dados (`POST /institutions/register/step` confere `responsible_user_id`).
 - **Publicações** (spec 12): botão "+" do feed só aparece para quem é responsável por instituição aprovada; tela `screens/post-editor.ts`; cartão único `components/PostCard.ts` (feed e mural) com botão por tipo: campanha → **Doar** (`#/donate/:id?campanha=`), evento → **Participar** (agenda), comum → **Ajudar**. Doação de campanha confirmada soma em `posts.campaign_current`.
 - **Doação na V1** (spec 14.5/14.10/27.4): só **PIX** aparece e a API grava sempre `payment_method = 'pix'` e `anonymous = 0`. Não mostrar meio de pagamento que não funciona nem doação anônima.
 - SQL tem que rodar em **SQLite e MySQL**: nada de `NULLS FIRST/LAST` (usar `COALESCE`), cuidado com funções só de um banco. Nada de `.update({})` vazio (o knex recusa).
-- **Collation no MySQL (MariaDB da Hostinger):** tabelas importadas usam `utf8mb4_unicode_ci`, mas o que o `initDb()` cria pega o padrão do servidor (`utf8mb4_uca1400_ai_ci`) e JOIN entre as duas dá "Illegal mix of collations" (só aparece em produção). `unifyMysqlCollation()` no fim do `initDb()` converte as tabelas que destoam a cada subida.
+- **Collation no MySQL (MariaDB da Hostinger):** tabelas importadas usam `utf8mb4_unicode_ci`, mas o que o `initDb()` cria pega o padrão do servidor (`utf8mb4_uca1400_ai_ci`) e JOIN entre as duas dá "Illegal mix of collations" (só aparece em produção). `unifyMysqlCollation()` no fim do `initDb()` converte as tabelas que destoam a cada subida; tabela nova no MySQL já nasce com `t.charset/t.collate` (ver `post_likes`). Como as mudanças de banco chegam à produção e scripts opcionais para o phpMyAdmin: `docs/configuracao/mysql.md` e `docs/sql/`.
 
 ### Diferenças conscientes em relação ao PDF
 - Papel **`gestor`** (não existe no PDF): ajuda o admin a aprovar instituições e confirmar doações.
@@ -180,10 +180,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.10.1** · 25 versões
+Versão atual: **1.11.0** · 26 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.11.0 | 08/10/2026 | Minor | Curtir e comentar publicações, com tela de detalhe do post | Feed, Servidor, Banco de dados |
 | 1.10.1 | 08/10/2026 | Patch | Admin volta a listar instituições e cadastro de instituição sem erro na última etapa | Admin, Instituição, Banco de dados, Servidor |
 | 1.10.0 | 07/10/2026 | Minor | Instituição publica no feed: posts, eventos e campanhas | Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados |
 | 1.9.2 | 07/10/2026 | Patch | Ajustes contra o alerta "Perigoso" do Chrome | Autenticação, Sistema |

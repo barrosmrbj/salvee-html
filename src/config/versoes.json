@@ -1,6 +1,39 @@
 {
-  "versaoAtual": "1.10.1",
+  "versaoAtual": "1.11.0",
   "historico": [
+    {
+      "versao": "1.11.0",
+      "data": "2026-10-08",
+      "tipo": "minor",
+      "titulo": "Curtir e comentar publicações, com tela de detalhe do post",
+      "modulos": [
+        "Feed",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Coração para curtir (com contagem) em toda publicação do feed e do mural; uma curtida por pessoa, toque de novo desfaz (spec 11.8 e 23.1)",
+        "Comentários: balão com a quantidade abre a nova tela de detalhe da publicação (#/post/:id), com texto completo, fotos, botões e a lista de comentários com campo para escrever (até 500 caracteres) (spec 11.8 e 11.9)",
+        "Apagar comentário: o autor, a instituição dona da publicação e admin/gestor (moderação, spec 22.1); excluir a publicação apaga junto curtidas, comentários e inscrições",
+        "Tabelas novas post_likes e post_comments, criadas sozinhas na subida e já com a collation utf8mb4_unicode_ci no MySQL; rotas POST/DELETE /api/feed/:id/like, GET/POST /api/feed/:id/comments e DELETE /api/feed/comments/:id",
+        "Exportação SQLite → MySQL passa a criar as tabelas com COLLATE utf8mb4_unicode_ci (origem do erro de collation da v1.10.0)",
+        "Passo a passo de como as mudanças de banco chegam à produção e script opcional para o phpMyAdmin: docs/configuracao/mysql.md e docs/sql/v1.11.0-curtidas-comentarios.sql"
+      ],
+      "fontes": [
+        "server/db.js",
+        "server/routes/feed.js",
+        "server/scripts/exportar-mysql.js",
+        "src/components/PostCard.ts",
+        "src/screens/post-detail.ts",
+        "src/services/feed.service.ts",
+        "src/types/post.ts",
+        "src/router.ts",
+        "docs/configuracao/mysql.md",
+        "docs/sql/v1.11.0-curtidas-comentarios.sql",
+        "CLAUDE.md",
+        "docs/PENDENCIAS.md"
+      ]
+    },
     {
       "versao": "1.10.1",
       "data": "2026-10-08",

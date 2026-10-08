@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.10.1**
+**Versão atual: 1.11.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.11.0** | 08/10/2026 | Minor | Curtir e comentar publicações, com tela de detalhe do post | Feed, Servidor, Banco de dados |
 | **1.10.1** | 08/10/2026 | Patch | Admin volta a listar instituições e cadastro de instituição sem erro na última etapa | Admin, Instituição, Banco de dados, Servidor |
 | **1.10.0** | 07/10/2026 | Minor | Instituição publica no feed: posts, eventos e campanhas | Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados |
 | **1.9.2** | 07/10/2026 | Patch | Ajustes contra o alerta "Perigoso" do Chrome | Autenticação, Sistema |
@@ -46,6 +47,19 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.11.0 — Curtir e comentar publicações, com tela de detalhe do post
+
+*08/10/2026 · Minor · Feed, Servidor, Banco de dados*
+
+- Coração para curtir (com contagem) em toda publicação do feed e do mural; uma curtida por pessoa, toque de novo desfaz (spec 11.8 e 23.1)
+- Comentários: balão com a quantidade abre a nova tela de detalhe da publicação (#/post/:id), com texto completo, fotos, botões e a lista de comentários com campo para escrever (até 500 caracteres) (spec 11.8 e 11.9)
+- Apagar comentário: o autor, a instituição dona da publicação e admin/gestor (moderação, spec 22.1); excluir a publicação apaga junto curtidas, comentários e inscrições
+- Tabelas novas post_likes e post_comments, criadas sozinhas na subida e já com a collation utf8mb4_unicode_ci no MySQL; rotas POST/DELETE /api/feed/:id/like, GET/POST /api/feed/:id/comments e DELETE /api/feed/comments/:id
+- Exportação SQLite → MySQL passa a criar as tabelas com COLLATE utf8mb4_unicode_ci (origem do erro de collation da v1.10.0)
+- Passo a passo de como as mudanças de banco chegam à produção e script opcional para o phpMyAdmin: docs/configuracao/mysql.md e docs/sql/v1.11.0-curtidas-comentarios.sql
+
+Fontes: `server/db.js` · `server/routes/feed.js` · `server/scripts/exportar-mysql.js` · `src/components/PostCard.ts` · `src/screens/post-detail.ts` · `src/services/feed.service.ts` · `src/types/post.ts` · `src/router.ts` · `docs/configuracao/mysql.md` · `docs/sql/v1.11.0-curtidas-comentarios.sql` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.10.1 — Admin volta a listar instituições e cadastro de instituição sem erro na última etapa
 

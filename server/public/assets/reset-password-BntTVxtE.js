@@ -1,4 +1,4 @@
-import{B as c}from"./Button-kVf4TgMB.js";import{I as t,g as i}from"./Input-B4RMibzo.js";import{L as m}from"./Spinner-u1aW0YGE.js";import{s as a}from"./Toast-Drk6oq-5.js";import{g as p,a as f,A as u}from"./index-PjL8RKkz.js";function b(){const e=document.createElement("div");return e.className="screen bg-white",e.innerHTML=`
+import{B as c}from"./Button-kVf4TgMB.js";import{I as t,g as i}from"./Input-B4RMibzo.js";import{L as m}from"./Spinner-u1aW0YGE.js";import{s as a}from"./Toast-Drk6oq-5.js";import{g as p,a as f,A as u}from"./index-DVdynNLZ.js";function b(){const e=document.createElement("div");return e.className="screen bg-white",e.innerHTML=`
     <div class="flex items-center p-4 border-b border-gray-100">
       <h1 class="text-lg font-semibold ml-2">Criar nova senha</h1>
     </div>

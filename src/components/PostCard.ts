@@ -12,6 +12,10 @@ import type { Post } from '@/types'
 export interface PostCardOptions {
   /** chamado depois de excluir, para a tela tirar o cartão da lista */
   onDeleted?: (post: Post) => void
+  /** tela de detalhe: texto completo e o balão de comentários leva ao campo de comentar */
+  detail?: boolean
+  /** no detalhe: tocar no balão de comentários */
+  onCommentClick?: () => void
 }
 
 const TYPE_TAG: Record<string, { label: string; className: string } | undefined> = {
@@ -62,8 +66,10 @@ export function PostCard(post: Post, options: PostCardOptions = {}): HTMLElement
   }
 
   const content = document.createElement('p')
-  content.className = 'text-sm text-gray-600 leading-relaxed whitespace-pre-line line-clamp-6'
+  content.className = `text-sm text-gray-600 leading-relaxed whitespace-pre-line ${options.detail ? '' : 'line-clamp-6 cursor-pointer'}`
   content.textContent = post.content
+  // tocar no texto abre o detalhe da publicação (spec 11.9)
+  if (!options.detail) content.addEventListener('click', () => { window.location.hash = `/post/${post.id}` })
   card.appendChild(content)
 
   const images = post.images?.length ? post.images : (post.imageUrl ? [post.imageUrl] : [])
@@ -80,8 +86,64 @@ export function PostCard(post: Post, options: PostCardOptions = {}): HTMLElement
     if (post.eventInstructions) card.appendChild(infoLine('ℹ️', post.eventInstructions))
   }
 
+  card.appendChild(socialBar(post, options))
   card.appendChild(actionButton(post, goToInstitution))
   return card
+}
+
+// curtir e comentar (spec 11.8)
+function socialBar(post: Post, options: PostCardOptions): HTMLElement {
+  const bar = document.createElement('div')
+  bar.className = 'flex items-center gap-5 text-sm text-gray-500'
+
+  let liked = Boolean(post.liked)
+  let count = post.likeCount ?? 0
+  const like = document.createElement('button')
+  like.type = 'button'
+  like.className = 'flex items-center gap-1.5 py-1 active:scale-95 transition-transform'
+  const paint = () => {
+    like.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="${liked ? '#ef4444' : 'none'}" stroke="${liked ? '#ef4444' : 'currentColor'}" stroke-width="2" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.6 1-1.1a5.5 5.5 0 0 0 0-7.7z"/></svg><span>${count}</span>`
+    like.setAttribute('aria-label', liked ? 'Descurtir' : 'Curtir')
+    like.setAttribute('aria-pressed', String(liked))
+  }
+  paint()
+  like.addEventListener('click', async () => {
+    // muda na hora; se o servidor recusar, volta ao estado anterior
+    const before = { liked, count }
+    liked = !liked
+    count += liked ? 1 : -1
+    paint()
+    like.disabled = true
+    try {
+      const r = liked ? await feedService.likePost(post.id) : await feedService.unlikePost(post.id)
+      liked = r.liked
+      count = r.likeCount
+    } catch {
+      liked = before.liked
+      count = before.count
+      showToast('Não foi possível curtir agora', 'error')
+    } finally {
+      like.disabled = false
+      paint()
+    }
+  })
+
+  const comment = document.createElement('button')
+  comment.type = 'button'
+  comment.className = 'flex items-center gap-1.5 py-1'
+  comment.setAttribute('aria-label', 'Comentar')
+  comment.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z"/></svg>'
+  const commentCount = document.createElement('span')
+  commentCount.dataset['role'] = 'comment-count'
+  commentCount.textContent = String(post.commentCount ?? 0)
+  comment.appendChild(commentCount)
+  comment.addEventListener('click', () => {
+    if (options.onCommentClick) options.onCommentClick()
+    else window.location.hash = `/post/${post.id}`
+  })
+
+  bar.append(like, comment)
+  return bar
 }
 
 function actionButton(post: Post, goToInstitution: () => void): HTMLElement {

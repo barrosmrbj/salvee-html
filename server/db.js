@@ -189,6 +189,30 @@ async function initDb() {
     await db.schema.alterTable('donations', t => t.string('post_id'))
   }
 
+  // curtidas e comentários das publicações (spec 11.8 e 23.1)
+  // no MySQL já nascem na collation do resto do banco (ver unifyMysqlCollation)
+  const sameCollation = t => { if (isProduction) { t.charset('utf8mb4'); t.collate(MYSQL_COLLATION) } }
+  if (!(await db.schema.hasTable('post_likes'))) {
+    await db.schema.createTable('post_likes', t => {
+      sameCollation(t)
+      t.string('id', 36).primary()
+      t.string('post_id', 36).notNullable().index()
+      t.string('user_id', 36).notNullable()
+      t.unique(['post_id', 'user_id']) // cada pessoa curte uma vez
+      t.timestamps(true, true)
+    })
+  }
+  if (!(await db.schema.hasTable('post_comments'))) {
+    await db.schema.createTable('post_comments', t => {
+      sameCollation(t)
+      t.string('id', 36).primary()
+      t.string('post_id', 36).notNullable().index()
+      t.string('user_id', 36).notNullable()
+      t.text('content').notNullable()
+      t.timestamps(true, true)
+    })
+  }
+
   // falha aqui não pode impedir o servidor de subir: só registra no log
   if (isProduction) await unifyMysqlCollation().catch(err => console.error('Falha ao unificar a collation:', err.message))
   await normalizeUploadUrls()

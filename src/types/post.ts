@@ -24,6 +24,22 @@ export interface Post {
   registered?: boolean
   /** o usuário é responsável pela instituição: pode editar/excluir */
   canEdit?: boolean
+  /** o usuário curtiu */
+  liked?: boolean
+  likeCount?: number
+  commentCount?: number
+}
+
+export interface PostComment {
+  id: string
+  postId: string
+  userId: string
+  userName: string
+  userAvatarUrl: string | null
+  content: string
+  createdAt: string
+  /** autor do comentário, instituição dona do post ou admin/gestor */
+  canDelete: boolean
 }
 
 /** corpo de POST/PATCH /feed (a edição ignora institutionId e type) */

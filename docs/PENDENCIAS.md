@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 07/10/2026 (v1.10.0). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 08/10/2026 (v1.11.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -44,7 +44,7 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 | 8.6/8.7 Status | 🟡 | Botão "Pedir revisão" no admin e a instituição poder **reenviar correções**. |
 | 9.3 Recuperar senha | ✅ | Falta só o e-mail do cliente (SMTP). |
 | 9.4/10 Login de instituição por status | ❌ | Telas "Em análise", "Correção necessária", "Rejeitado". |
-| 11 Feed | 🟡 | Botões **Ajudar / Doar / Participar** ✅ e tipo visível ✅ (v1.10.0). Faltam **curtir, comentar**, tela de detalhe do post, **seguir** instituições, algoritmo com impulsionamento (hoje só por data). |
+| 11 Feed | 🟡 | Botões Ajudar / Doar / Participar ✅ e tipo visível ✅ (v1.10.0); **curtir, comentar** e tela de detalhe do post ✅ (v1.11.0). Faltam **seguir** instituições e algoritmo com impulsionamento (hoje só por data). |
 | 11.6 Mídia | 🟡 | Carrossel de até 5 imagens ✅ (v1.10.0). Falta vídeo. |
 | 12 Criação de conteúdo | ✅ | Post, evento e campanha; editar/excluir (v1.10.0). Falta vídeo. |
 | 13 Perfil da instituição | 🟡 | Mural com as publicações ✅ (v1.10.0). Faltam carrossel de fotos da instituição, barra de meta de arrecadação, mapa + rota (Maps/Waze), conferir discador do telefone. |
@@ -62,9 +62,9 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 
 ## Próximas funções (ordem sugerida)
 - [x] Criação de conteúdo, mural, botões Doar/Participar/Ajudar (v1.10.0).
-- [ ] **Tela de detalhe** do post e da campanha (11.9, 15.4); vídeo nas publicações (11.6).
+- [x] Curtir, comentar e tela de detalhe do post (v1.11.0).
+- [ ] **Tela de detalhe da campanha** (15.4); vídeo nas publicações (11.6); **seguir** instituições (23.1).
 - [ ] **Telas de status** da instituição no login e reenvio de correções (9.4, 10, 8.7).
-- [ ] **Curtir e comentar**; seguir instituições (11.8, 23.1).
 - [ ] **Recompensas com QR Code** de uso único e "Minhas recompensas"; XP/Salves configurável (18).
 - [ ] **PIX real**: integrar provedor (Mercado Pago, Asaas, Efí…); o webhook substitui a confirmação manual de doações.
 - [ ] Navegação com aba de **Gamificação** (5); escolha do tipo de conta antes do cadastro (6.3).
