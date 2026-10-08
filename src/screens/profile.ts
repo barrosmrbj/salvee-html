@@ -226,9 +226,11 @@ function renderDonationHistory(donations: Donation[], _institutions: Institution
     return
   }
 
-  const totalDonated = donations.reduce((s, d) => s + (d.amount ?? 0), 0)
-  const totalXp = donations.reduce((s, d) => s + (d.xpEarned ?? 0), 0)
-  const totalSalves = donations.reduce((s, d) => s + (d.salvesEarned ?? 0), 0)
+  // o resumo conta só as confirmadas: pendentes ainda não creditaram pontos
+  const confirmed = donations.filter(d => (d.status ?? 'confirmed') === 'confirmed')
+  const totalDonated = confirmed.reduce((s, d) => s + (d.amount ?? 0), 0)
+  const totalXp = confirmed.reduce((s, d) => s + (d.xpEarned ?? 0), 0)
+  const totalSalves = confirmed.reduce((s, d) => s + (d.salvesEarned ?? 0), 0)
 
   const summary = document.createElement('div')
   summary.className = 'bg-salvee-orange rounded-2xl p-4 text-white'
@@ -281,7 +283,16 @@ function renderDonationHistory(donations: Donation[], _institutions: Institution
     metaP.textContent = `${payIcon[d.paymentMethod ?? 'pix'] ?? '⚡'} ${(d.paymentMethod ?? 'pix').toUpperCase()} · ${new Date(d.createdAt).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })}`
     const pointsP = document.createElement('p')
     pointsP.className = 'text-xs text-salvee-orange font-medium mt-1'
-    pointsP.textContent = `+${d.xpEarned ?? 0} XP · +${d.salvesEarned ?? 0} SLV`
+    const status = d.status ?? 'confirmed'
+    if (status === 'confirmed') {
+      pointsP.textContent = `+${d.xpEarned ?? 0} XP · +${d.salvesEarned ?? 0} SLV`
+    } else if (status === 'pending') {
+      pointsP.className = 'text-xs text-amber-600 font-medium mt-1'
+      pointsP.textContent = `Aguardando confirmação · +${d.xpEarned ?? 0} XP · +${d.salvesEarned ?? 0} SLV`
+    } else {
+      pointsP.className = 'text-xs text-gray-400 font-medium mt-1'
+      pointsP.textContent = 'Cancelada'
+    }
     info.appendChild(nameP)
     info.appendChild(metaP)
     info.appendChild(pointsP)

@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.6.3**
+**Versão atual: 1.7.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.7.0** | 07/10/2026 | Minor | Doação só credita pontos após confirmação; fotos fora da pasta do app | Doação, Admin, Perfil, Configurações, Servidor, Banco de dados |
 | **1.6.3** | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
 | **1.6.2** | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |
 | **1.6.1** | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |
@@ -38,6 +39,20 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.7.0 — Doação só credita pontos após confirmação; fotos fora da pasta do app
+
+*07/10/2026 · Minor · Doação, Admin, Perfil, Configurações, Servidor, Banco de dados*
+
+- Doação nasce pendente (donations.status): fica no histórico, mas XP e Salves só entram quando o pagamento é confirmado. Antes, qualquer doação somava pontos na hora, sem pagamento
+- Nova tela Admin → Confirmar doações (admin/gestor), com abas por status e ações Confirmar pagamento / Cancelar; rotas GET /api/admin/donations e PATCH /api/admin/donations/:id/status, protegida contra crédito em dobro
+- Tela de doação avisa que os pontos entram após a confirmação; erro ao registrar não mostra mais falso sucesso. Histórico do perfil mostra o status e o resumo soma só as confirmadas
+- Valor da doação validado no servidor (inteiro positivo)
+- Imagens enviadas vão para UPLOAD_DIR (fora do app, sobrevivem aos redeploys da Hostinger); as versionadas em server/uploads são copiadas para lá na subida
+- Links de imagem passam a ser relativos (/uploads/...) e os antigos com domínio são convertidos na subida: não quebram mais quando o domínio muda. Imagem inexistente responde 404
+- Dev: o Vite repassa /uploads para a API
+
+Fontes: `server/routes/donations.js` · `server/routes/admin.js` · `server/db.js` · `server/uploads.js` · `server/routes/upload.js` · `server/index.js` · `src/screens/admin/donation-approvals.ts` · `src/screens/donation.ts` · `src/screens/profile.ts` · `src/screens/settings.ts` · `src/router.ts` · `src/services/admin.service.ts` · `src/types/donation.ts` · `src/types/admin.ts` · `vite.config.ts` · `CLAUDE.md`
 
 ### 1.6.3 — Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona
 

@@ -100,6 +100,77 @@ router.patch('/institutions/:id/status', authMiddleware, requireGestor, async (r
   }
 })
 
+// GET /admin/donations?status=pending
+router.get('/donations', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    let query = db('donations')
+      .leftJoin('users', 'donations.user_id', 'users.id')
+      .leftJoin('institutions', 'donations.institution_id', 'institutions.id')
+      .select(
+        'donations.*',
+        'users.name as user_name', 'users.email as user_email',
+        'institutions.name as institution_name'
+      )
+    if (req.query.status) query = query.where('donations.status', req.query.status)
+    const list = await query.orderBy('donations.created_at', 'desc')
+    res.json(list.map(d => ({
+      id: d.id,
+      status: d.status || 'confirmed',
+      amount: d.amount,
+      paymentMethod: d.payment_method,
+      message: d.message || null,
+      anonymous: Boolean(d.anonymous),
+      xpEarned: d.xp_earned,
+      salvesEarned: d.salves_earned,
+      userId: d.user_id,
+      userName: d.user_name || null,
+      userEmail: d.user_email || null,
+      institutionId: d.institution_id,
+      institutionName: d.institution_name || 'Instituição',
+      createdAt: d.created_at,
+      confirmedAt: d.confirmed_at || null,
+    })))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// PATCH /admin/donations/:id/status  { status: 'confirmed' | 'cancelled' }
+// Só sai de pending; confirmar credita XP/Salves ao doador uma única vez.
+router.patch('/donations/:id/status', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const { status } = req.body
+    if (!['confirmed', 'cancelled'].includes(status)) {
+      return res.status(400).json({ error: 'Status inválido. Use: confirmed | cancelled' })
+    }
+    const result = await db.transaction(async trx => {
+      const donation = await trx('donations').where({ id: req.params.id }).first()
+      if (!donation) return { code: 404, error: 'Doação não encontrada' }
+      // o where com status pending impede crédito em dobro se duas confirmações chegarem juntas
+      const changed = await trx('donations')
+        .where({ id: req.params.id, status: 'pending' })
+        .update({
+          status,
+          confirmed_at: status === 'confirmed' ? new Date() : null,
+          confirmed_by: req.userId,
+          updated_at: new Date(),
+        })
+      if (!changed) return { code: 409, error: 'Esta doação já foi processada' }
+      if (status === 'confirmed') {
+        await trx('users').where({ id: donation.user_id })
+          .increment({ xp: donation.xp_earned || 0, salves: donation.salves_earned || 0 })
+      }
+      return { code: 200 }
+    })
+    if (result.code !== 200) return res.status(result.code).json({ error: result.error })
+    res.json({ ok: true, donationId: req.params.id, status })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
 function formatAdminInst(i) {
   return {
     id: i.id,

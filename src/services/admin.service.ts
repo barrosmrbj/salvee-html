@@ -1,5 +1,5 @@
 import { request } from './api'
-import type { AdminInstitution, AdminUser, InstitutionStatus } from '@/types'
+import type { AdminDonation, AdminInstitution, AdminUser, DonationStatus, InstitutionStatus } from '@/types'
 
 export const adminService = {
   async listInstitutions(status?: InstitutionStatus): Promise<AdminInstitution[]> {
@@ -26,6 +26,18 @@ export const adminService = {
     await request<void>(`/admin/users/${id}/role`, {
       method: 'PATCH',
       body: JSON.stringify({ role }),
+    })
+  },
+
+  async listDonations(status?: DonationStatus): Promise<AdminDonation[]> {
+    const query = status ? `?status=${status}` : ''
+    return request<AdminDonation[]>(`/admin/donations${query}`)
+  },
+
+  async updateDonationStatus(id: string, status: 'confirmed' | 'cancelled'): Promise<void> {
+    await request<void>(`/admin/donations/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
     })
   },
 }

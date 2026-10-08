@@ -33,6 +33,7 @@ export function mount(): void {
     if (user.role === 'admin' || user.role === 'gestor') {
       const adminItems: SettingItem[] = [
         { label: 'Aprovar instituições', icon: '🏢', action: () => { window.location.hash = '/admin/institutions' } },
+        { label: 'Confirmar doações', icon: '💰', action: () => { window.location.hash = '/admin/donations' } },
       ]
       if (user.role === 'admin') {
         adminItems.push({ label: 'Gerenciar usuários', icon: '👥', action: () => { window.location.hash = '/admin/users' } })

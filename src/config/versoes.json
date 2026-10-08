@@ -1,6 +1,47 @@
 {
-  "versaoAtual": "1.6.3",
+  "versaoAtual": "1.7.0",
   "historico": [
+    {
+      "versao": "1.7.0",
+      "data": "2026-10-07",
+      "tipo": "minor",
+      "titulo": "Doação só credita pontos após confirmação; fotos fora da pasta do app",
+      "modulos": [
+        "Doação",
+        "Admin",
+        "Perfil",
+        "Configurações",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Doação nasce pendente (donations.status): fica no histórico, mas XP e Salves só entram quando o pagamento é confirmado. Antes, qualquer doação somava pontos na hora, sem pagamento",
+        "Nova tela Admin → Confirmar doações (admin/gestor), com abas por status e ações Confirmar pagamento / Cancelar; rotas GET /api/admin/donations e PATCH /api/admin/donations/:id/status, protegida contra crédito em dobro",
+        "Tela de doação avisa que os pontos entram após a confirmação; erro ao registrar não mostra mais falso sucesso. Histórico do perfil mostra o status e o resumo soma só as confirmadas",
+        "Valor da doação validado no servidor (inteiro positivo)",
+        "Imagens enviadas vão para UPLOAD_DIR (fora do app, sobrevivem aos redeploys da Hostinger); as versionadas em server/uploads são copiadas para lá na subida",
+        "Links de imagem passam a ser relativos (/uploads/...) e os antigos com domínio são convertidos na subida: não quebram mais quando o domínio muda. Imagem inexistente responde 404",
+        "Dev: o Vite repassa /uploads para a API"
+      ],
+      "fontes": [
+        "server/routes/donations.js",
+        "server/routes/admin.js",
+        "server/db.js",
+        "server/uploads.js",
+        "server/routes/upload.js",
+        "server/index.js",
+        "src/screens/admin/donation-approvals.ts",
+        "src/screens/donation.ts",
+        "src/screens/profile.ts",
+        "src/screens/settings.ts",
+        "src/router.ts",
+        "src/services/admin.service.ts",
+        "src/types/donation.ts",
+        "src/types/admin.ts",
+        "vite.config.ts",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.6.3",
       "data": "2026-10-07",

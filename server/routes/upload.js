@@ -1,14 +1,12 @@
 const express = require('express')
 const multer = require('multer')
 const path = require('path')
-const fs = require('fs')
 const { v4: uuidv4 } = require('uuid')
 const { authMiddleware } = require('../middleware/auth')
 
 const router = express.Router()
 
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads')
-if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true })
+const { UPLOADS_DIR } = require('../uploads')
 
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, UPLOADS_DIR),
@@ -30,11 +28,9 @@ const upload = multer({
 
 router.post('/', authMiddleware, upload.single('file'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo recebido' })
-  // URL absoluta: o frontend roda em outro domínio/porta e um caminho relativo apontaria para ele.
-  // PUBLIC_URL (ex.: https://api.dominio.com) tem prioridade; senão usa o host da requisição.
-  const base = process.env.PUBLIC_URL || `${req.protocol}://${req.get('host')}`
-  const url = `${base.replace(/\/$/, '')}/uploads/${req.file.filename}`
-  res.json({ url })
+  // URL relativa: frontend e API estão no mesmo domínio (em dev, o Vite repassa /uploads para a API).
+  // Assim o link salvo no banco continua válido se o domínio mudar.
+  res.json({ url: `/uploads/${req.file.filename}` })
 })
 
 router.use((err, _req, res, _next) => {

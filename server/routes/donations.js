@@ -10,19 +10,23 @@ router.post('/initiate', authMiddleware, async (req, res) => {
     const { institutionId, amount, message, paymentMethod, anonymous } = req.body
     if (!institutionId || !amount) return res.status(400).json({ error: 'Campos obrigatórios' })
 
-    const xpEarned = Math.floor(amount / 2)
-    const salvesEarned = Math.floor(amount / 4)
+    const value = Number(amount)
+    if (!Number.isInteger(value) || value <= 0) return res.status(400).json({ error: 'Valor inválido' })
+
+    // A doação nasce pendente: XP/Salves ficam reservados e só são creditados quando o pagamento
+    // for confirmado (hoje por admin/gestor em PATCH /admin/donations/:id/status).
+    const xpEarned = Math.floor(value / 2)
+    const salvesEarned = Math.floor(value / 4)
     const id = uuidv4()
 
     await db('donations').insert({
       id, user_id: req.userId, institution_id: institutionId,
-      amount, payment_method: paymentMethod || 'pix',
+      amount: value, payment_method: paymentMethod || 'pix',
       anonymous: anonymous ? 1 : 0, message, xp_earned: xpEarned, salves_earned: salvesEarned,
+      status: 'pending',
     })
 
-    await db('users').where({ id: req.userId }).increment({ xp: xpEarned, salves: salvesEarned })
-
-    res.json({ donationId: id, xpEarned, salvesEarned })
+    res.json({ donationId: id, xpEarned, salvesEarned, status: 'pending' })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -38,7 +42,7 @@ router.get('/history', authMiddleware, async (req, res) => {
       .select(
         'donations.id', 'donations.institution_id', 'donations.amount',
         'donations.payment_method', 'donations.anonymous',
-        'donations.xp_earned', 'donations.salves_earned', 'donations.created_at',
+        'donations.xp_earned', 'donations.salves_earned', 'donations.status', 'donations.created_at',
         'institutions.name as institution_name', 'institutions.logo_url as institution_logo_url'
       )
     res.json(list.map(d => ({
@@ -51,6 +55,7 @@ router.get('/history', authMiddleware, async (req, res) => {
       anonymous: Boolean(d.anonymous),
       xpEarned: d.xp_earned,
       salvesEarned: d.salves_earned,
+      status: d.status || 'confirmed',
       createdAt: d.created_at,
     })))
   } catch (err) {

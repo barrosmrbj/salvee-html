@@ -296,6 +296,7 @@ function renderSummaryStep(container: HTMLElement): void {
 
   addRow('Valor', `R$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'font-bold text-salvee-orange text-lg')
   addRow('Pontuação', `+${xp}XP · +${salves}SLV`)
+  addRow('', 'Creditada após a confirmação do pagamento', 'text-xs text-gray-400')
   if (message) addRow('Mensagem', message)
   wrapper.appendChild(details)
 
@@ -362,13 +363,13 @@ function renderSummaryStep(container: HTMLElement): void {
           })
           xpEarned = result.xpEarned
           salvesEarned = result.salvesEarned
-        } catch {
-          xpEarned = Math.floor(amount / 2)
-          salvesEarned = Math.floor(amount / 4)
-        } finally {
-          overlay.remove()
           step = 'success'
           renderStep()
+        } catch {
+          // sem registro no servidor não há doação: fica no resumo para tentar de novo
+          showToast('Não foi possível registrar a doação. Tente novamente.', 'error')
+        } finally {
+          overlay.remove()
         }
       },
     })
@@ -391,10 +392,10 @@ function renderSuccessStep(screen: HTMLElement): void {
   const textBlock = document.createElement('div')
   const h2 = document.createElement('h2')
   h2.className = 'text-2xl font-bold text-gray-900 mb-2'
-  h2.textContent = 'Parabéns!'
+  h2.textContent = 'Obrigado!'
   const p = document.createElement('p')
   p.className = 'text-gray-500 text-sm'
-  p.textContent = 'Sua doação foi efetuada com sucesso!'
+  p.textContent = 'Sua doação foi registrada e está aguardando a confirmação do pagamento. Os pontos abaixo entram na sua conta assim que ela for confirmada.'
   textBlock.appendChild(h2)
   textBlock.appendChild(p)
   main.appendChild(textBlock)

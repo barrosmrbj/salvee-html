@@ -31,6 +31,7 @@ const ROUTES: RouteDefinition[] = [
   { path: '/settings', load: () => import('@/screens/settings'), protected: true },
   { path: '/admin/institutions', load: () => import('@/screens/admin/institution-approvals'), protected: true },
   { path: '/admin/users', load: () => import('@/screens/admin/user-management'), protected: true },
+  { path: '/admin/donations', load: () => import('@/screens/admin/donation-approvals'), protected: true },
 ]
 
 export function parseParams(

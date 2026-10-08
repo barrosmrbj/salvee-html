@@ -61,7 +61,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### Rotas do frontend (`src/router.ts`)
 
-`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`* (* = protegida).
+`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`* (* = protegida).
 
 ### API (`server/routes/`, prefixo `/api`)
 
@@ -69,13 +69,14 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
 - `institutions`: lista, `/destaques`, `/:id`, `POST /register/step`
 - `feed`, `search` (+ `/categories`), `donations` (`/initiate`, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
-- `upload`: POST multipart → `server/uploads/`
-- `admin`: `GET /users?name=&role=` e `PATCH /users/:id/role` (só **admin**); `GET /institutions` e `PATCH /institutions/:id/status` (**admin** ou **gestor**)
+- `upload`: POST multipart → pasta `UPLOAD_DIR` (padrão `server/uploads/`); devolve URL **relativa** `/uploads/<arquivo>`
+- `admin`: `GET /users?name=&role=` e `PATCH /users/:id/role` (só **admin**); `GET /institutions`, `PATCH /institutions/:id/status`, `GET /donations?status=` e `PATCH /donations/:id/status` (**admin** ou **gestor**)
 
 ### Papéis e regras
 
 - `users.role`: `user` (padrão), `gestor`, `admin`. A seção de administração em Configurações aparece conforme o papel.
 - Qualquer usuário logado pode cadastrar uma instituição. Ela nasce `pending`; admin/gestor aprova (`approved` → `verified = true`), reprova (`rejected` + `rejection_reason`) ou pede revisão (`needs_revision`).
+- Doação nasce `pending` (`donations.status`): aparece no histórico, mas **não credita XP/Salves**. Admin/gestor confirma em Configurações → Confirmar doações (`confirmed` → credita uma única vez, protegido contra confirmação em dobro) ou cancela (`cancelled`). Doações anteriores à coluna ficaram `confirmed`. Quando houver PIX real, o webhook do provedor substitui a confirmação manual.
 - Tabelas: `users`, `institutions`, `posts`, `donations`, `calendar_registrations`, `rewards`. Coluna nova = adicionar `hasColumn`/`alterTable` no fim de `initDb()` (vale para SQLite e MySQL).
 
 ## Ambiente
@@ -87,7 +88,8 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 ## Armadilhas conhecidas
 
 - **Não deixar `.js` compilados em `src/`** ao lado dos `.ts` (ex.: `src/services/index.js`). O Vite resolve o `.js` antigo e os imports novos quebram (ex.: `adminService` "não exportado"). O projeto roda `.ts` direto; `tsc` é só `--noEmit`.
-- `server/uploads/` fica em disco; um redeploy na Hostinger pode apagar. Fazer backup. Uploads novos de dev não entram no git (`.gitignore`).
+- Imagens enviadas: em produção ficam em `UPLOAD_DIR` (fora do app, sobrevivem ao redeploy); sem a variável, em `server/uploads/`, que **some a cada deploy** na Hostinger. Fazer backup da pasta. Uploads novos de dev não entram no git (`.gitignore`). As imagens versionadas em `server/uploads/` são copiadas para `UPLOAD_DIR` na subida (sem sobrescrever).
+- Links de imagem são salvos relativos (`/uploads/x.jpg`); `initDb()` converte os antigos absolutos a cada subida. Em dev, o Vite repassa `/uploads` para a API (`vite.config.ts` → `server.proxy`).
 - CORS fica aberto para qualquer origem se `CORS_ORIGIN` não estiver definido; em produção, definir com a URL do frontend.
 - `server/public/` é gerado pelo build: não editar à mão. Arquivo estático novo vai em `public/` (raiz) e entra no próximo build.
 
@@ -120,7 +122,7 @@ Regras:
 - Variáveis de ambiente (no painel do app ou, se o painel não tiver a tela, em `~/salvee.env.production` na home do SSH, fora do repositório e preservado nos redeploys; nunca no git). Ordem: painel > `server/.env(.production)` > `~/salvee.env.production`: `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://skyblue-hedgehog-581364.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. `PORT` é definido pela Hostinger.
 - Em produção sem `JWT_SECRET` o servidor não sobe; falha de conexão com o MySQL aparece no log como "Falha ao conectar/preparar o banco".
 - `better-sqlite3` está em `optionalDependencies`: se não compilar na Hostinger, a instalação segue (produção usa só `mysql2`).
-- Uploads retornam URL absoluta (`PUBLIC_URL` ou host da requisição). Os arquivos ficam no disco do app e **podem sumir num redeploy**.
+- **`UPLOAD_DIR=/home/u526770669/salvee-uploads`** (variável no painel): pasta das imagens fora do app. Sem ela as fotos somem a cada deploy. `PUBLIC_URL` não é mais usado para montar o link das imagens (ficou relativo).
 - Teste: `https://skyblue-hedgehog-581364.hostingersite.com/api/health` → `{ "ok": true, "version": "x.y.z" }` com a mesma versão mostrada em Configurações.
 
 **Domínio antigo:** o site estático `darkblue-rook-985577.hostingersite.com` (Git → `public_html`) continua recebendo a `master`; o **`.htaccess` da raiz** redireciona tudo (302) para o domínio de produção e impede que o código do repositório seja servido. O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`).
@@ -156,10 +158,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.6.3** · 17 versões
+Versão atual: **1.7.0** · 18 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.7.0 | 07/10/2026 | Minor | Doação só credita pontos após confirmação; fotos fora da pasta do app | Doação, Admin, Perfil, Configurações, Servidor, Banco de dados |
 | 1.6.3 | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
 | 1.6.2 | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |
 | 1.6.1 | 07/10/2026 | Patch | Node.js App da Hostinger: variáveis fora do repositório e start pela raiz | Servidor, Sistema |

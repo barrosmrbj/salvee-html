@@ -8,6 +8,7 @@ require('dotenv').config({ path: [path.join(__dirname, envFile), path.join(os.ho
 const express = require('express')
 const cors = require('cors')
 const { initDb } = require('./db')
+const { UPLOADS_DIR } = require('./uploads')
 
 const isProduction = process.env.NODE_ENV === 'production'
 if (isProduction && !process.env.JWT_SECRET) {
@@ -35,7 +36,8 @@ app.use('/api/calendar', require('./routes/calendar'))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/admin', require('./routes/admin'))
 app.use('/api/upload', require('./routes/upload'))
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+// imagem inexistente responde 404 (não cai no index.html do frontend)
+app.use('/uploads', express.static(UPLOADS_DIR), (req, res) => res.status(404).end())
 
 // versão sincronizada com src/config/versoes.json por `npm run versao:changelog`
 const { version } = require('./package.json')
@@ -56,7 +58,7 @@ const PORT = process.env.PORT || 8000
 
 initDb()
   .then(() => {
-    app.listen(PORT, () => console.log(`Salvee API ${version} running on port ${PORT} (${process.env.DB_CLIENT || 'sqlite'})`))
+    app.listen(PORT, () => console.log(`Salvee API ${version} running on port ${PORT} (${process.env.DB_CLIENT || 'sqlite'}; uploads em ${UPLOADS_DIR})`))
   })
   .catch(err => {
     console.error('Falha ao conectar/preparar o banco:', err.message)

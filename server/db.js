@@ -134,8 +134,42 @@ async function initDb() {
   if (!(await db.schema.hasColumn('institutions', 'rejection_reason'))) {
     await db.schema.alterTable('institutions', t => t.text('rejection_reason'))
   }
+  // doação: pending (aguardando pagamento, sem pontos) → confirmed (credita XP/Salves) | cancelled.
+  // As anteriores a esta coluna já tinham creditado os pontos, por isso o padrão é confirmed.
+  if (!(await db.schema.hasColumn('donations', 'status'))) {
+    await db.schema.alterTable('donations', t => t.string('status').defaultTo('confirmed'))
+  }
+  if (!(await db.schema.hasColumn('donations', 'confirmed_at'))) {
+    await db.schema.alterTable('donations', t => {
+      t.timestamp('confirmed_at').nullable()
+      t.string('confirmed_by')
+    })
+  }
+
+  await normalizeUploadUrls()
 
   console.log('Database ready')
+}
+
+// Links de imagem enviada eram salvos com o domínio (http://localhost:8000/uploads/x.jpg,
+// https://darkblue-…/uploads/x.jpg). Agora são relativos (/uploads/x.jpg) e valem em qualquer
+// domínio. Converte os antigos; idempotente, roda a cada subida.
+const UPLOAD_URL_COLUMNS = [
+  ['users', 'avatar_url'],
+  ['institutions', 'logo_url'],
+  ['institutions', 'photo_url'],
+  ['posts', 'image_url'],
+  ['rewards', 'partner_logo_url'],
+]
+
+async function normalizeUploadUrls() {
+  for (const [table, column] of UPLOAD_URL_COLUMNS) {
+    const rows = await db(table).select('id', column).where(column, 'like', 'http%/uploads/%')
+    for (const row of rows) {
+      const relative = row[column].replace(/^https?:\/\/[^/]+(?=\/uploads\/)/, '')
+      if (relative !== row[column]) await db(table).where({ id: row.id }).update({ [column]: relative })
+    }
+  }
 }
 
 module.exports = { db, initDb }
