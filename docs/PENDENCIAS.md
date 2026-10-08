@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 07/10/2026 (v1.9.1). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 07/10/2026 (v1.10.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -36,7 +36,7 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 
 | Seção | Situação | O que falta |
 |---|---|---|
-| 5 Navegação | 🟡 | Abas devem ser Feed, Busca, **Gamificação**, Calendário (+ Configurações no topo); hoje Feed, Buscar, Agenda, Perfil. Botão "+" aparece para todos (deveria só instituição aprovada). |
+| 5 Navegação | 🟡 | Abas devem ser Feed, Busca, **Gamificação**, Calendário (+ Configurações no topo); hoje Feed, Buscar, Agenda, Perfil. Botão "+" só para instituição aprovada ✅ (v1.10.0). |
 | 6.1 Splash | ✅ | — |
 | 6.2/6.3 Boas-vindas e tipo de conta | 🟡 | "Comece aqui" deve ir para a escolha Usuário/Instituição **antes** do cadastro, e a escolha deve ser gravada na conta. |
 | 7 Cadastro de usuário | 🟡 | Validar tamanho mínimo de senha e formato do e-mail no cadastro. Login social ✅ (sem duplicar por e-mail). |
@@ -44,13 +44,13 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 | 8.6/8.7 Status | 🟡 | Botão "Pedir revisão" no admin e a instituição poder **reenviar correções**. |
 | 9.3 Recuperar senha | ✅ | Falta só o e-mail do cliente (SMTP). |
 | 9.4/10 Login de instituição por status | ❌ | Telas "Em análise", "Correção necessária", "Rejeitado". |
-| 11 Feed | 🟡 | **Curtir, comentar**, botões **Ajudar / Doar / Participar**, tela de detalhe do post, **seguir** instituições, algoritmo com impulsionamento (hoje só por data). |
-| 11.6 Mídia | 🟡 | Carrossel de imagens e vídeo (hoje 1 imagem). |
-| 12 Criação de conteúdo | ❌ | Formulários de post, evento e campanha; editar/excluir; rotas POST/PATCH/DELETE. |
-| 13 Perfil da instituição | 🟡 | **Mural vazio** (não carrega posts), carrossel de fotos, barra de meta de arrecadação, mapa + rota (Maps/Waze), conferir discador do telefone. |
+| 11 Feed | 🟡 | Botões **Ajudar / Doar / Participar** ✅ e tipo visível ✅ (v1.10.0). Faltam **curtir, comentar**, tela de detalhe do post, **seguir** instituições, algoritmo com impulsionamento (hoje só por data). |
+| 11.6 Mídia | 🟡 | Carrossel de até 5 imagens ✅ (v1.10.0). Falta vídeo. |
+| 12 Criação de conteúdo | ✅ | Post, evento e campanha; editar/excluir (v1.10.0). Falta vídeo. |
+| 13 Perfil da instituição | 🟡 | Mural com as publicações ✅ (v1.10.0). Faltam carrossel de fotos da instituição, barra de meta de arrecadação, mapa + rota (Maps/Waze), conferir discador do telefone. |
 | 14 Doação | 🟡 | Só PIX e sem anônima ✅ (v1.9.1). Falta **PIX real** e doação ligada a campanha. |
-| 15 Campanhas | ❌ | Criação, tela de detalhe, valor arrecadado atualizado. |
-| 16 Eventos | 🟡 | API de inscrição existe, mas **nenhuma tela chama "Participar"**; aviso de alteração do evento. |
+| 15 Campanhas | 🟡 | Criação, barra de progresso, prazo, Doar ligado à campanha e arrecadado somado na confirmação ✅ (v1.10.0). Falta a tela de detalhe da campanha (15.4) e aparecer na busca. |
+| 16 Eventos | 🟡 | Criação e **Participar** (entra na agenda) ✅ (v1.10.0). Falta avisar o participante quando o evento muda. |
 | 17 Busca | 🟡 | "Causas perto de você" usa dados fixos: geolocalização real + fallback por cidade. |
 | 18 Gamificação | 🟡 | Resgate não fica registrado; QR é só texto (sem validação/uso único); falta "Minhas recompensas", requisito de nível e **regra de XP/Salves configurável** (hoje fixa: valor/2 e valor/4). |
 | 19 Calendário | 🟡 | Tela de detalhe com mapa, rota e cancelar participação. |
@@ -61,8 +61,8 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 | 27.1 Selo | ✅ | — |
 
 ## Próximas funções (ordem sugerida)
-- [ ] **Criação de conteúdo** pela instituição aprovada (post, evento, campanha) e botão "+" só para ela (12, 5).
-- [ ] **Mural** do perfil carregando os posts; botões **Doar / Participar / Ajudar** no feed; tela de campanha (13.8, 11.8, 15.4).
+- [x] Criação de conteúdo, mural, botões Doar/Participar/Ajudar (v1.10.0).
+- [ ] **Tela de detalhe** do post e da campanha (11.9, 15.4); vídeo nas publicações (11.6).
 - [ ] **Telas de status** da instituição no login e reenvio de correções (9.4, 10, 8.7).
 - [ ] **Curtir e comentar**; seguir instituições (11.8, 23.1).
 - [ ] **Recompensas com QR Code** de uso único e "Minhas recompensas"; XP/Salves configurável (18).

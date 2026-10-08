@@ -1,7 +1,12 @@
 import { request } from './api'
-import type { Institution, InstitutionRegisterPayload } from '@/types'
+import type { Institution, InstitutionRegisterPayload, MyInstitution } from '@/types'
 
 export const institutionService = {
+  /** instituições pelas quais o usuário é responsável (qualquer status) */
+  async listMine(): Promise<MyInstitution[]> {
+    return request<MyInstitution[]>('/institutions/mine')
+  },
+
   async getById(id: string): Promise<Institution> {
     return request<Institution>(`/institutions/${id}`)
   },

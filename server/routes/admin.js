@@ -160,6 +160,8 @@ router.patch('/donations/:id/status', authMiddleware, requireGestor, async (req,
       if (status === 'confirmed') {
         await trx('users').where({ id: donation.user_id })
           .increment({ xp: donation.xp_earned || 0, salves: donation.salves_earned || 0 })
+        // doação de campanha: soma no arrecadado (barra de progresso, spec 15.3)
+        if (donation.post_id) await trx('posts').where({ id: donation.post_id }).increment('campaign_current', donation.amount)
       }
       return { code: 200 }
     })

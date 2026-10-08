@@ -1,6 +1,7 @@
 // src/screens/donation.ts
 import { Button, NumericKeyboard, showToast, LoadingOverlay } from '@/components'
-import { donationService, institutionService } from '@/services'
+import { donationService, feedService, institutionService } from '@/services'
+import { getHashQuery } from '@/router'
 import type { Institution, PaymentMethod } from '@/types'
 import girlSvg from '../../.Documentacao/ilustracoes_salvee/__girl_salvee_004.svg?url'
 
@@ -13,6 +14,9 @@ let paymentMethod: PaymentMethod = 'pix'
 let institution: Institution | null = null
 let xpEarned = 0
 let salvesEarned = 0
+// doação pelo botão Doar de uma campanha (#/donate/:id?campanha=<postId>)
+let campaignId: string | null = null
+let campaignTitle = ''
 
 export function render(params?: Record<string, string>): HTMLElement {
   const el = document.createElement('div')
@@ -25,6 +29,13 @@ export function render(params?: Record<string, string>): HTMLElement {
 export function mount(): void {
   const el = document.querySelector('[data-institution-id]') as HTMLElement
   const id = el?.dataset['institutionId'] ?? ''
+
+  campaignId = getHashQuery().get('campanha')
+  if (campaignId) {
+    feedService.getPostById(campaignId)
+      .then(post => { campaignTitle = post.title ?? ''; if (step === 'summary') renderStep() })
+      .catch(() => { campaignId = null })
+  }
 
   institutionService.getById(id).then(inst => {
     institution = inst
@@ -290,6 +301,7 @@ function renderSummaryStep(container: HTMLElement): void {
     details.appendChild(row)
   }
 
+  if (campaignTitle) addRow('Campanha', campaignTitle)
   addRow('Valor', `R$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'font-bold text-salvee-orange text-lg')
   addRow('Pontuação', `+${xp}XP · +${salves}SLV`)
   addRow('', 'Creditada após a confirmação do pagamento', 'text-xs text-gray-400')
@@ -333,6 +345,7 @@ function renderSummaryStep(container: HTMLElement): void {
         try {
           const result = await donationService.initiate({
             institutionId: institution?.id ?? '',
+            postId: campaignId ?? undefined,
             amount,
             message,
             paymentMethod,
@@ -428,4 +441,6 @@ export function unmount(): void {
   institution = null
   xpEarned = 0
   salvesEarned = 0
+  campaignId = null
+  campaignTitle = ''
 }

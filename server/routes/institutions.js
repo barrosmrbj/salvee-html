@@ -32,6 +32,17 @@ router.get('/destaques', authMiddleware, async (req, res) => {
   }
 })
 
+// GET /institutions/mine — instituições pelas quais o usuário é responsável (qualquer status)
+router.get('/mine', authMiddleware, async (req, res) => {
+  try {
+    const list = await db('institutions').where({ responsible_user_id: req.userId }).orderBy('name')
+    res.json(list.map(i => ({ id: i.id, name: i.name, status: i.status, logoUrl: i.logo_url || null })))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const inst = await db('institutions').where({ id: req.params.id }).first()

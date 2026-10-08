@@ -1,6 +1,6 @@
 // src/screens/institution-profile.ts
-import { Button, Spinner } from '@/components'
-import { institutionService } from '@/services'
+import { Button, PostCard, Spinner } from '@/components'
+import { feedService, institutionService } from '@/services'
 import type { Institution } from '@/types'
 
 type Tab = 'mural' | 'sobre' | 'info'
@@ -145,10 +145,30 @@ function renderTab(inst: Institution, tabContent: HTMLElement): void {
   tabContent.innerHTML = ''
 
   if (activeTab === 'mural') {
-    const p = document.createElement('p')
-    p.className = 'text-center text-gray-400 py-8 text-sm'
-    p.textContent = 'Nenhuma postagem ainda.'
-    tabContent.appendChild(p)
+    // as mesmas publicações do feed, só desta instituição (spec 13.8)
+    const empty = (text: string) => {
+      const p = document.createElement('p')
+      p.className = 'text-center text-gray-400 py-8 text-sm'
+      p.textContent = text
+      tabContent.appendChild(p)
+    }
+    const list = document.createElement('div')
+    list.className = 'flex flex-col gap-4'
+    const loading = document.createElement('div')
+    loading.className = 'flex justify-center py-8'
+    loading.appendChild(Spinner())
+    tabContent.append(loading, list)
+    feedService.listPosts(1, inst.id).then(posts => {
+      loading.remove()
+      if (activeTab !== 'mural') return
+      if (!posts.length) return empty('Nenhuma postagem ainda.')
+      posts.forEach(p => list.appendChild(PostCard(p, {
+        onDeleted: () => { if (!list.children.length) empty('Nenhuma postagem ainda.') },
+      })))
+    }).catch(() => {
+      loading.remove()
+      empty('Não foi possível carregar as publicações.')
+    })
   } else if (activeTab === 'sobre') {
     if (inst.mission) {
       const section = document.createElement('div')

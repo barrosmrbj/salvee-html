@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.9.2**
+**Versão atual: 1.10.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.10.0** | 07/10/2026 | Minor | Instituição publica no feed: posts, eventos e campanhas | Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados |
 | **1.9.2** | 07/10/2026 | Patch | Ajustes contra o alerta "Perigoso" do Chrome | Autenticação, Sistema |
 | **1.9.1** | 07/10/2026 | Patch | Correções de segurança e ajustes à especificação oficial (PDF) | Instituição, Feed, Busca, Doação, Servidor, Sistema |
 | **1.9.0** | 07/10/2026 | Minor | E-mail pela Hostinger: recuperar senha e confirmar cadastro | Autenticação, Onboarding, Servidor, Banco de dados |
@@ -44,6 +45,21 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.10.0 — Instituição publica no feed: posts, eventos e campanhas
+
+*07/10/2026 · Minor · Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados*
+
+- Botão "+" do feed só para quem é responsável por instituição aprovada, com as opções Post, Evento e Campanha (spec 5, 12.1 a 12.6)
+- Nova tela de publicação (#/post/new e #/post/:id/edit): título, texto, até 5 imagens (carrossel), meta e prazo da campanha, data, horário, local e instruções do evento; editar e excluir pelo menu da publicação (12.7)
+- Rotas POST, PATCH e DELETE /api/feed com checagem de permissão; admin/gestor também excluem (moderação); GET /api/institutions/mine; colunas novas em posts (title, images, campaign_deadline, event_instructions, created_by)
+- Cartão de publicação único no feed e no mural: tipo visível (Evento/Campanha), carrossel, barra de progresso da campanha e botão por tipo: Doar, Participar ou Ajudar (11.7, 11.8, 27.2, 27.3)
+- Participar de evento passa a funcionar e coloca o evento na Agenda (o app chamava um endereço errado da API); só eventos de instituições aprovadas
+- Mural do perfil da instituição mostra as publicações dela (13.8)
+- Doar numa campanha liga a doação a ela (donations.post_id); quando admin/gestor confirma o pagamento, o valor soma no arrecadado da campanha
+- Feed sem dados de exemplo quando a API falha: mostra aviso de erro ou de lista vazia
+
+Fontes: `server/routes/feed.js` · `server/routes/calendar.js` · `server/routes/institutions.js` · `server/routes/donations.js` · `server/routes/admin.js` · `server/db.js` · `src/components/PostCard.ts` · `src/screens/post-editor.ts` · `src/screens/feed.ts` · `src/screens/institution-profile.ts` · `src/screens/donation.ts` · `src/services/feed.service.ts` · `src/services/calendar.service.ts` · `src/services/institution.service.ts` · `src/types/post.ts` · `src/types/donation.ts` · `src/router.ts` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.9.2 — Ajustes contra o alerta "Perigoso" do Chrome
 

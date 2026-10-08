@@ -7,11 +7,19 @@ const router = express.Router()
 
 router.post('/initiate', authMiddleware, async (req, res) => {
   try {
-    const { institutionId, amount, message } = req.body
+    const { institutionId, amount, message, postId } = req.body
     if (!institutionId || !amount) return res.status(400).json({ error: 'Campos obrigatórios' })
 
     const value = Number(amount)
     if (!Number.isInteger(value) || value <= 0) return res.status(400).json({ error: 'Valor inválido' })
+
+    // doação pelo botão Doar de uma campanha: a campanha precisa ser da mesma instituição
+    let campaignId = null
+    if (postId) {
+      const campaign = await db('posts').where({ id: postId, type: 'campaign', institution_id: institutionId }).first()
+      if (!campaign) return res.status(400).json({ error: 'Campanha não encontrada' })
+      campaignId = campaign.id
+    }
 
     // A doação nasce pendente: XP/Salves ficam reservados e só são creditados quando o pagamento
     // for confirmado (hoje por admin/gestor em PATCH /admin/donations/:id/status).
@@ -25,6 +33,7 @@ router.post('/initiate', authMiddleware, async (req, res) => {
       anonymous: 0, // doação anônima fora da V1 (spec 14.10)
       message, xp_earned: xpEarned, salves_earned: salvesEarned,
       status: 'pending',
+      post_id: campaignId,
     })
 
     res.json({ donationId: id, xpEarned, salvesEarned, status: 'pending' })

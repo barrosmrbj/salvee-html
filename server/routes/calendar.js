@@ -17,7 +17,7 @@ router.get('/my-events', authMiddleware, async (req, res) => {
 
     res.json(regs.map(p => ({
       id: p.id, institutionId: p.institution_id, institutionName: p.institution_name,
-      title: p.content.slice(0, 60), date: p.event_date || p.created_at,
+      title: p.title || p.content.slice(0, 60), date: p.event_date || p.created_at,
       location: p.event_location || '', registered: true,
       category: p.category || null, imageUrl: p.image_url || null,
     })))
@@ -26,7 +26,14 @@ router.get('/my-events', authMiddleware, async (req, res) => {
   }
 })
 
+// "Participar" (spec 16.4): só eventos de instituições aprovadas
 router.post('/events/:id/register', authMiddleware, async (req, res) => {
+  const event = await db('posts')
+    .join('institutions', 'posts.institution_id', 'institutions.id')
+    .where({ 'posts.id': req.params.id, 'posts.type': 'event', 'institutions.status': 'approved' })
+    .first('posts.id')
+    .catch(() => null)
+  if (!event) return res.status(404).json({ error: 'Evento não encontrado' })
   try {
     const id = uuidv4()
     await db('calendar_registrations').insert({ id, user_id: req.userId, post_id: req.params.id })

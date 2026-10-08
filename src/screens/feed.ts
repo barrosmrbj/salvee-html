@@ -1,7 +1,6 @@
 // src/screens/feed.ts
-import { BottomNav, Avatar, VerifiedBadge, Spinner, showToast } from '@/components'
-import { authService, feedService } from '@/services'
-import type { Post } from '@/types'
+import { BottomNav, PostCard, Spinner } from '@/components'
+import { authService, feedService, institutionService } from '@/services'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -35,7 +34,10 @@ export function mount(): void {
 
   loadGreeting()
   loadFeedPosts()
-  buildFab()
+  // botão "+" só para o responsável por instituição aprovada (spec 5 e 12.2)
+  institutionService.listMine()
+    .then(list => { if (list.some(i => i.status === 'approved')) buildFab() })
+    .catch(() => {})
 
   document.getElementById('settings-btn')!.addEventListener('click', () => { window.location.hash = '/settings' })
 }
@@ -56,64 +58,21 @@ function loadFeedPosts(): void {
 
   feedService.listPosts().then(posts => {
     spinner.remove()
-    if (posts.length === 0) return
-    posts.forEach(p => container.appendChild(renderPost(p)))
+    if (posts.length === 0) return showEmpty(container, 'Ainda não há publicações. Volte em breve!')
+    posts.forEach(p => container.appendChild(PostCard(p, {
+      onDeleted: () => { if (!container.querySelector('article')) showEmpty(container, 'Ainda não há publicações.') },
+    })))
   }).catch(() => {
     spinner.remove()
-    getMockPosts().forEach(p => container.appendChild(renderPost(p)))
+    showEmpty(container, 'Não foi possível carregar o feed. Verifique sua conexão.')
   })
 }
 
-function renderPost(post: Post): HTMLElement {
-  const card = document.createElement('div')
-  card.className = 'bg-gray-50 rounded-2xl p-4 cursor-pointer'
-  card.addEventListener('click', () => { window.location.hash = `/institution/${post.institutionId}` })
-
-  const header = document.createElement('div')
-  header.className = 'flex items-center gap-3 mb-2'
-  header.appendChild(Avatar(post.institutionName ?? 'Inst', post.institutionLogoUrl, 'sm'))
-
-  const nameRow = document.createElement('div')
-  nameRow.className = 'flex items-center gap-1 min-w-0'
-  const nameSpan = document.createElement('span')
-  nameSpan.className = 'font-semibold text-gray-900 text-sm truncate'
-  nameSpan.textContent = post.institutionName ?? ''
-  nameRow.appendChild(nameSpan)
-  if (post.institutionVerified) nameRow.appendChild(VerifiedBadge())
-  header.appendChild(nameRow)
-
-  const timeSpan = document.createElement('span')
-  timeSpan.className = 'ml-auto text-xs text-gray-400 flex-shrink-0'
-  timeSpan.textContent = formatRelative(post.createdAt)
-  header.appendChild(timeSpan)
-  card.appendChild(header)
-
-  const content = document.createElement('p')
-  content.className = 'text-sm text-gray-600 leading-relaxed line-clamp-5'
-  content.textContent = post.content
-  card.appendChild(content)
-
-  return card
-}
-
-function formatRelative(iso: string): string {
-  const diffMs = Date.now() - new Date(iso).getTime()
-  const minutes = Math.floor(diffMs / 60000)
-  if (minutes < 1) return 'agora'
-  if (minutes < 60) return `${minutes} min atrás`
-  const hours = Math.floor(minutes / 60)
-  if (hours < 24) return `${hours} h atrás`
-  const days = Math.floor(hours / 24)
-  if (days < 7) return `${days} d atrás`
-  return new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })
-}
-
-function getMockPosts(): Post[] {
-  return [
-    { id: '1', institutionId: 'inst1', institutionName: 'Instituto Esperança', institutionVerified: true, type: 'campaign', content: 'Ajude-nos a construir uma nova ala para crianças carentes. Cada doação faz a diferença!', createdAt: new Date(Date.now() - 35 * 60000).toISOString(), campaignGoal: 10000, campaignCurrent: 6500 },
-    { id: '2', institutionId: 'inst2', institutionName: 'Lar dos Idosos Felizes', institutionVerified: true, type: 'common', content: 'Hoje nossos residentes receberam a visita de uma turma de escola. Momentos assim enchem nossos corações!', createdAt: new Date(Date.now() - 5 * 60000).toISOString() },
-    { id: '3', institutionId: 'inst3', institutionName: 'ONG Verde', institutionVerified: false, type: 'event', content: 'Mutirão de limpeza no Rio Negro. Venha participar!', createdAt: new Date(Date.now() - 3 * 3600000).toISOString(), eventDate: new Date(Date.now() + 86400000 * 3).toISOString(), eventLocation: 'Praia da Ponta Negra' },
-  ]
+function showEmpty(container: HTMLElement, text: string): void {
+  const p = document.createElement('p')
+  p.className = 'text-center text-gray-400 text-sm py-12'
+  p.textContent = text
+  container.appendChild(p)
 }
 
 let fabOpen = false
@@ -127,18 +86,22 @@ function buildFab(): void {
   subActions.className = 'flex-col items-end gap-3'
   subActions.style.display = 'none'
 
-  const photoBtn = fabButton(
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
-    'w-11 h-11',
-    () => { showToast('Publicar com foto em breve', 'info'); closeFab() }
-  )
-  const newPostBtn = fabButton(
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
-    'w-11 h-11',
-    () => { showToast('Novo post em breve', 'info'); closeFab() }
-  )
-  subActions.appendChild(photoBtn)
-  subActions.appendChild(newPostBtn)
+  const options: Array<{ label: string; tipo: string; icon: string }> = [
+    { label: 'Post', tipo: 'common', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>' },
+    { label: 'Evento', tipo: 'event', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>' },
+    { label: 'Campanha', tipo: 'campaign', icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>' },
+  ]
+  options.forEach(o => {
+    const row = document.createElement('div')
+    row.className = 'flex items-center gap-2 pointer-events-auto'
+    const text = document.createElement('span')
+    text.className = 'bg-white text-gray-700 text-xs font-semibold px-3 py-1.5 rounded-full shadow'
+    text.textContent = o.label
+    const btn = fabButton(o.icon, 'w-11 h-11', () => { closeFab(); window.location.hash = `/post/new?tipo=${o.tipo}` })
+    btn.setAttribute('aria-label', `Criar ${o.label.toLowerCase()}`)
+    row.append(text, btn)
+    subActions.appendChild(row)
+  })
   container.appendChild(subActions)
 
   const mainBtn = fabButton(

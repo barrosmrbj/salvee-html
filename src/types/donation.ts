@@ -23,6 +23,8 @@ export interface DonationInitPayload {
   message?: string
   paymentMethod: PaymentMethod
   anonymous: boolean
+  /** doação pelo botão Doar de uma campanha */
+  postId?: string
 }
 
 export interface DonationResult {

@@ -172,6 +172,23 @@ async function initDb() {
     })
   }
 
+  // publicações criadas pela instituição (spec 12): título, várias imagens, prazo da campanha,
+  // instruções do evento e quem criou. images = JSON com até 5 links /uploads/...
+  const postColumns = {
+    title: t => t.string('title'),
+    images: t => t.text('images'),
+    campaign_deadline: t => t.string('campaign_deadline'),
+    event_instructions: t => t.text('event_instructions'),
+    created_by: t => t.string('created_by'),
+  }
+  for (const [column, add] of Object.entries(postColumns)) {
+    if (!(await db.schema.hasColumn('posts', column))) await db.schema.alterTable('posts', add)
+  }
+  // doação feita pelo botão Doar de uma campanha: soma em posts.campaign_current quando confirmada
+  if (!(await db.schema.hasColumn('donations', 'post_id'))) {
+    await db.schema.alterTable('donations', t => t.string('post_id'))
+  }
+
   await normalizeUploadUrls()
 
   console.log('Database ready')

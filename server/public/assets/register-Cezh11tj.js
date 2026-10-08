@@ -1,4 +1,4 @@
-import{B as p}from"./Button-kVf4TgMB.js";import{I as r,g as t}from"./Input-B4RMibzo.js";import{L as u}from"./Spinner-u1aW0YGE.js";import{s as a}from"./Toast-Drk6oq-5.js";import{S as f}from"./SocialLogin-oKr7Ta-J.js";import{a as v,A as g}from"./index-D9054Hs0.js";function C(){const e=document.createElement("div");return e.className="screen bg-white overflow-y-auto",e.innerHTML=`
+import{B as p}from"./Button-kVf4TgMB.js";import{I as r,g as t}from"./Input-B4RMibzo.js";import{L as u}from"./Spinner-u1aW0YGE.js";import{s as a}from"./Toast-Drk6oq-5.js";import{S as f}from"./SocialLogin-CTecJY8w.js";import{a as v,A as g}from"./index-D-SQhf5n.js";function C(){const e=document.createElement("div");return e.className="screen bg-white overflow-y-auto",e.innerHTML=`
     <div class="flex items-center p-4 border-b border-gray-100">
       <button id="back-btn" class="w-10 h-10 flex items-center justify-center text-gray-600">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
