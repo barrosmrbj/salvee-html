@@ -70,7 +70,9 @@ router.post('/register/step', authMiddleware, async (req, res) => {
       const inst = await db('institutions').where({ id }).first()
       if (!inst) return res.status(404).json({ error: 'Instituição não encontrada' })
       if (!(await canManage(req.userId, inst))) return res.status(403).json({ error: 'Você não pode alterar esta instituição' })
-      await db('institutions').where({ id }).update(flattenStep(step, data))
+      // etapa pulada ou sem nada preenchido: não há o que salvar (o knex recusa update vazio)
+      const fields = flattenStep(step, data)
+      if (Object.keys(fields).length) await db('institutions').where({ id }).update({ ...fields, updated_at: new Date() })
     }
 
     res.json({ institutionId: id, step })

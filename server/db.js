@@ -189,9 +189,32 @@ async function initDb() {
     await db.schema.alterTable('donations', t => t.string('post_id'))
   }
 
+  // falha aqui não pode impedir o servidor de subir: só registra no log
+  if (isProduction) await unifyMysqlCollation().catch(err => console.error('Falha ao unificar a collation:', err.message))
   await normalizeUploadUrls()
 
   console.log('Database ready')
+}
+
+// MySQL/MariaDB: todas as colunas de texto com a mesma collation. As tabelas importadas pelo
+// phpMyAdmin vieram em utf8mb4_unicode_ci, mas colunas/tabelas criadas depois pelo initDb() pegam o
+// padrão do servidor (na Hostinger, utf8mb4_uca1400_ai_ci). Comparar uma com a outra num JOIN dá
+// "Illegal mix of collations". Converte as tabelas que destoam; idempotente, roda a cada subida.
+const MYSQL_COLLATION = 'utf8mb4_unicode_ci'
+
+async function unifyMysqlCollation() {
+  const [rows] = await db.raw(
+    `SELECT DISTINCT TABLE_NAME AS name FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND COLLATION_NAME IS NOT NULL AND COLLATION_NAME <> ?`,
+    [MYSQL_COLLATION]
+  )
+  for (const { name } of rows) {
+    await db.raw(`ALTER TABLE ?? CONVERT TO CHARACTER SET utf8mb4 COLLATE ${MYSQL_COLLATION}`, [name])
+    console.log(`Tabela ${name} convertida para ${MYSQL_COLLATION}`)
+  }
+  // tabelas novas já nascem com a mesma collation (se o usuário do banco puder alterar o padrão)
+  await db.raw(`ALTER DATABASE ?? CHARACTER SET utf8mb4 COLLATE ${MYSQL_COLLATION}`, [process.env.DB_NAME])
+    .catch(() => { /* sem permissão: a conversão acima continua corrigindo a cada subida */ })
 }
 
 // Links de imagem enviada eram salvos com o domínio (http://localhost:8000/uploads/x.jpg,

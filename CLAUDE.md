@@ -90,7 +90,8 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - **Instituição não aprovada não aparece publicamente** (spec 4.3/11.10): feed, busca, destaques e lista filtram `status = 'approved'`; `GET /institutions/:id` de não aprovada só para o responsável e admin/gestor. Só o responsável (ou admin/gestor) altera os dados (`POST /institutions/register/step` confere `responsible_user_id`).
 - **Publicações** (spec 12): botão "+" do feed só aparece para quem é responsável por instituição aprovada; tela `screens/post-editor.ts`; cartão único `components/PostCard.ts` (feed e mural) com botão por tipo: campanha → **Doar** (`#/donate/:id?campanha=`), evento → **Participar** (agenda), comum → **Ajudar**. Doação de campanha confirmada soma em `posts.campaign_current`.
 - **Doação na V1** (spec 14.5/14.10/27.4): só **PIX** aparece e a API grava sempre `payment_method = 'pix'` e `anonymous = 0`. Não mostrar meio de pagamento que não funciona nem doação anônima.
-- SQL tem que rodar em **SQLite e MySQL**: nada de `NULLS FIRST/LAST` (usar `COALESCE`), cuidado com funções só de um banco.
+- SQL tem que rodar em **SQLite e MySQL**: nada de `NULLS FIRST/LAST` (usar `COALESCE`), cuidado com funções só de um banco. Nada de `.update({})` vazio (o knex recusa).
+- **Collation no MySQL (MariaDB da Hostinger):** tabelas importadas usam `utf8mb4_unicode_ci`, mas o que o `initDb()` cria pega o padrão do servidor (`utf8mb4_uca1400_ai_ci`) e JOIN entre as duas dá "Illegal mix of collations" (só aparece em produção). `unifyMysqlCollation()` no fim do `initDb()` converte as tabelas que destoam a cada subida.
 
 ### Diferenças conscientes em relação ao PDF
 - Papel **`gestor`** (não existe no PDF): ajuda o admin a aprovar instituições e confirmar doações.
@@ -179,10 +180,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.10.0** · 24 versões
+Versão atual: **1.10.1** · 25 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.10.1 | 08/10/2026 | Patch | Admin volta a listar instituições e cadastro de instituição sem erro na última etapa | Admin, Instituição, Banco de dados, Servidor |
 | 1.10.0 | 07/10/2026 | Minor | Instituição publica no feed: posts, eventos e campanhas | Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados |
 | 1.9.2 | 07/10/2026 | Patch | Ajustes contra o alerta "Perigoso" do Chrome | Autenticação, Sistema |
 | 1.9.1 | 07/10/2026 | Patch | Correções de segurança e ajustes à especificação oficial (PDF) | Instituição, Feed, Busca, Doação, Servidor, Sistema |

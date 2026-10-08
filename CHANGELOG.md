@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.10.0**
+**Versão atual: 1.10.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.10.1** | 08/10/2026 | Patch | Admin volta a listar instituições e cadastro de instituição sem erro na última etapa | Admin, Instituição, Banco de dados, Servidor |
 | **1.10.0** | 07/10/2026 | Minor | Instituição publica no feed: posts, eventos e campanhas | Feed, Instituição, Calendário, Doação, Admin, Servidor, Banco de dados |
 | **1.9.2** | 07/10/2026 | Patch | Ajustes contra o alerta "Perigoso" do Chrome | Autenticação, Sistema |
 | **1.9.1** | 07/10/2026 | Patch | Correções de segurança e ajustes à especificação oficial (PDF) | Instituição, Feed, Busca, Doação, Servidor, Sistema |
@@ -45,6 +46,15 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.10.1 — Admin volta a listar instituições e cadastro de instituição sem erro na última etapa
+
+*08/10/2026 · Patch · Admin, Instituição, Banco de dados, Servidor*
+
+- Produção (MySQL): a lista do admin (Aprovar instituições) dava "Illegal mix of collations": colunas criadas pelo servidor ficaram com uma collation diferente das tabelas importadas. Na subida, o servidor agora converte para utf8mb4_unicode_ci as tabelas que destoam (sem impedir o app de subir se falhar)
+- Cadastro de instituição: pular a última etapa (logo, foto e história vazios) dava erro no servidor; agora a etapa sem dados é simplesmente ignorada
+
+Fontes: `server/db.js` · `server/routes/institutions.js` · `CLAUDE.md`
 
 ### 1.10.0 — Instituição publica no feed: posts, eventos e campanhas
 

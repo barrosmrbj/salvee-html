@@ -1,6 +1,27 @@
 {
-  "versaoAtual": "1.10.0",
+  "versaoAtual": "1.10.1",
   "historico": [
+    {
+      "versao": "1.10.1",
+      "data": "2026-10-08",
+      "tipo": "patch",
+      "titulo": "Admin volta a listar instituições e cadastro de instituição sem erro na última etapa",
+      "modulos": [
+        "Admin",
+        "Instituição",
+        "Banco de dados",
+        "Servidor"
+      ],
+      "itens": [
+        "Produção (MySQL): a lista do admin (Aprovar instituições) dava \"Illegal mix of collations\": colunas criadas pelo servidor ficaram com uma collation diferente das tabelas importadas. Na subida, o servidor agora converte para utf8mb4_unicode_ci as tabelas que destoam (sem impedir o app de subir se falhar)",
+        "Cadastro de instituição: pular a última etapa (logo, foto e história vazios) dava erro no servidor; agora a etapa sem dados é simplesmente ignorada"
+      ],
+      "fontes": [
+        "server/db.js",
+        "server/routes/institutions.js",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.10.0",
       "data": "2026-10-07",
