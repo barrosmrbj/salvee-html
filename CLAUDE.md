@@ -61,11 +61,12 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### Rotas do frontend (`src/router.ts`)
 
-`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`* (* = protegida).
+`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`* (* = protegida).
 
 ### API (`server/routes/`, prefixo `/api`)
 
 - `auth`: register, login, logout, me, forgot-password, send-phone-code, verify-phone
+- `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e o botão avisa "em breve".
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
 - `institutions`: lista, `/destaques`, `/:id`, `POST /register/step`
 - `feed`, `search` (+ `/categories`), `donations` (`/initiate`, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
@@ -119,7 +120,8 @@ Regras:
 - O build do Vite vai para `server/public/` (`vite.config.ts` → `build.outDir`), que é **versionado** e precisa ser regerado com `npm run build` antes de cada push. O Express serve essa pasta e devolve `index.html` para qualquer GET fora de `/api` e `/uploads`; rota `/api` inexistente responde 404 em JSON.
 - `VITE_API_URL=/api` (relativo) no `.env.production`: sem CORS e sem depender do domínio.
 - Configuração do app: Node 20/22, instalação `npm install`, start `npm start`; entrada `server/index.js` (raiz do repo) ou `index.js` (raiz `server`).
-- Variáveis de ambiente (no painel do app ou, se o painel não tiver a tela, em `~/salvee.env.production` na home do SSH, fora do repositório e preservado nos redeploys; nunca no git). Ordem: painel > `server/.env(.production)` > `~/salvee.env.production`: `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://skyblue-hedgehog-581364.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. `PORT` é definido pela Hostinger.
+- Variáveis de ambiente (no painel do app ou, se o painel não tiver a tela, em `~/salvee.env.production` na home do SSH, fora do repositório e preservado nos redeploys; nunca no git). Ordem: painel > `server/.env(.production)` > `~/salvee.env.production`: `NODE_ENV=production`, `JWT_SECRET`, `DB_CLIENT=mysql2`, `DB_HOST`, `DB_PORT=3306`, `DB_USER`, `DB_PASSWORD`, `DB_NAME=u526770669_salvee`, `PUBLIC_URL=https://skyblue-hedgehog-581364.hostingersite.com`. `CORS_ORIGIN` só se outro domínio for chamar a API. Login social (opcionais, cada provedor liga quando as suas existem): `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`; `FACEBOOK_APP_ID`/`FACEBOOK_APP_SECRET`; `APPLE_CLIENT_ID` (Services ID), `APPLE_TEAM_ID`, `APPLE_KEY_ID`, `APPLE_PRIVATE_KEY` (conteúdo do .p8, quebras de linha como `
+`). URL de retorno a cadastrar em cada provedor: `https://skyblue-hedgehog-581364.hostingersite.com/api/auth/oauth/<google|facebook|apple>/callback` (em dev, `http://localhost:8000/...`). `APP_URL` (opcional) = endereço do frontend para onde o login social volta; padrão: o mesmo domínio em produção, `http://localhost:5173` em dev. `PORT` é definido pela Hostinger.
 - Em produção sem `JWT_SECRET` o servidor não sobe; falha de conexão com o MySQL aparece no log como "Falha ao conectar/preparar o banco".
 - `better-sqlite3` está em `optionalDependencies`: se não compilar na Hostinger, a instalação segue (produção usa só `mysql2`).
 - **`UPLOAD_DIR=/home/u526770669/salvee-uploads`** (variável no painel): pasta das imagens fora do app. Sem ela as fotos somem a cada deploy. `PUBLIC_URL` não é mais usado para montar o link das imagens (ficou relativo).
@@ -158,10 +160,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.7.0** · 18 versões
+Versão atual: **1.8.0** · 19 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.8.0 | 07/10/2026 | Minor | Login social com Google, Facebook e Apple e logos oficiais nos botões | Autenticação, Servidor, Banco de dados |
 | 1.7.0 | 07/10/2026 | Minor | Doação só credita pontos após confirmação; fotos fora da pasta do app | Doação, Admin, Perfil, Configurações, Servidor, Banco de dados |
 | 1.6.3 | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
 | 1.6.2 | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |

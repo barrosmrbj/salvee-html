@@ -21,6 +21,7 @@ const ROUTES: RouteDefinition[] = [
   { path: '/verify-phone', load: () => import('@/screens/onboarding/verify-phone') },
   { path: '/welcome-success', load: () => import('@/screens/onboarding/welcome-success') },
   { path: '/choose-profile', load: () => import('@/screens/onboarding/choose-profile') },
+  { path: '/oauth', load: () => import('@/screens/auth/oauth') },
   { path: '/forgot-password', load: () => import('@/screens/auth/forgot-password') },
   { path: '/feed', load: () => import('@/screens/feed'), protected: true },
   { path: '/search', load: () => import('@/screens/search'), protected: true },
@@ -33,6 +34,12 @@ const ROUTES: RouteDefinition[] = [
   { path: '/admin/users', load: () => import('@/screens/admin/user-management'), protected: true },
   { path: '/admin/donations', load: () => import('@/screens/admin/donation-approvals'), protected: true },
 ]
+
+export function getHashQuery(): URLSearchParams {
+  const hash = window.location.hash
+  const i = hash.indexOf('?')
+  return new URLSearchParams(i >= 0 ? hash.slice(i + 1) : '')
+}
 
 export function parseParams(
   pattern: string,
@@ -50,7 +57,8 @@ export function parseParams(
 }
 
 function matchRoute(hash: string): { route: RouteDefinition; params: Record<string, string> } | null {
-  const path = hash.replace(/^#\/?/, '') || '/'
+  // ignora a query (#/login?erro=...): cada tela lê a sua com getHashQuery()
+  const path = hash.replace(/^#\/?/, '').split('?')[0] || '/'
   // normalize: ensure leading slash
   const normalizedPath = path.startsWith('/') ? path : `/${path}`
 

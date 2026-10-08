@@ -1,6 +1,37 @@
 {
-  "versaoAtual": "1.7.0",
+  "versaoAtual": "1.8.0",
   "historico": [
+    {
+      "versao": "1.8.0",
+      "data": "2026-10-07",
+      "tipo": "minor",
+      "titulo": "Login social com Google, Facebook e Apple e logos oficiais nos botões",
+      "modulos": [
+        "Autenticação",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Botões \"ou entre com\" (login e cadastro) com os logos oficiais da Apple, do Google e do Facebook no lugar dos emojis e letras; componente único SocialLogin",
+        "Login social pelo fluxo OAuth (authorization code) nas rotas /api/auth/oauth/:provider e /callback, sem dependência nova; protegido com state assinado + cookie contra login forjado",
+        "Cria a conta no primeiro acesso ou vincula a uma conta existente com o mesmo e-mail confirmado; colunas users.google_id, facebook_id e apple_id",
+        "Cada provedor só é ativado quando as credenciais dele estão nas variáveis de ambiente; sem elas o botão avisa \"disponível em breve\"",
+        "Nova tela #/oauth recebe o login; erros e cancelamento voltam para o login com aviso. O router passa a aceitar query no hash (#/rota?x=y)"
+      ],
+      "fontes": [
+        "server/routes/oauth.js",
+        "server/index.js",
+        "server/db.js",
+        "src/components/SocialLogin.ts",
+        "src/screens/auth/oauth.ts",
+        "src/screens/auth/login.ts",
+        "src/screens/auth/register.ts",
+        "src/router.ts",
+        "src/services/api.ts",
+        "CLAUDE.md",
+        "server/.env.example"
+      ]
+    },
     {
       "versao": "1.7.0",
       "data": "2026-10-07",

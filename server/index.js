@@ -26,6 +26,7 @@ const corsOrigins = (process.env.CORS_ORIGIN || '').split(',').map(s => s.trim()
 app.use(cors(corsOrigins.length ? { origin: corsOrigins } : undefined))
 app.use(express.json())
 
+app.use('/api/auth/oauth', require('./routes/oauth'))
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/feed', require('./routes/feed'))
 app.use('/api/institutions', require('./routes/institutions'))

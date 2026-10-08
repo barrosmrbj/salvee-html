@@ -146,6 +146,13 @@ async function initDb() {
     })
   }
 
+  // login social: id do usuário em cada provedor (vincula a conta mesmo se o e-mail mudar lá)
+  for (const column of ['google_id', 'facebook_id', 'apple_id']) {
+    if (!(await db.schema.hasColumn('users', column))) {
+      await db.schema.alterTable('users', t => t.string(column).nullable().unique())
+    }
+  }
+
   await normalizeUploadUrls()
 
   console.log('Database ready')

@@ -1,4 +1,4 @@
-import { Button, Input, getInputValue, showToast, LoadingOverlay } from '@/components'
+import { Button, Input, getInputValue, showToast, LoadingOverlay, SocialLogin } from '@/components'
 import { authService } from '@/services'
 import { ApiError } from '@/services/api'
 
@@ -51,20 +51,7 @@ export function mount(): void {
     Button({ label: 'Avançar', variant: 'primary', fullWidth: true, type: 'submit' })
   )
 
-  const socialContainer = document.getElementById('social-register')!
-  const providers = [
-    { label: 'Apple', bg: 'bg-black text-white', icon: '🍎' },
-    { label: 'Google', bg: 'bg-white border border-gray-200 text-gray-700', icon: 'G' },
-    { label: 'Facebook', bg: 'bg-blue-600 text-white', icon: 'f' },
-  ]
-  providers.forEach(p => {
-    const btn = document.createElement('button')
-    btn.type = 'button'
-    btn.className = `w-14 h-14 rounded-2xl ${p.bg} flex items-center justify-center text-lg font-bold`
-    btn.title = p.label
-    btn.textContent = p.icon
-    socialContainer.appendChild(btn)
-  })
+  document.getElementById('social-register')!.appendChild(SocialLogin('Cadastrar'))
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault()

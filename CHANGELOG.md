@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.7.0**
+**Versão atual: 1.8.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.8.0** | 07/10/2026 | Minor | Login social com Google, Facebook e Apple e logos oficiais nos botões | Autenticação, Servidor, Banco de dados |
 | **1.7.0** | 07/10/2026 | Minor | Doação só credita pontos após confirmação; fotos fora da pasta do app | Doação, Admin, Perfil, Configurações, Servidor, Banco de dados |
 | **1.6.3** | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
 | **1.6.2** | 07/10/2026 | Patch | Instalação na Hostinger sempre traz as dependências da API | Sistema |
@@ -39,6 +40,18 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.8.0 — Login social com Google, Facebook e Apple e logos oficiais nos botões
+
+*07/10/2026 · Minor · Autenticação, Servidor, Banco de dados*
+
+- Botões "ou entre com" (login e cadastro) com os logos oficiais da Apple, do Google e do Facebook no lugar dos emojis e letras; componente único SocialLogin
+- Login social pelo fluxo OAuth (authorization code) nas rotas /api/auth/oauth/:provider e /callback, sem dependência nova; protegido com state assinado + cookie contra login forjado
+- Cria a conta no primeiro acesso ou vincula a uma conta existente com o mesmo e-mail confirmado; colunas users.google_id, facebook_id e apple_id
+- Cada provedor só é ativado quando as credenciais dele estão nas variáveis de ambiente; sem elas o botão avisa "disponível em breve"
+- Nova tela #/oauth recebe o login; erros e cancelamento voltam para o login com aviso. O router passa a aceitar query no hash (#/rota?x=y)
+
+Fontes: `server/routes/oauth.js` · `server/index.js` · `server/db.js` · `src/components/SocialLogin.ts` · `src/screens/auth/oauth.ts` · `src/screens/auth/login.ts` · `src/screens/auth/register.ts` · `src/router.ts` · `src/services/api.ts` · `CLAUDE.md` · `server/.env.example`
 
 ### 1.7.0 — Doação só credita pontos após confirmação; fotos fora da pasta do app
 
