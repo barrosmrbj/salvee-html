@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.8.0**
+**Versão atual: 1.8.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.8.1** | 07/10/2026 | Patch | Botão de mostrar senha e verificação por SMS sem travar o cadastro | Autenticação, Onboarding, Servidor |
 | **1.8.0** | 07/10/2026 | Minor | Login social com Google, Facebook e Apple e logos oficiais nos botões | Autenticação, Servidor, Banco de dados |
 | **1.7.0** | 07/10/2026 | Minor | Doação só credita pontos após confirmação; fotos fora da pasta do app | Doação, Admin, Perfil, Configurações, Servidor, Banco de dados |
 | **1.6.3** | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
@@ -40,6 +41,17 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.8.1 — Botão de mostrar senha e verificação por SMS sem travar o cadastro
+
+*07/10/2026 · Patch · Autenticação, Onboarding, Servidor*
+
+- Campos de senha (entrar e cadastro) ganham o botão de olho para mostrar/ocultar a senha (componente Input, vale para todo campo de senha)
+- Verificação de telefone: em produção, sem provedor de SMS, o código não é mais gravado no log do servidor (ninguém recebia e expunha códigos) e a API responde 503 com aviso
+- Tela de verificação ganha "Pular por enquanto": o cadastro não fica mais travado esperando um SMS que não chega
+- Telefone verificado passa a ser salvo no usuário (users.phone); "Reenviar SMS" mostra erro em vez de falhar em silêncio
+
+Fontes: `src/components/Input.ts` · `src/screens/onboarding/verify-phone.ts` · `server/routes/auth.js`
 
 ### 1.8.0 — Login social com Google, Facebook e Apple e logos oficiais nos botões
 

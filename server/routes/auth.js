@@ -75,9 +75,14 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/send-phone-code', authMiddleware, async (req, res) => {
   const { phone } = req.body
   if (!phone) return res.status(400).json({ error: 'Telefone obrigatório' })
+  // Ainda não há provedor de SMS. Em produção o código não pode ir para o log (ninguém recebe e
+  // quem lê o log veria códigos de terceiros): responde 503 e o app oferece "Pular por enquanto".
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(503).json({ error: 'A verificação por SMS ainda não está disponível. Toque em "Pular por enquanto".' })
+  }
   const code = String(Math.floor(1000 + Math.random() * 9000))
   phoneCodeStore.set(phone, code)
-  console.log(`[SMS MOCK] Código para ${phone}: ${code}`)
+  console.log(`[SMS MOCK - só em dev] Código para ${phone}: ${code}`)
   res.json({ ok: true })
 })
 
@@ -89,7 +94,13 @@ router.post('/verify-phone', authMiddleware, async (req, res) => {
     return res.status(400).json({ error: 'Código inválido' })
   }
   phoneCodeStore.delete(phone)
-  res.json({ ok: true })
+  try {
+    await db('users').where({ id: req.userId }).update({ phone, updated_at: new Date() })
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
 })
 
 function formatUser(u) {

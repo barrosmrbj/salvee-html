@@ -1,4 +1,4 @@
-import{B as c}from"./Button-kVf4TgMB.js";import{I as l,g as n}from"./Input-BsBDOMNE.js";import{L as m}from"./Spinner-u1aW0YGE.js";import{s as t}from"./Toast-Drk6oq-5.js";import{S as p}from"./SocialLogin-Dm3atw0e.js";import{g as f,a as u,A as g}from"./index-MTCbVQVW.js";function E(){const e=document.createElement("div");return e.className="screen bg-white",e.innerHTML=`
+import{B as c}from"./Button-kVf4TgMB.js";import{I as l,g as n}from"./Input-B4RMibzo.js";import{L as m}from"./Spinner-u1aW0YGE.js";import{s as t}from"./Toast-Drk6oq-5.js";import{S as p}from"./SocialLogin-Be5U0WGb.js";import{g as f,a as u,A as g}from"./index-RIGTckb5.js";function E(){const e=document.createElement("div");return e.className="screen bg-white",e.innerHTML=`
     <div class="flex items-center p-4 border-b border-gray-100">
       <button id="back-btn" class="w-10 h-10 flex items-center justify-center text-gray-600">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

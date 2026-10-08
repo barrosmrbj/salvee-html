@@ -129,11 +129,23 @@ function renderStep(): void {
     resendBtn.className = 'text-salvee-orange text-sm font-medium'
     resendBtn.textContent = 'Reenviar SMS'
     resendBtn.addEventListener('click', async () => {
-      await authService.sendPhoneCode(phone)
-      showToast('Novo código enviado!', 'success')
+      try {
+        await authService.sendPhoneCode(phone)
+        showToast('Novo código enviado!', 'success')
+      } catch (err) {
+        showToast(err instanceof ApiError ? err.message : 'Erro ao reenviar o código', 'error')
+      }
     })
     content.appendChild(resendBtn)
   }
+
+  // enquanto não houver envio real de SMS em produção, a verificação não pode travar o cadastro
+  const skipBtn = document.createElement('button')
+  skipBtn.type = 'button'
+  skipBtn.className = 'text-gray-400 text-sm font-medium underline'
+  skipBtn.textContent = 'Pular por enquanto'
+  skipBtn.addEventListener('click', () => { window.location.hash = '/welcome-success' })
+  content.appendChild(skipBtn)
 }
 
 export function unmount(): void {

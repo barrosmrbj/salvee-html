@@ -1,6 +1,28 @@
 {
-  "versaoAtual": "1.8.0",
+  "versaoAtual": "1.8.1",
   "historico": [
+    {
+      "versao": "1.8.1",
+      "data": "2026-10-07",
+      "tipo": "patch",
+      "titulo": "Botão de mostrar senha e verificação por SMS sem travar o cadastro",
+      "modulos": [
+        "Autenticação",
+        "Onboarding",
+        "Servidor"
+      ],
+      "itens": [
+        "Campos de senha (entrar e cadastro) ganham o botão de olho para mostrar/ocultar a senha (componente Input, vale para todo campo de senha)",
+        "Verificação de telefone: em produção, sem provedor de SMS, o código não é mais gravado no log do servidor (ninguém recebia e expunha códigos) e a API responde 503 com aviso",
+        "Tela de verificação ganha \"Pular por enquanto\": o cadastro não fica mais travado esperando um SMS que não chega",
+        "Telefone verificado passa a ser salvo no usuário (users.phone); \"Reenviar SMS\" mostra erro em vez de falhar em silêncio"
+      ],
+      "fontes": [
+        "src/components/Input.ts",
+        "src/screens/onboarding/verify-phone.ts",
+        "server/routes/auth.js"
+      ]
+    },
     {
       "versao": "1.8.0",
       "data": "2026-10-07",

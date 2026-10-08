@@ -65,7 +65,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### API (`server/routes/`, prefixo `/api`)
 
-- `auth`: register, login, logout, me, forgot-password, send-phone-code, verify-phone
+- `auth`: register, login, logout, me, forgot-password (ainda não envia e-mail), send-phone-code, verify-phone. SMS ainda sem provedor: em dev o código sai no log do servidor; em produção `send-phone-code` responde 503 e a tela oferece "Pular por enquanto"
 - `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e o botão avisa "em breve". Como criar as credenciais: `docs/configuracao/login-social.md` (pendente: o cliente ainda não tem o e-mail do projeto).
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
 - `institutions`: lista, `/destaques`, `/:id`, `POST /register/step`
@@ -160,10 +160,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.8.0** · 19 versões
+Versão atual: **1.8.1** · 20 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.8.1 | 07/10/2026 | Patch | Botão de mostrar senha e verificação por SMS sem travar o cadastro | Autenticação, Onboarding, Servidor |
 | 1.8.0 | 07/10/2026 | Minor | Login social com Google, Facebook e Apple e logos oficiais nos botões | Autenticação, Servidor, Banco de dados |
 | 1.7.0 | 07/10/2026 | Minor | Doação só credita pontos após confirmação; fotos fora da pasta do app | Doação, Admin, Perfil, Configurações, Servidor, Banco de dados |
 | 1.6.3 | 07/10/2026 | Patch | Produção no Node.js App skyblue-hedgehog; domínio antigo redireciona | Sistema, Servidor |
