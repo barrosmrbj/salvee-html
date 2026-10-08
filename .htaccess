@@ -1,8 +1,10 @@
-# Site estático antigo da Hostinger (darkblue-rook-985577, Git → public_html): redireciona tudo
-# para o Node.js App de produção. Também impede que o código-fonte do repositório seja servido.
-# 302 (temporário) para não ficar preso no cache do navegador se o domínio mudar de novo.
+# Site estático antigo da Hostinger (darkblue-rook-985577, Git → public_html): mostra só a página
+# endereco-antigo.html com o link para o Node.js App de produção. Sem redirecionamento automático
+# (domínio que redireciona para outro é um dos sinais que o Google Safe Browsing trata como golpe).
+# Também impede que o código-fonte do repositório seja servido.
 # No Node.js App este arquivo não é usado: o Express serve server/public/.
 Options -Indexes -MultiViews
 
 RewriteEngine On
-RewriteRule ^(.*)$ https://skyblue-hedgehog-581364.hostingersite.com/$1 [R=302,L]
+RewriteCond %{REQUEST_URI} !^/endereco-antigo\.html$
+RewriteRule ^ /endereco-antigo.html [L]

@@ -1,6 +1,33 @@
 {
-  "versaoAtual": "1.9.1",
+  "versaoAtual": "1.9.2",
   "historico": [
+    {
+      "versao": "1.9.2",
+      "data": "2026-10-07",
+      "tipo": "patch",
+      "titulo": "Ajustes contra o alerta \"Perigoso\" do Chrome",
+      "modulos": [
+        "Autenticação",
+        "Sistema"
+      ],
+      "itens": [
+        "Botões de login com Google, Apple e Facebook só aparecem quando a rede está configurada no servidor; sem nenhuma, a seção \"ou entre com\" fica oculta (logos de marcas sem login real num domínio novo parecem phishing para o Google Safe Browsing)",
+        "Domínio antigo darkblue-rook deixa de redirecionar automaticamente: mostra uma página com o link para o endereço novo",
+        "Meta de verificação do Google Search Console no site, para pedir a revisão do alerta",
+        "Texto do cadastro sem citar conta social enquanto ela não estiver disponível"
+      ],
+      "fontes": [
+        "src/components/SocialLogin.ts",
+        "src/screens/auth/login.ts",
+        "src/screens/auth/register.ts",
+        "index.html",
+        ".htaccess",
+        "endereco-antigo.html",
+        "CLAUDE.md",
+        "docs/PENDENCIAS.md",
+        "docs/configuracao/login-social.md"
+      ]
+    },
     {
       "versao": "1.9.1",
       "data": "2026-10-07",

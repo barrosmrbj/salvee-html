@@ -14,7 +14,7 @@ export function render(): HTMLElement {
       <h1 class="text-lg font-semibold ml-2">Crie uma conta</h1>
     </div>
     <div class="p-6 flex flex-col gap-4">
-      <p class="text-gray-500 text-sm">Preencha as informações abaixo ou registre-se com sua conta social</p>
+      <p class="text-gray-500 text-sm">Preencha as informações abaixo para criar sua conta</p>
       <form id="register-form" class="flex flex-col gap-4">
         <div id="field-name"></div>
         <div id="field-email"></div>
@@ -26,12 +26,14 @@ export function render(): HTMLElement {
         </label>
         <div id="btn-register"></div>
       </form>
-      <div class="flex items-center gap-3 my-2">
-        <div class="flex-1 h-px bg-gray-200"></div>
-        <span class="text-xs text-gray-400">ou crie a conta com</span>
-        <div class="flex-1 h-px bg-gray-200"></div>
+      <div id="social-section" class="hidden">
+        <div class="flex items-center gap-3 my-2">
+          <div class="flex-1 h-px bg-gray-200"></div>
+          <span class="text-xs text-gray-400">ou crie a conta com</span>
+          <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+        <div id="social-register" class="mt-4"></div>
       </div>
-      <div id="social-register" class="flex gap-3 justify-center"></div>
       <p class="text-center text-sm text-gray-500">Já tem uma conta? <a href="#/login" class="text-salvee-orange font-medium">Clique aqui</a></p>
     </div>
   `
@@ -51,7 +53,7 @@ export function mount(): void {
     Button({ label: 'Avançar', variant: 'primary', fullWidth: true, type: 'submit' })
   )
 
-  document.getElementById('social-register')!.appendChild(SocialLogin('Cadastrar'))
+  document.getElementById('social-register')!.appendChild(SocialLogin('Cadastrar', document.getElementById('social-section')!))
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault()

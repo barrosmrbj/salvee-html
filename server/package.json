@@ -1,6 +1,6 @@
 {
   "name": "salvee-api",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "type": "commonjs",
   "main": "index.js",
   "engines": {

@@ -2,7 +2,7 @@
 
 O código já está pronto (v1.8.0, `server/routes/oauth.js`). Cada rede só fica ativa depois que as
 credenciais dela forem colocadas nas **variáveis de ambiente do app na Hostinger**. Até lá, o botão
-mostra "Entrar com … estará disponível em breve".
+**não aparece** (sem nenhuma rede configurada, a seção "ou entre com" fica oculta).
 
 > **Quem deve criar as contas:** o dono do app (a instituição/cliente), com um e-mail próprio do
 > projeto (ex.: `contato@salvee...`). As contas de desenvolvedor ficam no nome dele, e não no de quem

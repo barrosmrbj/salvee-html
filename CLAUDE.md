@@ -73,7 +73,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 ### API (`server/routes/`, prefixo `/api`)
 
 - `auth`: register (envia "confirme seu e-mail"), login, logout, me (inclui `emailVerified`), forgot-password (link por e-mail, 1 h), reset-password, verify-email, resend-verification, mail-status, send-phone-code, verify-phone. E-mail: `server/mailer.js` (SMTP da Hostinger; sem `SMTP_USER`/`SMTP_PASS`, em dev o e-mail sai no log e em produção as rotas respondem 503 e o cadastro pula a confirmação). Links em `email_tokens` (só o hash). Como configurar: `docs/configuracao/email.md`. A tela `/verify-phone` continua no código, mas o cadastro agora vai para `/verify-email`. SMS ainda sem provedor: em dev o código sai no log do servidor; em produção `send-phone-code` responde 503 e a tela oferece "Pular por enquanto"
-- `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e o botão avisa "em breve". Como criar as credenciais: `docs/configuracao/login-social.md` (pendente: o cliente ainda não tem o e-mail do projeto).
+- `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e **o botão não aparece** (sem nenhum configurado, a seção "ou entre com" fica oculta: logos de Google/Apple/Facebook sem login real fizeram o Google Safe Browsing marcar o site como "Perigoso"). Como criar as credenciais: `docs/configuracao/login-social.md` (pendente: o cliente ainda não tem o e-mail do projeto).
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
 - `institutions`: lista, `/destaques`, `/:id`, `POST /register/step`
 - `feed`, `search` (+ `/categories`), `donations` (`/initiate`, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
@@ -144,7 +144,7 @@ Regras:
 - **`UPLOAD_DIR=/home/u526770669/salvee-uploads`** (variável no painel): pasta das imagens fora do app. Sem ela as fotos somem a cada deploy. `PUBLIC_URL` não é mais usado para montar o link das imagens (ficou relativo).
 - Teste: `https://skyblue-hedgehog-581364.hostingersite.com/api/health` → `{ "ok": true, "version": "x.y.z" }` com a mesma versão mostrada em Configurações.
 
-**Domínio antigo:** o site estático `darkblue-rook-985577.hostingersite.com` (Git → `public_html`) continua recebendo a `master`; o **`.htaccess` da raiz** redireciona tudo (302) para o domínio de produção e impede que o código do repositório seja servido. O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`).
+**Domínio antigo:** o site estático `darkblue-rook-985577.hostingersite.com` (Git → `public_html`) continua recebendo a `master`; o **`.htaccess` da raiz** serve só `endereco-antigo.html` (aviso com link para o domínio novo, **sem redirecionamento automático**, que o Google trata como sinal de golpe) e impede que o código do repositório seja servido. O `index.html` da raiz é o de desenvolvimento (carrega `/src/main.ts`) e tem a meta `google-site-verification` do Search Console.
 
 ## Controle de versão do Salvee (obrigatório a cada mudança)
 
@@ -177,10 +177,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.9.1** · 22 versões
+Versão atual: **1.9.2** · 23 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.9.2 | 07/10/2026 | Patch | Ajustes contra o alerta "Perigoso" do Chrome | Autenticação, Sistema |
 | 1.9.1 | 07/10/2026 | Patch | Correções de segurança e ajustes à especificação oficial (PDF) | Instituição, Feed, Busca, Doação, Servidor, Sistema |
 | 1.9.0 | 07/10/2026 | Minor | E-mail pela Hostinger: recuperar senha e confirmar cadastro | Autenticação, Onboarding, Servidor, Banco de dados |
 | 1.8.1 | 07/10/2026 | Patch | Botão de mostrar senha e verificação por SMS sem travar o cadastro | Autenticação, Onboarding, Servidor |

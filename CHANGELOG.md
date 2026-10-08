@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.9.1**
+**Versão atual: 1.9.2**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.9.2** | 07/10/2026 | Patch | Ajustes contra o alerta "Perigoso" do Chrome | Autenticação, Sistema |
 | **1.9.1** | 07/10/2026 | Patch | Correções de segurança e ajustes à especificação oficial (PDF) | Instituição, Feed, Busca, Doação, Servidor, Sistema |
 | **1.9.0** | 07/10/2026 | Minor | E-mail pela Hostinger: recuperar senha e confirmar cadastro | Autenticação, Onboarding, Servidor, Banco de dados |
 | **1.8.1** | 07/10/2026 | Patch | Botão de mostrar senha e verificação por SMS sem travar o cadastro | Autenticação, Onboarding, Servidor |
@@ -43,6 +44,17 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.9.2 — Ajustes contra o alerta "Perigoso" do Chrome
+
+*07/10/2026 · Patch · Autenticação, Sistema*
+
+- Botões de login com Google, Apple e Facebook só aparecem quando a rede está configurada no servidor; sem nenhuma, a seção "ou entre com" fica oculta (logos de marcas sem login real num domínio novo parecem phishing para o Google Safe Browsing)
+- Domínio antigo darkblue-rook deixa de redirecionar automaticamente: mostra uma página com o link para o endereço novo
+- Meta de verificação do Google Search Console no site, para pedir a revisão do alerta
+- Texto do cadastro sem citar conta social enquanto ela não estiver disponível
+
+Fontes: `src/components/SocialLogin.ts` · `src/screens/auth/login.ts` · `src/screens/auth/register.ts` · `index.html` · `.htaccess` · `endereco-antigo.html` · `CLAUDE.md` · `docs/PENDENCIAS.md` · `docs/configuracao/login-social.md`
 
 ### 1.9.1 — Correções de segurança e ajustes à especificação oficial (PDF)
 

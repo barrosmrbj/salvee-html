@@ -1,7 +1,6 @@
 // Botões "entrar com" Apple / Google / Facebook (login e cadastro).
 // O clique leva para /api/auth/oauth/:provider; o servidor volta em #/oauth?token=... (screens/auth/oauth.ts).
 import { BASE_URL, request } from '@/services/api'
-import { showToast } from './Toast'
 
 type Provider = 'apple' | 'google' | 'facebook'
 
@@ -34,28 +33,27 @@ function getEnabled(): Promise<Record<Provider, boolean>> {
   return enabledPromise
 }
 
-export function SocialLogin(action: 'Entrar' | 'Cadastrar' = 'Entrar'): HTMLElement {
+// Só mostra os provedores configurados no servidor. Sem nenhum, a seção inteira ("ou entre com")
+// continua oculta: logos de Google/Apple/Facebook sem login real num domínio novo fazem o
+// Google Safe Browsing marcar o site como phishing.
+export function SocialLogin(action: 'Entrar' | 'Cadastrar', section?: HTMLElement): HTMLElement {
   const container = document.createElement('div')
   container.className = 'flex gap-3 justify-center'
-  void getEnabled()
-
-  PROVIDERS.forEach(p => {
-    const btn = document.createElement('button')
-    btn.type = 'button'
-    btn.className = `w-14 h-14 rounded-2xl ${p.className} flex items-center justify-center shadow-sm transition-colors active:scale-95`
-    btn.title = `${action} com ${p.label}`
-    btn.setAttribute('aria-label', `${action} com ${p.label}`)
-    btn.innerHTML = p.icon
-    btn.addEventListener('click', async () => {
-      const enabled = await getEnabled()
-      if (!enabled[p.id]) {
-        showToast(`Entrar com ${p.label} estará disponível em breve`, 'info')
-        return
-      }
-      window.location.href = `${BASE_URL}/auth/oauth/${p.id}`
-    })
-    container.appendChild(btn)
+  void getEnabled().then(enabled => {
+    const active = PROVIDERS.filter(p => enabled[p.id])
+    active.forEach(p => container.appendChild(providerButton(p, action)))
+    if (active.length > 0) section?.classList.remove('hidden')
   })
-
   return container
+}
+
+function providerButton(p: (typeof PROVIDERS)[number], action: string): HTMLButtonElement {
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  btn.className = `w-14 h-14 rounded-2xl ${p.className} flex items-center justify-center shadow-sm transition-colors active:scale-95`
+  btn.title = `${action} com ${p.label}`
+  btn.setAttribute('aria-label', `${action} com ${p.label}`)
+  btn.innerHTML = p.icon
+  btn.addEventListener('click', () => { window.location.href = `${BASE_URL}/auth/oauth/${p.id}` })
+  return btn
 }

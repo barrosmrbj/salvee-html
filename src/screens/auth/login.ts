@@ -24,12 +24,14 @@ export function render(): HTMLElement {
         <a href="#/forgot-password" class="text-salvee-orange text-sm font-medium text-right self-end">Esqueci minha senha</a>
         <div id="btn-login" class="mt-2"></div>
       </form>
-      <div class="flex items-center gap-3 my-6">
-        <div class="flex-1 h-px bg-gray-200"></div>
-        <span class="text-xs text-gray-400">ou entre com</span>
-        <div class="flex-1 h-px bg-gray-200"></div>
+      <div id="social-section" class="hidden">
+        <div class="flex items-center gap-3 my-6">
+          <div class="flex-1 h-px bg-gray-200"></div>
+          <span class="text-xs text-gray-400">ou entre com</span>
+          <div class="flex-1 h-px bg-gray-200"></div>
+        </div>
+        <div id="social-buttons"></div>
       </div>
-      <div id="social-buttons" class="flex gap-3 justify-center"></div>
       <p class="text-center text-sm text-gray-500 mt-6">
         Não tem conta? <a href="#/register" class="text-salvee-orange font-medium">Cadastre-se</a>
       </p>
@@ -52,7 +54,7 @@ export function mount(): void {
     Button({ label: 'Entrar', variant: 'primary', fullWidth: true, type: 'submit' })
   )
 
-  document.getElementById('social-buttons')!.appendChild(SocialLogin('Entrar'))
+  document.getElementById('social-buttons')!.appendChild(SocialLogin('Entrar', document.getElementById('social-section')!))
 
   // erro devolvido pelo login social (#/login?erro=...)
   const oauthError = getHashQuery().get('erro')

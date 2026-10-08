@@ -21,6 +21,10 @@ O cliente ainda não tem **domínio próprio** nem **e-mail do projeto**. Com o 
    Falta o cliente criar as credenciais com o e-mail dele. Passo a passo: `docs/configuracao/login-social.md`.
 
 ## Fazer assim que possível
+- [ ] **Alerta "Perigoso" do Chrome** (Google Safe Browsing): a meta de verificação já está no site (v1.9.2).
+      No Search Console, concluir a verificação de `https://skyblue-hedgehog-581364.hostingersite.com`,
+      ver **Segurança e ações manuais → Problemas de segurança** e **Solicitar revisão**. Com o domínio próprio,
+      verificar o domínio novo também.
 - [ ] Trocar a senha do `admin@salvee.com` (ainda é a padrão `Salvee@2025`).
 - [ ] Conferir no SSH que as fotos estão na pasta fixa: `ls -la ~/salvee-uploads` (deve ter os 2 arquivos do git).
 - [ ] Limpeza no SSH (opcional): `rm ~/salvee.env.production` e a pasta antiga `~/salvee`.
