@@ -50,8 +50,9 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 - Cria a conta no primeiro acesso ou vincula a uma conta existente com o mesmo e-mail confirmado; colunas users.google_id, facebook_id e apple_id
 - Cada provedor só é ativado quando as credenciais dele estão nas variáveis de ambiente; sem elas o botão avisa "disponível em breve"
 - Nova tela #/oauth recebe o login; erros e cancelamento voltam para o login com aviso. O router passa a aceitar query no hash (#/rota?x=y)
+- Passo a passo para criar as credenciais de cada rede (Google, Facebook, Apple) em docs/configuracao/login-social.md
 
-Fontes: `server/routes/oauth.js` · `server/index.js` · `server/db.js` · `src/components/SocialLogin.ts` · `src/screens/auth/oauth.ts` · `src/screens/auth/login.ts` · `src/screens/auth/register.ts` · `src/router.ts` · `src/services/api.ts` · `CLAUDE.md` · `server/.env.example`
+Fontes: `server/routes/oauth.js` · `server/index.js` · `server/db.js` · `src/components/SocialLogin.ts` · `src/screens/auth/oauth.ts` · `src/screens/auth/login.ts` · `src/screens/auth/register.ts` · `src/router.ts` · `src/services/api.ts` · `CLAUDE.md` · `server/.env.example` · `docs/configuracao/login-social.md`
 
 ### 1.7.0 — Doação só credita pontos após confirmação; fotos fora da pasta do app
 

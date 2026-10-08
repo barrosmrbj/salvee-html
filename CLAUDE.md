@@ -66,7 +66,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 ### API (`server/routes/`, prefixo `/api`)
 
 - `auth`: register, login, logout, me, forgot-password, send-phone-code, verify-phone
-- `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e o botão avisa "em breve".
+- `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e o botão avisa "em breve". Como criar as credenciais: `docs/configuracao/login-social.md` (pendente: o cliente ainda não tem o e-mail do projeto).
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
 - `institutions`: lista, `/destaques`, `/:id`, `POST /register/step`
 - `feed`, `search` (+ `/categories`), `donations` (`/initiate`, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
