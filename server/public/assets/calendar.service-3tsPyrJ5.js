@@ -1,1 +1,0 @@
-import{r}from"./index-BXtAGB8o.js";const a={async getMyEvents(){return r("/calendar/my-events")},async registerForEvent(e){await r(`/calendar/events/${e}/register`,{method:"POST"})},async unregisterFromEvent(e){await r(`/calendar/events/${e}/register`,{method:"DELETE"})}};export{a as c};

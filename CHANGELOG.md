@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.12.0**
+**Versão atual: 1.12.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.12.1** | 08/10/2026 | Patch | Situação do cadastro da instituição no Perfil | Perfil, Instituição |
 | **1.12.0** | 08/10/2026 | Minor | Situação da instituição no login, pedido de revisão e reenvio de correções | Onboarding, Instituição, Admin, Autenticação, Feed, Configurações, Servidor, Banco de dados |
 | **1.11.0** | 08/10/2026 | Minor | Curtir e comentar publicações, com tela de detalhe do post | Feed, Servidor, Banco de dados |
 | **1.10.1** | 08/10/2026 | Patch | Admin volta a listar instituições e cadastro de instituição sem erro na última etapa | Admin, Instituição, Banco de dados, Servidor |
@@ -48,6 +49,14 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.12.1 — Situação do cadastro da instituição no Perfil
+
+*08/10/2026 · Patch · Perfil, Instituição*
+
+- Perfil ganha o cartão "Minha instituição" para quem cadastrou alguma: "Seu cadastro de instituição está em análise" (EM ANÁLISE), "está aprovado" (APROVADO), "precisa de correções" ou "não foi aprovado"; tocar abre a tela completa da situação
+
+Fontes: `src/screens/profile.ts`
 
 ### 1.12.0 — Situação da instituição no login, pedido de revisão e reenvio de correções
 

@@ -1,6 +1,22 @@
 {
-  "versaoAtual": "1.12.0",
+  "versaoAtual": "1.12.1",
   "historico": [
+    {
+      "versao": "1.12.1",
+      "data": "2026-10-08",
+      "tipo": "patch",
+      "titulo": "Situação do cadastro da instituição no Perfil",
+      "modulos": [
+        "Perfil",
+        "Instituição"
+      ],
+      "itens": [
+        "Perfil ganha o cartão \"Minha instituição\" para quem cadastrou alguma: \"Seu cadastro de instituição está em análise\" (EM ANÁLISE), \"está aprovado\" (APROVADO), \"precisa de correções\" ou \"não foi aprovado\"; tocar abre a tela completa da situação"
+      ],
+      "fontes": [
+        "src/screens/profile.ts"
+      ]
+    },
     {
       "versao": "1.12.0",
       "data": "2026-10-08",

@@ -1,7 +1,7 @@
 // src/screens/profile.ts
 import { BottomNav, Avatar, Spinner, showToast, Button } from '@/components'
 import { userService, gamificationService, donationService, institutionService } from '@/services'
-import type { User, GameBalance, Reward, Donation, Institution } from '@/types'
+import type { User, GameBalance, Reward, Donation, Institution, MyInstitution } from '@/types'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -107,6 +107,13 @@ function renderProfile(user: User, balance: GameBalance, rewards: Reward[], dona
   addStat(balance.salves, 'Salves')
   hero.appendChild(statsRow)
   content.appendChild(hero)
+
+  // situação do cadastro de instituição (só para quem cadastrou alguma)
+  const instStatus = document.createElement('div')
+  content.appendChild(instStatus)
+  institutionService.listMine()
+    .then(mine => { if (mine.length) instStatus.appendChild(institutionStatusCard(mine)) })
+    .catch(() => {})
 
   // Tabs
   const tabBar = document.createElement('div')
@@ -313,6 +320,50 @@ function getMockDonations(): Donation[] {
     { id: 'd2', institutionId: 'inst-casa-esperanca', institutionName: 'Casa Esperança', amount: 100, paymentMethod: 'pix', anonymous: false, xpEarned: 50, salvesEarned: 25, createdAt: new Date(Date.now() - 86400000 * 3).toISOString() },
     { id: 'd3', institutionId: 'inst-ong-raizes', institutionName: 'ONG Raízes', amount: 30, paymentMethod: 'pix', anonymous: false, xpEarned: 15, salvesEarned: 7, createdAt: new Date(Date.now() - 86400000 * 7).toISOString() },
   ]
+}
+
+// Cartão "Minha instituição" no perfil: situação de cada cadastro (em análise, aprovado...).
+// Tocar leva à tela completa (#/institution-status), com o que corrigir e as ações.
+const INSTITUTION_STATUS: Record<MyInstitution['status'], { label: string; text: string; className: string; icon: string }> = {
+  pending: { icon: '⏳', label: 'EM ANÁLISE', text: 'Seu cadastro de instituição está em análise.', className: 'bg-amber-50 text-amber-700 border-amber-200' },
+  approved: { icon: '✅', label: 'APROVADO', text: 'Seu cadastro de instituição está aprovado.', className: 'bg-green-50 text-green-700 border-green-200' },
+  needs_revision: { icon: '✏️', label: 'CORREÇÃO NECESSÁRIA', text: 'Seu cadastro de instituição precisa de correções.', className: 'bg-blue-50 text-blue-700 border-blue-200' },
+  rejected: { icon: '❌', label: 'NÃO APROVADO', text: 'Seu cadastro de instituição não foi aprovado.', className: 'bg-red-50 text-red-600 border-red-200' },
+}
+
+function institutionStatusCard(mine: MyInstitution[]): HTMLElement {
+  const section = document.createElement('div')
+  section.className = 'bg-white border-b border-gray-100 px-4 py-4 flex flex-col gap-3'
+  const title = document.createElement('p')
+  title.className = 'text-xs font-semibold text-gray-400 uppercase tracking-wider'
+  title.textContent = mine.length > 1 ? 'Minhas instituições' : 'Minha instituição'
+  section.appendChild(title)
+
+  mine.forEach(inst => {
+    const s = INSTITUTION_STATUS[inst.status]
+    const row = document.createElement('button')
+    row.type = 'button'
+    row.className = `w-full text-left rounded-2xl border px-4 py-3 flex items-center gap-3 ${s.className}`
+    const icon = document.createElement('span')
+    icon.className = 'text-2xl flex-shrink-0'
+    icon.textContent = s.icon
+    const info = document.createElement('div')
+    info.className = 'flex-1 min-w-0'
+    const name = document.createElement('p')
+    name.className = 'font-semibold text-gray-900 text-sm truncate'
+    name.textContent = inst.name
+    const text = document.createElement('p')
+    text.className = 'text-xs mt-0.5'
+    text.textContent = s.text
+    info.append(name, text)
+    const badge = document.createElement('span')
+    badge.className = 'text-[10px] font-bold tracking-wide flex-shrink-0'
+    badge.textContent = s.label
+    row.append(icon, info, badge)
+    row.addEventListener('click', () => { window.location.hash = '/institution-status' })
+    section.appendChild(row)
+  })
+  return section
 }
 
 function getMockUser(): User {
