@@ -40,7 +40,7 @@ Conferido em 10/10/2026 (v1.14.0): **14 completas, 3 parciais, 2 sem funcionar d
 | 1 | Splash e onboarding | ✅ | — |
 | 2 | Escolha entre usuário e instituição | ✅ | Feita depois de criar a conta (decisão do projeto). |
 | 3 | Cadastro de usuário comum | 🟡 | Validar senha mínima e formato do e-mail no cadastro. |
-| 4 | Cadastro institucional com validação | ✅ | Aprovar / pedir revisão / rejeitar / corrigir e reenviar / telas de situação. Faltam horário de funcionamento e várias fotos. |
+| 4 | Cadastro institucional com validação | ✅ | Aprovar / pedir revisão / rejeitar / corrigir e reenviar / telas de situação; várias fotos e horário (v1.14.0). |
 | 5 | Login e recuperação de senha | 🟡 | Código pronto; falta a caixa de e-mail do cliente (domínio próprio). |
 | 6 | Feed | ✅ | "Para você" ranqueado com impulsionamento de quem recebeu menos e etiqueta "Precisa de apoio" (v1.14.0). |
 | 7 | Curtidas e comentários | ✅ | — |
