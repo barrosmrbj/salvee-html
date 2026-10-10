@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.18.1**
+**Versão atual: 1.18.2**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.18.2** | 10/10/2026 | Patch | Manifesto do app passa a ser /manifest.json | Sistema, Servidor |
 | **1.18.1** | 10/10/2026 | Patch | Manifesto do app com o tipo certo para "Instalar app" | Servidor, Sistema |
 | **1.18.0** | 10/10/2026 | Minor | Visual responsivo para celular, tablet e computador e app instalável na tela inicial | Sistema |
 | **1.17.0** | 10/10/2026 | Minor | Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin | Busca, Admin, Configurações, Servidor, Banco de dados |
@@ -57,6 +58,15 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.18.2 — Manifesto do app passa a ser /manifest.json
+
+*10/10/2026 · Patch · Sistema, Servidor*
+
+- Na Hostinger os arquivos estáticos são entregues pelo LiteSpeed (antes do Express), que não conhece .webmanifest e o servia como text/plain; o manifesto agora é /manifest.json, entregue como JSON, para o "Instalar app" funcionar
+- Desfeito o ajuste da 1.18.1 no Express, que não tinha efeito em produção
+
+Fontes: `public/manifest.json` · `index.html` · `server/index.js` · `CLAUDE.md`
 
 ### 1.18.1 — Manifesto do app com o tipo certo para "Instalar app"
 

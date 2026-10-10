@@ -50,12 +50,9 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Rota não encontrad
 // frontend: build do Vite em server/public (npm run build na raiz). O router é por hash (#/...),
 // então qualquer outro GET devolve o index.html.
 const PUBLIC_DIR = path.join(__dirname, 'public')
-app.use(express.static(PUBLIC_DIR, {
-  // o mime do Express não conhece .webmanifest (sairia text/plain): tipo certo para o "Instalar app" (PWA)
-  setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.webmanifest')) res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8')
-  },
-}))
+// Na Hostinger os arquivos estáticos são entregues pelo LiteSpeed antes de chegar aqui; por isso o
+// manifesto do app é /manifest.json (extensão que qualquer servidor conhece), não .webmanifest.
+app.use(express.static(PUBLIC_DIR))
 app.get('*', (req, res, next) => {
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'), err => err && next())
 })

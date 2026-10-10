@@ -1,6 +1,26 @@
 {
-  "versaoAtual": "1.18.1",
+  "versaoAtual": "1.18.2",
   "historico": [
+    {
+      "versao": "1.18.2",
+      "data": "2026-10-10",
+      "tipo": "patch",
+      "titulo": "Manifesto do app passa a ser /manifest.json",
+      "modulos": [
+        "Sistema",
+        "Servidor"
+      ],
+      "itens": [
+        "Na Hostinger os arquivos estáticos são entregues pelo LiteSpeed (antes do Express), que não conhece .webmanifest e o servia como text/plain; o manifesto agora é /manifest.json, entregue como JSON, para o \"Instalar app\" funcionar",
+        "Desfeito o ajuste da 1.18.1 no Express, que não tinha efeito em produção"
+      ],
+      "fontes": [
+        "public/manifest.json",
+        "index.html",
+        "server/index.js",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.18.1",
       "data": "2026-10-10",

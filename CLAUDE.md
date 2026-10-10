@@ -6,7 +6,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 **Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). **Especificação oficial: `.Documentacao/Especificação SALVEE.pdf`** (37 páginas; em caso de conflito, vale o PDF). `salvee_especificacao.md` é um resumo antigo e marca como "(implementado)" partes incompletas: não usar como referência de status. **Pendências, comparação com o PDF e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`. **Protótipo visual dos designers (Figma, mockups das telas):** https://www.figma.com/proto/E6qAZObrdwAH1WoCLOk8f2/Salvee?node-id=4-340&t=6UThrBMosZ7Zzatf-1 (referência de layout; em conflito de regra, vale o PDF). Imagem estática dos mockups: `.Documentacao/mockups_projeto_salvee.png`.
 
-- **Frontend:** Vite 6 + TypeScript (vanilla, sem framework) + Tailwind 3, em `src/`. **Responsivo, celular primeiro** (`src/styles/global.css`): celular = tela inteira (margens seguras de entalhe, campos com 16px contra o zoom do iPhone, altura `100dvh`); tablet (≥ 768px) = coluna de 640px; computador (≥ 1024px) = coluna de 680px e a barra de baixo vira menu lateral. A largura vem de `--app-max` (classe `max-w-app`): barra fixa nova deve usar `max-w-app` + `left-1/2 -translate-x-1/2`. Instalável na tela inicial (PWA): `public/manifest.webmanifest` e ícones em `public/icons/`.
+- **Frontend:** Vite 6 + TypeScript (vanilla, sem framework) + Tailwind 3, em `src/`. **Responsivo, celular primeiro** (`src/styles/global.css`): celular = tela inteira (margens seguras de entalhe, campos com 16px contra o zoom do iPhone, altura `100dvh`); tablet (≥ 768px) = coluna de 640px; computador (≥ 1024px) = coluna de 680px e a barra de baixo vira menu lateral. A largura vem de `--app-max` (classe `max-w-app`): barra fixa nova deve usar `max-w-app` + `left-1/2 -translate-x-1/2`. Instalável na tela inicial (PWA): `public/manifest.json` (não `.webmanifest`: o LiteSpeed da Hostinger entrega estáticos direto e serviria como text/plain) e ícones em `public/icons/`.
 - **Backend:** Node.js + Express 4 (CommonJS) em `server/`, banco via Knex (SQLite em dev, MySQL em produção).
 - **Produção:** Hostinger (hPanel), domínio `skyblue-hedgehog-581364.hostingersite.com`, MySQL `u526770669_salvee`.
 - Idioma da interface, dos commits e da documentação: **português (pt-BR)**.
@@ -188,10 +188,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.18.1** · 36 versões
+Versão atual: **1.18.2** · 37 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.18.2 | 10/10/2026 | Patch | Manifesto do app passa a ser /manifest.json | Sistema, Servidor |
 | 1.18.1 | 10/10/2026 | Patch | Manifesto do app com o tipo certo para "Instalar app" | Servidor, Sistema |
 | 1.18.0 | 10/10/2026 | Minor | Visual responsivo para celular, tablet e computador e app instalável na tela inicial | Sistema |
 | 1.17.0 | 10/10/2026 | Minor | Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin | Busca, Admin, Configurações, Servidor, Banco de dados |
