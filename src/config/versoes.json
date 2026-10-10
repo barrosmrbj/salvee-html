@@ -1,6 +1,34 @@
 {
-  "versaoAtual": "1.17.0",
+  "versaoAtual": "1.18.0",
   "historico": [
+    {
+      "versao": "1.18.0",
+      "data": "2026-10-10",
+      "tipo": "minor",
+      "titulo": "Visual responsivo para celular, tablet e computador e app instalável na tela inicial",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "Celular: o app ocupa a tela inteira (antes era uma coluna fixa de 390px com faixas dos lados), respeita o entalhe e a barra de gestos, acompanha a barra do navegador (100dvh) e os campos usam letra de 16px para o iPhone não dar zoom sozinho",
+        "Tablet (a partir de 768px): coluna central de 640px com sombra; \"Causas perto de você\" em 2 colunas",
+        "Computador (a partir de 1024px): coluna de 680px e a barra de navegação de baixo vira menu lateral à esquerda, com o logo",
+        "Instalar na tela inicial (PWA): manifesto e ícones do Salvee (Android, iPhone e navegador); o ícone /favicon.svg, que não existia (erro 404), foi criado",
+        "Zoom de pinça liberado (antes bloqueado por maximum-scale=1, ruim para acessibilidade); avisos (toast) abaixo do entalhe; classe scrollbar-hide, usada em várias telas e que não existia, passa a esconder a barra de rolagem lateral dos carrosséis"
+      ],
+      "fontes": [
+        "src/styles/global.css",
+        "tailwind.config.ts",
+        "index.html",
+        "public/manifest.webmanifest",
+        "public/favicon.svg",
+        "public/icons/",
+        "src/components/BottomNav.ts",
+        "src/components/Toast.ts",
+        "src/screens/search.ts",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.17.0",
       "data": "2026-10-10",

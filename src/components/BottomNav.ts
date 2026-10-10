@@ -26,12 +26,22 @@ const NAV_ITEMS: NavItem[] = [
 export function BottomNav(): HTMLElement {
   const nav = document.createElement('nav')
   nav.id = 'bottom-nav'
+  // celular/tablet: barra fixa embaixo; computador (>= 1024px): menu lateral à esquerda (global.css, #bottom-nav)
   nav.className = 'fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-app bg-white border-t border-gray-100 flex items-center justify-around pb-safe z-40'
+  nav.setAttribute('aria-label', 'Navegação principal')
+
+  // logo só aparece no menu lateral do computador
+  const logo = document.createElement('a')
+  logo.href = '#/feed'
+  logo.className = 'nav-logo hidden items-center gap-2 px-3 pb-4 mb-2 border-b border-gray-200 w-full'
+  logo.innerHTML = '<img src="/favicon.svg" alt="" class="w-8 h-8" /><span class="text-lg font-bold text-salvee-orange">Salvee</span>'
+  nav.appendChild(logo)
 
   NAV_ITEMS.forEach(item => {
     const btn = document.createElement('button')
     const isActive = window.location.hash === item.hash
     btn.className = `flex flex-col items-center gap-0.5 py-2 px-4 transition-colors ${isActive ? 'text-salvee-orange' : 'text-gray-400'}`
+    if (isActive) btn.setAttribute('aria-current', 'page')
     btn.innerHTML = `${item.icon}<span class="text-[10px] font-medium">${item.label}</span>`
     btn.addEventListener('click', () => { window.location.hash = item.hash })
     nav.appendChild(btn)

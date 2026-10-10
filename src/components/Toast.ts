@@ -18,7 +18,9 @@ export function showToast(message: string, type: ToastType = 'info', duration = 
 
   const toast = document.createElement('div')
   toast.id = 'salvee-toast'
-  toast.className = `fixed top-4 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg max-w-xs w-full ${colors[type]} transition-all duration-300 opacity-0`
+  // abaixo do entalhe do celular
+  toast.style.top = 'calc(env(safe-area-inset-top) + 16px)'
+  toast.className = `fixed left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 px-4 py-3 rounded-xl text-white text-sm font-medium shadow-lg max-w-xs w-full ${colors[type]} transition-all duration-300 opacity-0`
 
   const iconSpan = document.createElement('span')
   iconSpan.className = 'font-bold'

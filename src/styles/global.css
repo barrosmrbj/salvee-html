@@ -4,6 +4,24 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Layout responsivo (celular primeiro):
+  - celular (< 768px): o app ocupa a tela inteira;
+  - tablet (>= 768px): coluna central de 640px com sombra;
+  - computador (>= 1024px): coluna de 680px e a barra de baixo vira menu lateral (ver #bottom-nav abaixo).
+  --app-max alimenta a classe max-w-app (tailwind.config.ts), usada também pelas barras fixas das telas.
+*/
+:root {
+  --app-max: 100%;
+  --nav-rail: 0px;
+}
+@media (min-width: 768px) {
+  :root { --app-max: 640px; }
+}
+@media (min-width: 1024px) {
+  :root { --app-max: 680px; --nav-rail: 112px; }
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -12,18 +30,72 @@
 
   html, body {
     @apply h-full m-0 p-0 bg-gray-100 font-sans;
+    -webkit-text-size-adjust: 100%;
   }
 
   #app {
     @apply max-w-app mx-auto min-h-full bg-white relative overflow-x-hidden;
   }
+
+  img { max-width: 100%; }
+}
+
+@media (min-width: 768px) {
+  #app { box-shadow: 0 0 0 1px rgb(0 0 0 / 0.04), 0 10px 40px rgb(0 0 0 / 0.06); }
+}
+
+/* iPhone dá zoom sozinho ao tocar em campo com letra menor que 16px */
+@media (max-width: 767px) {
+  input, select, textarea { font-size: 16px !important; }
 }
 
 @layer utilities {
   .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom, 16px);
+    padding-bottom: max(env(safe-area-inset-bottom), 16px);
   }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  /* altura da tela que acompanha a barra do navegador do celular (dvh) */
   .screen {
-    @apply min-h-screen flex flex-col;
+    @apply flex flex-col;
+    min-height: 100vh;
+    min-height: 100dvh;
   }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+}
+
+/*
+  Computador: a barra de navegação de baixo vira um menu lateral fixo, à esquerda da coluna.
+  Seletor por id para vencer as classes utilitárias do componente (BottomNav.ts).
+*/
+@media (min-width: 1024px) {
+  #bottom-nav {
+    top: 0;
+    bottom: 0;
+    left: calc(50% - var(--app-max) / 2 - var(--nav-rail) - 16px);
+    width: var(--nav-rail);
+    transform: none;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 24px 8px;
+    border-top: 0;
+    background: transparent;
+  }
+  #bottom-nav button {
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  #bottom-nav button:hover { background: #fff; }
+  #bottom-nav button span { font-size: 14px; }
+  #bottom-nav .nav-logo { display: flex; }
 }

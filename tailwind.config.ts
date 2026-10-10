@@ -16,7 +16,8 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       maxWidth: {
-        app: '390px',
+        // largura da coluna do app: 100% no celular, 640px no tablet, 680px no computador (global.css)
+        app: 'var(--app-max)',
       },
     },
   },

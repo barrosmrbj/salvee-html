@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.17.0**
+**Versão atual: 1.18.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.18.0** | 10/10/2026 | Minor | Visual responsivo para celular, tablet e computador e app instalável na tela inicial | Sistema |
 | **1.17.0** | 10/10/2026 | Minor | Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin | Busca, Admin, Configurações, Servidor, Banco de dados |
 | **1.16.0** | 10/10/2026 | Minor | Cadastro de instituição só vai para aprovação ao "Enviar para análise" | Onboarding, Instituição, Admin, Perfil, Feed, Servidor |
 | **1.15.0** | 10/10/2026 | Minor | Localização no mapa: instituição marca o local e "Perto de mim" com GPS | Busca, Instituição, Onboarding, Servidor, Banco de dados |
@@ -55,6 +56,18 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.18.0 — Visual responsivo para celular, tablet e computador e app instalável na tela inicial
+
+*10/10/2026 · Minor · Sistema*
+
+- Celular: o app ocupa a tela inteira (antes era uma coluna fixa de 390px com faixas dos lados), respeita o entalhe e a barra de gestos, acompanha a barra do navegador (100dvh) e os campos usam letra de 16px para o iPhone não dar zoom sozinho
+- Tablet (a partir de 768px): coluna central de 640px com sombra; "Causas perto de você" em 2 colunas
+- Computador (a partir de 1024px): coluna de 680px e a barra de navegação de baixo vira menu lateral à esquerda, com o logo
+- Instalar na tela inicial (PWA): manifesto e ícones do Salvee (Android, iPhone e navegador); o ícone /favicon.svg, que não existia (erro 404), foi criado
+- Zoom de pinça liberado (antes bloqueado por maximum-scale=1, ruim para acessibilidade); avisos (toast) abaixo do entalhe; classe scrollbar-hide, usada em várias telas e que não existia, passa a esconder a barra de rolagem lateral dos carrosséis
+
+Fontes: `src/styles/global.css` · `tailwind.config.ts` · `index.html` · `public/manifest.webmanifest` · `public/favicon.svg` · `public/icons/` · `src/components/BottomNav.ts` · `src/components/Toast.ts` · `src/screens/search.ts` · `CLAUDE.md`
 
 ### 1.17.0 — Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin
 

@@ -68,7 +68,7 @@ export function render(): HTMLElement {
               <select id="city-select" class="bg-transparent text-xs font-semibold text-salvee-orange outline-none max-w-[9rem]" aria-label="Cidade"></select>
             </label>
           </div>
-          <div id="causas-list" class="flex flex-col gap-3 px-4"></div>
+          <div id="causas-list" class="flex flex-col gap-3 px-4 md:grid md:grid-cols-2"></div>
         </section>
       </div>
     </div>
