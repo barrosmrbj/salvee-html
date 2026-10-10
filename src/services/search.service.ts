@@ -25,8 +25,10 @@ export interface SearchCampaign {
   goal: number
   current: number
   deadline: string | null
-  /** mesma cidade escolhida pelo usuário */
+  /** perto: até 30 km pelo GPS, ou mesma cidade escolhida */
   nearby?: boolean
+  /** só com GPS ligado e instituição com local no mapa */
+  distanceKm?: number | null
 }
 
 export interface SearchResult {
@@ -52,10 +54,15 @@ export const searchService = {
   },
 
   /** "Causas perto de você": campanhas em andamento; cidade escolhida primeiro */
-  async listCausas(params: { category?: string; city?: string } = {}): Promise<SearchCampaign[]> {
+  async listCausas(params: { category?: string; city?: string; lat?: number; lng?: number } = {}): Promise<SearchCampaign[]> {
     const qs = new URLSearchParams()
     if (params.category) qs.set('category', params.category)
     if (params.city) qs.set('city', params.city)
+    // posição do usuário só nesta consulta (o servidor não guarda)
+    if (params.lat !== undefined && params.lng !== undefined) {
+      qs.set('lat', params.lat.toFixed(2)) // ~1 km: basta para ordenar e protege a privacidade
+      qs.set('lng', params.lng.toFixed(2))
+    }
     return request<SearchCampaign[]>(`/search/causas?${qs}`)
   },
 }

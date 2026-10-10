@@ -3,13 +3,14 @@
 // 2. carrossel de categorias (as que existem nas instituições aprovadas)
 // 3. Destaques: instituições com menos ajuda recente
 // 4. Causas perto de você: campanhas em andamento, primeiro as da cidade escolhida
-import { BottomNav, ProgressBar, Spinner, VerifiedBadge } from '@/components'
+import { BottomNav, ProgressBar, Spinner, VerifiedBadge, showToast } from '@/components'
 import { searchService } from '@/services'
 import { request } from '@/services/api'
 import type { SearchCampaign } from '@/services/search.service'
 import type { Institution } from '@/types'
 
 const CITY_KEY = 'salvee_cidade'
+const GPS_KEY = 'salvee_gps' // preferência do usuário: 'on' liga o GPS em "Causas perto de você"
 const CATEGORY_ICONS: Record<string, string> = {
   'Saúde': '🏥', 'Crianças': '🧒', 'Idosos': '👵', 'Educação': '📚', 'Animais': '🐾', 'Alimentação': '🍲',
   'Meio Ambiente': '🌱', 'Moradia': '🏠', 'Abrigos': '🏠', 'Asilos': '👵', 'Creches': '🧸', 'Igrejas': '⛪', 'Outros': '💛',
@@ -46,9 +47,13 @@ export function render(): HTMLElement {
         </section>
 
         <section class="mt-6">
-          <div class="flex items-center justify-between gap-2 px-4 mb-3">
+          <div class="flex items-center justify-between gap-2 px-4 mb-1">
             <h2 class="text-base font-bold text-gray-900">Causas perto de você</h2>
-            <label class="flex items-center gap-1 text-xs text-gray-500">
+            <button id="gps-toggle" type="button" class="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border"></button>
+          </div>
+          <div class="flex items-center justify-between gap-2 px-4 mb-3">
+            <p id="gps-status" class="text-[11px] text-gray-400"></p>
+            <label id="city-label" class="flex items-center gap-1 text-xs text-gray-500">
               <span aria-hidden="true">📍</span>
               <select id="city-select" class="bg-transparent text-xs font-semibold text-salvee-orange outline-none max-w-[9rem]" aria-label="Cidade"></select>
             </label>
@@ -66,6 +71,7 @@ export function mount(): void {
 
   buildCategories()
   buildDestaques()
+  setupGps()
   void buildCities().then(buildCausas)
 
   document.getElementById('search-input')!.addEventListener('input', e => {
@@ -185,18 +191,88 @@ async function buildCities(): Promise<void> {
   } catch { /* só "Todas" */ }
   const saved = getCity()
   if ([...select.options].some(o => o.value === saved)) select.value = saved
-  select.addEventListener('change', () => { setCity(select.value); buildCausas() })
+  select.addEventListener('change', () => { setCity(select.value); void buildCausas() })
 }
 
-function buildCausas(): void {
+// ---- GPS do usuário (opcional, ele liga ou desliga) ----
+let gpsOn = false
+let position: { lat: number; lng: number } | null = null
+
+function getPref(key: string): string {
+  try { return localStorage.getItem(key) ?? '' } catch { return '' }
+}
+function setPref(key: string, value: string): void {
+  try { value ? localStorage.setItem(key, value) : localStorage.removeItem(key) } catch { /* sem armazenamento */ }
+}
+
+function paintGps(text?: string): void {
+  const btn = document.getElementById('gps-toggle')!
+  btn.className = `flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
+    gpsOn ? 'bg-salvee-orange text-white border-salvee-orange' : 'bg-white text-gray-600 border-gray-200'
+  }`
+  btn.textContent = gpsOn ? '📍 Perto de mim: ligado' : '📍 Perto de mim'
+  btn.setAttribute('aria-pressed', String(gpsOn))
+  document.getElementById('gps-status')!.textContent = text ?? (gpsOn
+    ? 'Usando sua localização (não fica guardada).'
+    : 'Ligue para ver as campanhas mais próximas, ou escolha a cidade.')
+  // com GPS ligado a cidade não é usada
+  document.getElementById('city-label')!.classList.toggle('opacity-40', gpsOn)
+}
+
+function locate(): Promise<boolean> {
+  return new Promise(resolve => {
+    if (!('geolocation' in navigator)) { resolve(false); return }
+    navigator.geolocation.getCurrentPosition(
+      pos => { position = { lat: pos.coords.latitude, lng: pos.coords.longitude }; resolve(true) },
+      () => resolve(false),
+      { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 },
+    )
+  })
+}
+
+function setupGps(): void {
+  gpsOn = getPref(GPS_KEY) === 'on'
+  paintGps(gpsOn ? 'Obtendo sua localização…' : undefined)
+  document.getElementById('gps-toggle')!.addEventListener('click', async () => {
+    if (gpsOn) {
+      gpsOn = false
+      position = null
+      setPref(GPS_KEY, '')
+      paintGps()
+      buildCausas()
+      return
+    }
+    paintGps('Obtendo sua localização…')
+    if (await locate()) {
+      gpsOn = true
+      setPref(GPS_KEY, 'on')
+      paintGps()
+    } else {
+      // negou ou não conseguiu: continua pela cidade (fallback do PDF, 27.5)
+      showToast('Não foi possível usar a localização. Mostrando pela cidade escolhida.', 'info', 4000)
+      paintGps()
+    }
+    buildCausas()
+  })
+}
+
+async function buildCausas(): Promise<void> {
   const list = document.getElementById('causas-list')!
   list.innerHTML = ''
   list.appendChild(Spinner())
+  // preferência ligada numa visita anterior: pega a posição de novo
+  if (gpsOn && !position && !(await locate())) {
+    gpsOn = false
+    setPref(GPS_KEY, '')
+    paintGps('Localização indisponível. Mostrando pela cidade escolhida.')
+  }
   const city = (document.getElementById('city-select') as HTMLSelectElement).value
-  searchService.listCausas({ city }).then(causas => {
+  const params = gpsOn && position ? { lat: position.lat, lng: position.lng } : { city }
+  searchService.listCausas(params).then(causas => {
     list.innerHTML = ''
     if (!causas.length) return emptyText(list, 'Nenhuma campanha em andamento no momento.')
-    if (city && !causas.some(c => c.nearby)) emptyText(list, `Ainda não há campanhas em ${city}. Veja as de outras cidades:`)
+    if (gpsOn && !causas.some(c => c.nearby)) emptyText(list, 'Nenhuma campanha a até 30 km. Veja as mais próximas:')
+    else if (!gpsOn && city && !causas.some(c => c.nearby)) emptyText(list, `Ainda não há campanhas em ${city}. Veja as de outras cidades:`)
     causas.forEach(c => list.appendChild(campaignItem(c)))
   }).catch(() => {
     list.innerHTML = ''
@@ -224,7 +300,8 @@ function campaignItem(c: SearchCampaign): HTMLElement {
   info.className = 'flex-1 min-w-0 flex flex-col gap-1'
   const cat = document.createElement('span')
   cat.className = 'text-[11px] text-salvee-orange font-semibold'
-  cat.textContent = [c.category, c.nearby ? '📍 perto de você' : ''].filter(Boolean).join(' · ') || 'Campanha'
+  const where = c.distanceKm != null ? `📍 a ${c.distanceKm.toLocaleString('pt-BR')} km` : c.nearby ? '📍 perto de você' : ''
+  cat.textContent = [c.category, where].filter(Boolean).join(' · ') || 'Campanha'
   const title = document.createElement('p')
   title.className = 'text-sm font-semibold text-gray-900 truncate'
   title.textContent = c.title
@@ -327,5 +404,6 @@ export function unmount(): void {
   clearTimeout(searchTimeout)
   query = ''
   category = ''
+  position = null
   document.getElementById('bottom-nav')?.remove()
 }

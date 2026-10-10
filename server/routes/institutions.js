@@ -48,7 +48,7 @@ router.get('/mine/:id', authMiddleware, async (req, res) => {
   try {
     const inst = await db('institutions').where({ id: req.params.id }).first()
     if (!inst || !(await canManage(req.userId, inst))) return res.status(404).json({ error: 'Instituição não encontrada' })
-    const fields = ['name', 'responsible', 'contact_email', 'contact_phone', 'category', 'subcategory', 'description', 'opening_hours', 'photos',
+    const fields = ['name', 'responsible', 'contact_email', 'contact_phone', 'category', 'subcategory', 'description', 'opening_hours', 'photos', 'latitude', 'longitude',
       'audience', 'cnpj', 'street', 'city', 'state', 'zip', 'mission', 'founded_year', 'history', 'logo_url', 'photo_url', 'documents_url']
     res.json({
       id: inst.id, status: inst.status, rejectionReason: inst.rejection_reason || null,
@@ -160,11 +160,19 @@ async function canManage(userId, inst) {
 function flattenStep(step, data) {
   const maps = {
     1: { name: data.name, responsible: data.responsible, contact_email: data.contact_email, contact_phone: data.contact_phone, category: data.category, subcategory: data.subcategory },
-    2: { description: data.description, city: data.city, state: data.state, audience: data.audience, cnpj: data.cnpj, street: data.street, zip: data.zip, mission: data.mission, founded_year: data.founded_year ? Number(data.founded_year) : null, opening_hours: data.opening_hours },
+    2: { description: data.description, city: data.city, state: data.state, audience: data.audience, cnpj: data.cnpj, street: data.street, zip: data.zip, mission: data.mission, founded_year: data.founded_year ? Number(data.founded_year) : null, opening_hours: data.opening_hours, ...coordFields(data.latitude, data.longitude) },
     3: { logo_url: data.logo_url, history: data.history, documents_url: data.documents_url, ...photoFields(data.photos) },
   }
   const flat = maps[step] || {}
   return Object.fromEntries(Object.entries(flat).filter(([, v]) => v !== undefined && v !== null && v !== ''))
+}
+
+// coordenadas válidas (graus) ou nada; aceita número ou texto
+function coordFields(lat, lng) {
+  const la = Number(lat), lo = Number(lng)
+  if (lat === '' || lat == null || lng === '' || lng == null) return {}
+  if (!Number.isFinite(la) || !Number.isFinite(lo) || Math.abs(la) > 90 || Math.abs(lo) > 180) return {}
+  return { latitude: la, longitude: lo }
 }
 
 // fotos do carrossel: só links enviados pelo app, até 6; a primeira também vai para photo_url (telas antigas)
@@ -209,6 +217,8 @@ function formatInst(i) {
     state: i.state || '',
     email: i.contact_email || undefined,
     openingHours: i.opening_hours || undefined,
+    latitude: i.latitude ?? undefined,
+    longitude: i.longitude ?? undefined,
     audience: i.audience || undefined,
     mission: i.mission,
     history: i.history,

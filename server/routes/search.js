@@ -48,7 +48,8 @@ async function activeCampaigns({ q, category } = {}) {
     .where('posts.type', 'campaign')
     .where('institutions.status', 'approved')
     .select('posts.*', 'institutions.name as institution_name', 'institutions.logo_url as institution_logo_url',
-      'institutions.category as institution_category', 'institutions.city as institution_city', 'institutions.state as institution_state')
+      'institutions.category as institution_category', 'institutions.city as institution_city', 'institutions.state as institution_state',
+      'institutions.latitude as institution_latitude', 'institutions.longitude as institution_longitude')
   if (category) query = query.where('institutions.category', category)
   if (q) {
     query = query.andWhere(function () {
@@ -118,19 +119,50 @@ router.get('/cities', authMiddleware, async (req, res) => {
   }
 })
 
-// GET /search/causas?category=&city= → campanhas em andamento (spec 17.6).
-// Sem coordenadas cadastradas, "perto" = mesma cidade (fallback do PDF: pedir a cidade).
-// Ordem: cidade escolhida primeiro, depois quem recebeu menos, depois prazo mais próximo.
+// distância em km entre dois pontos (fórmula de haversine)
+function distanceKm(lat1, lng1, lat2, lng2) {
+  const rad = d => (d * Math.PI) / 180
+  const a = Math.sin(rad(lat2 - lat1) / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(rad(lng2 - lng1) / 2) ** 2
+  return 6371 * 2 * Math.asin(Math.sqrt(a))
+}
+const NEARBY_KM = 30
+
+// GET /search/causas?category=&city=&lat=&lng= → campanhas em andamento (spec 17.6).
+// Com GPS do usuário (lat/lng): mais perto primeiro, pelas coordenadas da instituição; a posição só é
+// usada nesta consulta, nada é guardado. Sem GPS: "perto" = cidade escolhida (fallback do PDF).
+// Depois: quem recebeu menos ajuda, depois prazo mais próximo.
 router.get('/causas', authMiddleware, async (req, res) => {
   try {
     const category = String(req.query.category || '').trim()
     const city = String(req.query.city || '').trim().toLowerCase()
+    const lat = Number(req.query.lat), lng = Number(req.query.lng)
+    const gps = req.query.lat !== undefined && Number.isFinite(lat) && Number.isFinite(lng) && Math.abs(lat) <= 90 && Math.abs(lng) <= 180
     const [campaigns, attention] = await Promise.all([activeCampaigns({ category }), attentionRanking()])
+
+    const dist = new Map()
+    if (gps) {
+      for (const p of campaigns) {
+        if (p.institution_latitude != null && p.institution_longitude != null) {
+          dist.set(p.id, distanceKm(lat, lng, Number(p.institution_latitude), Number(p.institution_longitude)))
+        }
+      }
+    }
     const sameCity = p => (city && String(p.institution_city || '').toLowerCase() === city ? 1 : 0)
+    const isNear = p => (gps ? (dist.get(p.id) ?? Infinity) <= NEARBY_KM : Boolean(sameCity(p)))
     const need = p => attention.need.get(p.institution_id) ?? 0
     const deadline = p => p.campaign_deadline || '9999-12-31'
-    campaigns.sort((a, b) => sameCity(b) - sameCity(a) || need(b) - need(a) || deadline(a).localeCompare(deadline(b)))
-    res.json(campaigns.slice(0, 30).map(p => ({ ...formatCampaign(p), nearby: Boolean(sameCity(p)) })))
+    campaigns.sort((a, b) => {
+      if (gps) {
+        const da = dist.get(a.id) ?? Infinity, db2 = dist.get(b.id) ?? Infinity
+        if (da !== db2) return da - db2 // sem coordenadas vão para o fim
+      } else if (sameCity(b) - sameCity(a)) return sameCity(b) - sameCity(a)
+      return need(b) - need(a) || deadline(a).localeCompare(deadline(b))
+    })
+    res.json(campaigns.slice(0, 30).map(p => ({
+      ...formatCampaign(p),
+      nearby: isNear(p),
+      distanceKm: dist.has(p.id) ? Math.round(dist.get(p.id) * 10) / 10 : null,
+    })))
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })

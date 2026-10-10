@@ -20,6 +20,8 @@ export interface Institution {
   city?: string
   state?: string
   openingHours?: string
+  latitude?: number
+  longitude?: number
   audience?: string
   /** campanha em andamento para a barra de meta do perfil (spec 13.6) */
   activeCampaign?: { id: string; title: string; goal: number; current: number; deadline: string | null } | null

@@ -335,7 +335,9 @@ function renderInfo(inst: Institution, tabContent: HTMLElement): void {
   tabContent.appendChild(list)
 
   // mapa com marcação + rota (spec 13.10): sem chave de API, pelo endereço
-  const mapQuery = [street, cityState, a?.zipCode].filter(Boolean).join(', ')
+  // ponto marcado no cadastro é mais preciso que o endereço
+  const hasCoords = inst.latitude != null && inst.longitude != null
+  const mapQuery = hasCoords ? `${inst.latitude},${inst.longitude}` : [street, cityState, a?.zipCode].filter(Boolean).join(', ')
   if (mapQuery) {
     const q = encodeURIComponent(mapQuery)
     const map = document.createElement('iframe')
@@ -358,7 +360,7 @@ function renderInfo(inst: Institution, tabContent: HTMLElement): void {
       routes.appendChild(link)
     }
     routeBtn('🗺️ Google Maps', `https://www.google.com/maps/dir/?api=1&destination=${q}`)
-    routeBtn('🚗 Waze', `https://waze.com/ul?q=${q}&navigate=yes`)
+    routeBtn('🚗 Waze', hasCoords ? `https://waze.com/ul?ll=${q}&navigate=yes` : `https://waze.com/ul?q=${q}&navigate=yes`)
     tabContent.appendChild(routes)
   }
 }

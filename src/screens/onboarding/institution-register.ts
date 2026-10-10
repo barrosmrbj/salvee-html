@@ -1,4 +1,5 @@
-import { Button, Input, showToast, LoadingOverlay } from '@/components'
+import { Button, Input, showToast, LoadingOverlay, LocationPicker } from '@/components'
+import type { Coords } from '@/components'
 import { institutionService, authService } from '@/services'
 import { ApiError } from '@/services/api'
 import { getHashQuery } from '@/router'
@@ -159,6 +160,7 @@ function renderStep2(container: HTMLElement): void {
   appendInput(container, { id: 'state', label: 'Estado (opcional)', placeholder: 'AM' })
   appendInput(container, { id: 'zip', label: 'CEP (opcional)', placeholder: '69000-000' })
   appendInput(container, { id: 'opening_hours', label: 'Dias e horários de funcionamento (opcional)', placeholder: 'Seg a sex, 8h às 17h' })
+  appendLocation(container)
   appendTextarea(container, { id: 'mission', label: 'Missão (opcional)', placeholder: 'Nossa missão é...' })
   appendInput(container, { id: 'founded_year', label: 'Ano de fundação (opcional)', type: 'number', placeholder: '2010' })
 }
@@ -177,6 +179,24 @@ function renderStep3(container: HTMLElement): void {
   appendPhotoPicker(container)
   appendTextarea(container, { id: 'history', label: 'História (opcional)', placeholder: 'Conte como a instituição surgiu...' })
   appendFileInput(container, { id: 'docs', label: 'Documentos para análise', hint: 'PDF, JPG ou PNG · máx. 1 MB', accept: '.pdf,image/jpeg,image/png' })
+}
+
+// ── Localização (spec 17.6) ──────────────────────────────────────────────────
+let coords: Coords | null = null
+let coordsLoaded = false
+
+function appendLocation(container: HTMLElement): void {
+  if (!coordsLoaded) {
+    coordsLoaded = true
+    const lat = Number(editData?.['latitude']), lng = Number(editData?.['longitude'])
+    if (editData?.['latitude'] != null && Number.isFinite(lat) && Number.isFinite(lng)) coords = { lat, lng }
+  }
+  const value = (id: string) => (document.getElementById(id) as HTMLInputElement | null)?.value.trim() ?? ''
+  container.appendChild(LocationPicker({
+    initial: coords,
+    getAddress: () => [value('street'), value('city'), value('state'), value('zip'), 'Brasil'].filter(Boolean).join(', '),
+    onChange: c => { coords = c },
+  }))
 }
 
 // ── Fotos do perfil (carrossel, spec 8.3 etapa 4 e 13.3) ──────────────────────
@@ -444,7 +464,7 @@ async function submitStep1(): Promise<void> {
 }
 
 async function submitStep2(): Promise<void> {
-  const data: Record<string, string> = {}
+  const data: Record<string, unknown> = coords ? { latitude: coords.lat, longitude: coords.lng } : {}
   ;['description', 'audience', 'cnpj', 'street', 'city', 'state', 'zip', 'opening_hours', 'mission', 'founded_year'].forEach(id => {
     const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement
     if (el?.value) data[id] = el.value
@@ -499,4 +519,6 @@ export function unmount(): void {
   editData = null
   photos = []
   photosLoaded = false
+  coords = null
+  coordsLoaded = false
 }

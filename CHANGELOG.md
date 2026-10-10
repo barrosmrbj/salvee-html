@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.14.0**
+**Versão atual: 1.15.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.15.0** | 10/10/2026 | Minor | Localização no mapa: instituição marca o local e "Perto de mim" com GPS | Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | **1.14.0** | 10/10/2026 | Minor | Feed com impulsionamento, perfil da instituição completo e busca reformulada | Feed, Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | **1.13.1** | 10/10/2026 | Patch | Escolha Usuário/Instituição depois de criar a conta | Onboarding, Autenticação, Servidor |
 | **1.13.0** | 10/10/2026 | Minor | Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro | Doação, Feed, Instituição, Onboarding, Autenticação, Configurações, Servidor, Banco de dados |
@@ -52,6 +53,17 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.15.0 — Localização no mapa: instituição marca o local e "Perto de mim" com GPS
+
+*10/10/2026 · Minor · Busca, Instituição, Onboarding, Servidor, Banco de dados*
+
+- Cadastro da instituição (etapa 2): bloco "Localização no mapa" para marcar o local pelo GPS de quem está cadastrando (com permissão do navegador), pelo endereço digitado ou tocando/arrastando o marcador; mapa Leaflet + OpenStreetMap, gratuito e sem chave, baixado só quando aparece; colunas institutions.latitude e longitude
+- Busca → Causas perto de você: botão "📍 Perto de mim" que cada usuário liga ou desliga; ligado, ordena as campanhas pela distância ("a 3,5 km", perto = até 30 km); a posição vai arredondada (~1 km) só na consulta e não é guardada; negou a permissão → continua pela cidade escolhida (spec 17.6 e 27.5)
+- Perfil da instituição: mapa e rota Google Maps/Waze pelo ponto marcado, mais preciso que o endereço
+- Script opcional para o phpMyAdmin em docs/sql/v1.15.0-coordenadas.sql
+
+Fontes: `src/components/LocationPicker.ts` · `src/screens/onboarding/institution-register.ts` · `src/screens/search.ts` · `src/services/search.service.ts` · `src/screens/institution-profile.ts` · `src/types/institution.ts` · `server/db.js` · `server/routes/institutions.js` · `server/routes/search.js` · `package.json` · `docs/sql/v1.15.0-coordenadas.sql` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.14.0 — Feed com impulsionamento, perfil da instituição completo e busca reformulada
 

@@ -39,7 +39,7 @@ node server/scripts/exportar-mysql.js  # SQLite local → server/export/salvee-m
 src/
   main.ts, router.ts      # router por HASH (#/rota), rotas com `protected: true` exigem token
   config/versoes.json     # fonte única de versões (ver "Controle de versão")
-  components/             # Button, Input (senha com botão de olho), Toast, Card, Avatar, Badge, BottomNav, BottomSheet, ProgressBar, NumericKeyboard, Spinner, SocialLogin
+  components/             # Button, Input (senha com botão de olho), Toast, Card, Avatar, Badge, BottomNav, BottomSheet, ProgressBar, NumericKeyboard, Spinner, SocialLogin, PostCard, LocationPicker (mapa Leaflet)
   screens/                # cada tela exporta render(): HTMLElement, mount(), unmount()
     auth/                 # login, register, forgot-password, reset-password, verify-email, oauth (retorno do login social)
     onboarding/           # choose-profile, verify-phone (sem uso no fluxo atual), institution-register, welcome-success
@@ -78,7 +78,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
 - `institutions`: `POST|DELETE /:id/follow` (seguir; só aprovadas), `GET /:id` traz `following` e `followersCount`; lista, `/destaques`, `/mine` (instituições do usuário, qualquer status, com motivo), `/mine/:id` (dados completos para corrigir, só responsável/admin/gestor), `/:id`, `POST /register/step` (etapa com `institutionId` atualiza, nunca duplica; etapa vazia é ignorada), `POST /:id/resubmit` (needs_revision → pending)
 - `feed` (`routes/feed.js`): `GET /?page=&institutionId=&seguindo=1` (aba "Para você" ranqueada por novidade + afinidade + urgência + engajamento + impulsionamento de quem recebeu menos, com `boosted` = etiqueta "Precisa de apoio"; mural e "Seguindo" em ordem cronológica; cada post traz `images[]`, `registered`, `canEdit`), `GET /:id`, `POST /` (cria post comum, evento ou campanha), `PATCH /:id`, `DELETE /:id`; curtidas `POST|DELETE /:id/like`; comentários `GET|POST /:id/comments` e `DELETE /comments/:commentId` (apagam: autor, instituição dona do post, admin/gestor). Cada post traz também `liked`, `likeCount`, `commentCount`. Só o **responsável por instituição aprovada** cria/edita; excluir também admin/gestor (moderação). Imagens: até 5, só links `/uploads/...`
-- `search` (`routes/search.js`): `GET /?q=&category=` → `{ institutions, campaigns }` (menos ajudadas primeiro), `/categories` (categorias reais com contagem), `/cities`, `/causas?category=&city=` (campanhas em andamento, cidade escolhida primeiro); `donations` (`/initiate` com `postId` opcional da campanha, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
+- `search` (`routes/search.js`): `GET /?q=&category=` → `{ institutions, campaigns }` (menos ajudadas primeiro), `/categories` (categorias reais com contagem), `/cities`, `/causas?category=&city=&lat=&lng=` (campanhas em andamento; com GPS do usuário, mais perto primeiro e `distanceKm`; sem, cidade escolhida primeiro); `donations` (`/initiate` com `postId` opcional da campanha, `/history`), `gamification` (`/balance`, `/rewards`, `/rewards/:id/redeem`), `calendar` (`/my-events`, `/events/:id/register`)
 - `upload`: POST multipart → pasta `UPLOAD_DIR` (padrão `server/uploads/`); devolve URL **relativa** `/uploads/<arquivo>`
 - `admin`: `GET /users?name=&role=` e `PATCH /users/:id/role` (só **admin**); `GET /institutions`, `PATCH /institutions/:id/status`, `GET /donations?status=` e `PATCH /donations/:id/status` (**admin** ou **gestor**)
 
@@ -92,6 +92,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - Tabelas: `users`, `institutions`, `institution_follows`, `posts`, `post_likes`, `post_comments`, `donations`, `calendar_registrations`, `rewards`, `email_tokens`. Coluna nova = adicionar `hasColumn`/`alterTable` no fim de `initDb()` (vale para SQLite e MySQL).
 - **Instituição não aprovada não aparece publicamente** (spec 4.3/11.10): feed, busca, destaques e lista filtram `status = 'approved'`; `GET /institutions/:id` de não aprovada só para o responsável e admin/gestor. Só o responsável (ou admin/gestor) altera os dados (`POST /institutions/register/step` confere `responsible_user_id`).
 - **Impulsionamento** (spec 1.4/4.4/11.4/17.5): `server/attention.js` mede a atenção recente de cada instituição aprovada; pesos do feed em `WEIGHTS` (`routes/feed.js`). Destaques = as que menos receberam. Sem nenhuma doação/seguidor ainda, ninguém recebe a etiqueta.
+- **Localização** (spec 17.6): no cadastro da instituição (etapa 2), `LocationPicker` marca o local por GPS de quem cadastra, pelo endereço (Nominatim/OpenStreetMap) ou tocando/arrastando no mapa (Leaflet + OpenStreetMap, sem chave; carregado sob demanda) → `institutions.latitude/longitude`. Na busca, "📍 Perto de mim" é opcional por usuário (preferência em localStorage `salvee_gps`); a posição vai arredondada (~1 km) só na consulta e não é guardada; negou → cidade escolhida. Mapa do Google interativo exigiria chave e cobrança: não usado.
 - **Perfil da instituição** (spec 13): carrossel com até 6 fotos (`institutions.photos`, JSON), barra da campanha ativa, aba Info com endereço, CEP, horário (`opening_hours`), telefone (discador), e-mail, mapa (Google Maps embed, sem chave) e rota (Google Maps/Waze). A instituição aprovada edita dados e fotos pela tela "Minha instituição".
 - **Publicações** (spec 12): botão "+" do feed só aparece para quem é responsável por instituição aprovada; tela `screens/post-editor.ts`; cartão único `components/PostCard.ts` (feed e mural) com botão por tipo: campanha → **Doar** (`#/donate/:id?campanha=`), evento → **Participar** (agenda), comum → **Ajudar**. Doação de campanha confirmada soma em `posts.campaign_current`.
 - **Doação na V1** (spec 14.5/14.10/27.4): só **PIX** aparece e a API grava sempre `payment_method = 'pix'` e `anonymous = 0`. Não mostrar meio de pagamento que não funciona nem doação anônima.
@@ -186,10 +187,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.14.0** · 31 versões
+Versão atual: **1.15.0** · 32 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.15.0 | 10/10/2026 | Minor | Localização no mapa: instituição marca o local e "Perto de mim" com GPS | Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | 1.14.0 | 10/10/2026 | Minor | Feed com impulsionamento, perfil da instituição completo e busca reformulada | Feed, Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | 1.13.1 | 10/10/2026 | Patch | Escolha Usuário/Instituição depois de criar a conta | Onboarding, Autenticação, Servidor |
 | 1.13.0 | 10/10/2026 | Minor | Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro | Doação, Feed, Instituição, Onboarding, Autenticação, Configurações, Servidor, Banco de dados |

@@ -197,6 +197,11 @@ async function initDb() {
     await db.schema.alterTable('institutions', t => t.string('opening_hours'))
   }
 
+  // coordenadas do local (GPS de quem cadastra, endereço ou ajuste no mapa): "Causas perto de você" (spec 17.6)
+  if (!(await db.schema.hasColumn('institutions', 'latitude'))) {
+    await db.schema.alterTable('institutions', t => { t.double('latitude'); t.double('longitude') })
+  }
+
   // documento enviado na última etapa do cadastro da instituição, para a análise (spec 8.3, etapa 6)
   if (!(await db.schema.hasColumn('institutions', 'documents_url'))) {
     await db.schema.alterTable('institutions', t => t.string('documents_url'))

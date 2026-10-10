@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 10/10/2026 (v1.14.0). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 10/10/2026 (v1.15.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -32,7 +32,7 @@ O cliente ainda não tem **domínio próprio** nem **e-mail do projeto**. Com o 
       Pular por enquanto (verificação), Criar nova senha e Confirme seu e-mail.
 
 ## 25. Funcionalidades da versão 1 (checklist do PDF)
-Conferido em 10/10/2026 (v1.14.0): **14 completas, 3 parciais, 2 sem funcionar de verdade** (de 19 + painel admin).
+Conferido em 10/10/2026 (v1.15.0): **15 completas, 2 parciais, 2 sem funcionar de verdade** (de 19 + painel admin).
 ✅ completo · 🟡 parcial · ❌ não funciona de verdade.
 
 | # | Funcionalidade (seção 25) | Situação | O que falta |
@@ -50,7 +50,7 @@ Conferido em 10/10/2026 (v1.14.0): **14 completas, 3 parciais, 2 sem funcionar d
 | 11 | Busca | ✅ | Instituições e campanhas por nome, categoria, cidade ou palavra-chave; menos ajudadas primeiro (v1.14.0). |
 | 12 | Categorias | ✅ | Carrossel com as categorias reais; tocar mostra instituições e campanhas da categoria (v1.14.0). |
 | 13 | Destaques | ✅ | Menos ajuda recente (30 dias) e menos seguidores primeiro (v1.14.0). |
-| 14 | Causas perto de você | 🟡 | Campanhas reais em andamento, primeiro as da cidade escolhida (v1.14.0). Falta GPS (precisa de coordenadas das instituições). |
+| 14 | Causas perto de você | ✅ | Campanhas reais; "Perto de mim" com GPS opcional do usuário (distância em km) ou pela cidade; instituição marca o local no cadastro por GPS, endereço ou mapa (v1.15.0). Instituições antigas sem local precisam marcar em "Editar dados e fotos". |
 | 15 | Doação com método realmente suportado | 🟡 | Só PIX na tela, mas sem cobrança real: o admin confirma à mão. Falta integrar provedor. |
 | 16 | Gamificação básica com XP e Salves | ✅ | Pontos só com doação confirmada. Faltam aba própria na navegação e regra de pontos configurável. |
 | 17 | Recompensas e QR Code | ❌ | Resgate desconta Salves e não guarda nada; QR é só texto; sem "Minhas recompensas" nem validação no parceiro. |
@@ -58,7 +58,7 @@ Conferido em 10/10/2026 (v1.14.0): **14 completas, 3 parciais, 2 sem funcionar d
 | 19 | Configurações | ❌ | 7 itens sem ação: Notificações, Geral, Acessibilidade, Pagamentos, Segurança (alterar senha), Ajuda, Sobre (termos e privacidade). |
 | — | Painel administrativo mínimo | ✅ | Instituições, doações, usuários, moderação. Faltam recompensas/parceiros e categorias. |
 
-**Prioridade sugerida:** 17 + aba Gamificação → 19 (alterar senha, termos, privacidade, ajuda, sobre) → 3 → 18 (detalhe do evento com mapa) → GPS em 14.
+**Prioridade sugerida:** 17 + aba Gamificação → 19 (alterar senha, termos, privacidade, ajuda, sobre) → 3 → 18 (detalhe do evento com mapa).
 **Dependem do cliente:** 5 (e-mail/domínio), 15 (provedor de PIX), login social (credenciais).
 
 ## Comparação com a especificação (`.Documentacao/Especificação SALVEE.pdf`)
