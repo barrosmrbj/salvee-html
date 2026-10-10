@@ -1,4 +1,5 @@
-import { authService } from '@/services'
+import { showToast } from '@/components'
+import { authService, userService } from '@/services'
 import bgImg from '../../../.Documentacao/inicio.jpg'
 
 export function render(): HTMLElement {
@@ -22,11 +23,13 @@ export function render(): HTMLElement {
 export function mount(): void {
   const container = document.getElementById('profile-options')!
 
-  const loggedIn = authService.isAuthenticated()
-  const profiles = [
-    // sem conta: vai para o cadastro levando o tipo; já logado: segue direto (spec 6.3)
-    { title: 'Usuário', description: 'Quero ajudar e acompanhar causas.', hash: loggedIn ? '/feed' : '/register?tipo=usuario', icon: '👤' },
-    { title: 'Instituição', description: 'Sou uma instituição e quero divulgar meu trabalho.', hash: loggedIn ? '/register/institution' : '/register?tipo=instituicao', icon: '🏢' },
+  // a escolha vem depois do cadastro: sem conta, primeiro criar o acesso
+  if (!authService.isAuthenticated()) { window.location.replace('#/register'); return }
+
+  // a escolha fica gravada na conta (spec 6.3); usuário vai ao feed (7.6), instituição ao cadastro dela
+  const profiles: Array<{ title: string; description: string; hash: string; icon: string; type: 'user' | 'institution' }> = [
+    { title: 'Usuário', description: 'Quero ajudar e acompanhar causas.', hash: '/feed', icon: '👤', type: 'user' },
+    { title: 'Instituição', description: 'Sou uma instituição e quero divulgar meu trabalho.', hash: '/register/institution', icon: '🏢', type: 'institution' },
   ]
 
   profiles.forEach(p => {
@@ -42,7 +45,15 @@ export function mount(): void {
         </div>
       </div>
     `
-    card.addEventListener('click', () => { window.location.hash = p.hash })
+    card.addEventListener('click', async () => {
+      card.disabled = true
+      try {
+        await userService.updateProfile({ accountType: p.type })
+      } catch {
+        showToast('Não foi possível salvar a escolha, mas você pode continuar', 'info')
+      }
+      window.location.hash = p.hash
+    })
     container.appendChild(card)
   })
 }

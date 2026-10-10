@@ -1,6 +1,32 @@
 {
-  "versaoAtual": "1.13.0",
+  "versaoAtual": "1.13.1",
   "historico": [
+    {
+      "versao": "1.13.1",
+      "data": "2026-10-10",
+      "tipo": "patch",
+      "titulo": "Escolha Usuário/Instituição depois de criar a conta",
+      "modulos": [
+        "Onboarding",
+        "Autenticação",
+        "Servidor"
+      ],
+      "itens": [
+        "\"Comece aqui\" volta a ir direto para o cadastro: as duas contas começam pelo mesmo acesso (o do responsável, no caso da instituição). A tela \"Qual é o seu perfil?\" aparece depois da confirmação e das boas-vindas; Usuário vai ao feed, Instituição ao cadastro dela",
+        "A escolha é gravada na conta (users.account_type) por PATCH /api/users/me",
+        "Correção: PATCH /api/users/me só altera os campos enviados (antes, enviar um campo só apagava o nome ou a foto)"
+      ],
+      "fontes": [
+        "src/screens/welcome.ts",
+        "src/screens/onboarding/welcome-success.ts",
+        "src/screens/onboarding/choose-profile.ts",
+        "src/screens/auth/register.ts",
+        "src/services/user.service.ts",
+        "server/routes/users.js",
+        "CLAUDE.md",
+        "docs/PENDENCIAS.md"
+      ]
+    },
     {
       "versao": "1.13.0",
       "data": "2026-10-10",

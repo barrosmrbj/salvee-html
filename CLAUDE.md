@@ -68,7 +68,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### Rotas do frontend (`src/router.ts`)
 
-`/`, `/welcome`, `/login`, `/register` (`?tipo=usuario|instituicao`), `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`* (`?corrigir=<id>` = corrigir e reenviar), `/institution-status`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`*, `/post/new?tipo=common|event|campaign`*, `/post/:id`* (detalhe + comentários), `/post/:id/edit`*, `/campanha/:id`* (tela da campanha), `/donate/:id?campanha=<postId>`* (* = protegida).
+`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`* (`?corrigir=<id>` = corrigir e reenviar), `/institution-status`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`*, `/post/new?tipo=common|event|campaign`*, `/post/:id`* (detalhe + comentários), `/post/:id/edit`*, `/campanha/:id`* (tela da campanha), `/donate/:id?campanha=<postId>`* (* = protegida).
 
 ### API (`server/routes/`, prefixo `/api`)
 
@@ -84,7 +84,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 ### Papéis e regras
 
 - `users.role`: `user` (padrão), `gestor`, `admin`. A seção de administração em Configurações aparece conforme o papel.
-- **Entrada (spec 6.2/6.3):** Boas-vindas → "Comece aqui" → `#/choose-profile` (Usuário ou Instituição) → `#/register?tipo=…` → confirme o e-mail → boas-vindas → usuário vai ao feed; `users.account_type = institution` segue para `#/register/institution`. O tipo só define o caminho: publicar continua exigindo instituição aprovada. Quem já tem conta cadastra instituição em Configurações → "Cadastrar minha instituição".
+- **Entrada (spec 6.2/6.3):** Boas-vindas → "Comece aqui" → `#/register` (todos criam primeiro o acesso; na instituição, o do responsável) → confirme o e-mail → boas-vindas → `#/choose-profile` "Qual é o seu perfil?" (grava `users.account_type` via `PATCH /users/me`) → Usuário vai ao feed; Instituição vai para `#/register/institution`. O tipo só define o caminho: publicar continua exigindo instituição aprovada. Quem já tem conta cadastra instituição em Configurações → "Cadastrar minha instituição".
 - Qualquer usuário logado pode cadastrar uma instituição. Ela nasce `pending`; admin/gestor aprova (`approved` → `verified = true`), reprova (`rejected` + `rejection_reason`) ou pede revisão (`needs_revision`, **motivo obrigatório**, uma linha por item a corrigir). O motivo fica em `rejection_reason` e some ao aprovar. Documento da última etapa em `institutions.documents_url` (link no admin).
 - **Instituição em validação** (spec 9.4/10): depois do login (`screens/auth/after-login.ts`), quem é responsável por instituição não aprovada vai para `#/institution-status` (Em análise / Correção necessária / Não aprovada / Aprovada). Não bloqueia o resto do app (a pessoa também é doadora); o feed mostra um aviso no topo e Configurações tem o atalho "Minha instituição". Corrigir = `#/register/institution?corrigir=<id>` com os dados já preenchidos → reenviar volta a `pending`.
 - Doação nasce `pending` (`donations.status`): aparece no histórico, mas **não credita XP/Salves**. Admin/gestor confirma em Configurações → Confirmar doações (`confirmed` → credita uma única vez, protegido contra confirmação em dobro) ou cancela (`cancelled`). Doações anteriores à coluna ficaram `confirmed`. Quando houver PIX real, o webhook do provedor substitui a confirmação manual.
@@ -97,6 +97,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### Diferenças conscientes em relação ao PDF
 - Papel **`gestor`** (não existe no PDF): ajuda o admin a aprovar instituições e confirmar doações.
+- **Escolha Usuário/Instituição depois de criar a conta** (o PDF põe antes): as duas começam pelo mesmo acesso, o do responsável.
 - **Confirmação de cadastro por e-mail** no lugar do SMS (o PDF trata telefone como opcional/futuro).
 - **Confirmação manual de doações** por admin/gestor até haver PIX real com webhook.
 - Navegação inferior hoje: Feed, Buscar, Agenda, Perfil (gamificação dentro do Perfil). O PDF pede **Feed, Busca, Gamificação, Calendário** + Configurações no topo — pendente.
@@ -182,10 +183,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.13.0** · 29 versões
+Versão atual: **1.13.1** · 30 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.13.1 | 10/10/2026 | Patch | Escolha Usuário/Instituição depois de criar a conta | Onboarding, Autenticação, Servidor |
 | 1.13.0 | 10/10/2026 | Minor | Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro | Doação, Feed, Instituição, Onboarding, Autenticação, Configurações, Servidor, Banco de dados |
 | 1.12.1 | 08/10/2026 | Patch | Situação do cadastro da instituição no Perfil | Perfil, Instituição |
 | 1.12.0 | 08/10/2026 | Minor | Situação da instituição no login, pedido de revisão e reenvio de correções | Onboarding, Instituição, Admin, Autenticação, Feed, Configurações, Servidor, Banco de dados |

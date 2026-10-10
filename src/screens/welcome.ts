@@ -30,8 +30,9 @@ export function mount(): void {
       label: 'Comece aqui',
       variant: 'secondary',
       fullWidth: true,
-      // primeiro a escolha Usuário/Instituição, depois o cadastro (spec 6.2 e 6.3)
-      onClick: () => { window.location.hash = '/choose-profile' },
+      // todo mundo cria primeiro o acesso (o responsável, no caso de instituição); a escolha
+      // Usuário/Instituição vem depois do cadastro
+      onClick: () => { window.location.hash = '/register' },
     })
   )
 

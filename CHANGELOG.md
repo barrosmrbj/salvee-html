@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.13.0**
+**Versão atual: 1.13.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.13.1** | 10/10/2026 | Patch | Escolha Usuário/Instituição depois de criar a conta | Onboarding, Autenticação, Servidor |
 | **1.13.0** | 10/10/2026 | Minor | Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro | Doação, Feed, Instituição, Onboarding, Autenticação, Configurações, Servidor, Banco de dados |
 | **1.12.1** | 08/10/2026 | Patch | Situação do cadastro da instituição no Perfil | Perfil, Instituição |
 | **1.12.0** | 08/10/2026 | Minor | Situação da instituição no login, pedido de revisão e reenvio de correções | Onboarding, Instituição, Admin, Autenticação, Feed, Configurações, Servidor, Banco de dados |
@@ -50,6 +51,16 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.13.1 — Escolha Usuário/Instituição depois de criar a conta
+
+*10/10/2026 · Patch · Onboarding, Autenticação, Servidor*
+
+- "Comece aqui" volta a ir direto para o cadastro: as duas contas começam pelo mesmo acesso (o do responsável, no caso da instituição). A tela "Qual é o seu perfil?" aparece depois da confirmação e das boas-vindas; Usuário vai ao feed, Instituição ao cadastro dela
+- A escolha é gravada na conta (users.account_type) por PATCH /api/users/me
+- Correção: PATCH /api/users/me só altera os campos enviados (antes, enviar um campo só apagava o nome ou a foto)
+
+Fontes: `src/screens/welcome.ts` · `src/screens/onboarding/welcome-success.ts` · `src/screens/onboarding/choose-profile.ts` · `src/screens/auth/register.ts` · `src/services/user.service.ts` · `server/routes/users.js` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.13.0 — Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro
 

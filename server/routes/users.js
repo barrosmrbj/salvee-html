@@ -20,8 +20,13 @@ async function getUser(req, res) {
 
 async function updateUser(req, res) {
   try {
-    const { name, avatarUrl } = req.body
-    await db('users').where({ id: req.userId }).update({ name, avatar_url: avatarUrl })
+    // só os campos enviados (antes, mandar um só apagava os outros)
+    const update = {}
+    if (typeof req.body.name === 'string' && req.body.name.trim()) update.name = req.body.name.trim()
+    if (req.body.avatarUrl !== undefined) update.avatar_url = req.body.avatarUrl || null
+    // escolha "Qual é o seu perfil?" depois do cadastro (spec 6.3)
+    if (['user', 'institution'].includes(req.body.accountType)) update.account_type = req.body.accountType
+    if (Object.keys(update).length) await db('users').where({ id: req.userId }).update({ ...update, updated_at: new Date() })
     const user = await db('users').where({ id: req.userId }).first()
     res.json(formatUser(user))
   } catch (err) {

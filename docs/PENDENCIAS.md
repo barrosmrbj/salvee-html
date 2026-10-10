@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 10/10/2026 (v1.13.0). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 10/10/2026 (v1.13.1). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -38,7 +38,7 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 |---|---|---|
 | 5 Navegação | 🟡 | Abas devem ser Feed, Busca, **Gamificação**, Calendário (+ Configurações no topo); hoje Feed, Buscar, Agenda, Perfil. Botão "+" só para instituição aprovada ✅ (v1.10.0). |
 | 6.1 Splash | ✅ | — |
-| 6.2/6.3 Boas-vindas e tipo de conta | ✅ | Escolha antes do cadastro, gravada em `users.account_type` (v1.13.0). |
+| 6.2/6.3 Boas-vindas e tipo de conta | ✅ | Escolha Usuário/Instituição logo depois de criar o acesso, gravada em `users.account_type` (v1.13.1). Diferença consciente: o PDF põe a escolha antes do cadastro, mas as duas contas começam pelo mesmo acesso (o do responsável). |
 | 7 Cadastro de usuário | 🟡 | Validar tamanho mínimo de senha e formato do e-mail no cadastro. Login social ✅ (sem duplicar por e-mail). |
 | 8 Cadastro de instituição | 🟡 | 3 etapas (PDF sugere 6). Documento salvo e visível no admin, cidade/estado e etapa 1 sem duplicar ✅ (v1.12.0). Faltam horários de funcionamento e **várias fotos** (só 1). |
 | 8.6/8.7 Status | ✅ | "Pedir revisão" no admin (com o que corrigir) e a instituição corrige e reenvia (v1.12.0). |

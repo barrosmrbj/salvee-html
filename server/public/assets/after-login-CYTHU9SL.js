@@ -1,0 +1,1 @@
+import{i}from"./institution.service-DtIMx-7U.js";async function e(){try{if((await i.listMine()).some(t=>t.status!=="approved")){window.location.replace("#/institution-status");return}}catch{}window.location.replace("#/feed")}export{e as g};

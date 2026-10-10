@@ -1,7 +1,6 @@
 import { Button, Input, getInputValue, showToast, LoadingOverlay, SocialLogin } from '@/components'
 import { authService } from '@/services'
 import { ApiError } from '@/services/api'
-import { getHashQuery } from '@/router'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -16,7 +15,6 @@ export function render(): HTMLElement {
     </div>
     <div class="p-6 flex flex-col gap-4">
       <p class="text-gray-500 text-sm">Preencha as informações abaixo para criar sua conta</p>
-      <p id="account-hint" class="hidden text-sm text-salvee-orange bg-salvee-orange-bg rounded-xl px-4 py-3"></p>
       <form id="register-form" class="flex flex-col gap-4">
         <div id="field-name"></div>
         <div id="field-email"></div>
@@ -42,17 +40,8 @@ export function render(): HTMLElement {
   return el
 }
 
-let accountType: 'user' | 'institution' = 'user'
-
 export function mount(): void {
   document.getElementById('back-btn')!.addEventListener('click', () => history.back())
-  // tipo escolhido na tela anterior (#/register?tipo=instituicao)
-  accountType = getHashQuery().get('tipo') === 'instituicao' ? 'institution' : 'user'
-  if (accountType === 'institution') {
-    const hint = document.getElementById('account-hint')!
-    hint.textContent = 'Conta de instituição: primeiro crie o acesso do responsável. Em seguida você preenche os dados da instituição, que passam pela análise da equipe Salvee.'
-    hint.classList.remove('hidden')
-  }
 
   const form = document.getElementById('register-form')!
   form.querySelector('#field-name')!.appendChild(Input({ id: 'name', label: 'Nome', placeholder: 'Ex. José Lucas', required: true }))
@@ -81,7 +70,7 @@ export function mount(): void {
     const overlay = LoadingOverlay()
     document.body.appendChild(overlay)
     try {
-      await authService.register({ name, email, password, accountType })
+      await authService.register({ name, email, password })
       // confirmação por e-mail (SMS fica para quando houver provedor; tela /verify-phone mantida)
       window.location.hash = '/verify-email'
     } catch (err) {

@@ -6,7 +6,7 @@ export const userService = {
     return request<User>('/users/me')
   },
 
-  async updateProfile(data: Partial<Pick<User, 'name' | 'phone'>>): Promise<User> {
+  async updateProfile(data: Partial<Pick<User, 'name' | 'phone' | 'accountType'>>): Promise<User> {
     return request<User>('/users/me', {
       method: 'PATCH',
       body: JSON.stringify(data),
