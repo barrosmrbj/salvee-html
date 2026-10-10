@@ -2,10 +2,11 @@ import { request } from './api'
 import type { Post, PostComment, PostPayload } from '@/types'
 
 export const feedService = {
-  /** institutionId: só as publicações dessa instituição (mural do perfil) */
-  async listPosts(page = 1, institutionId?: string): Promise<Post[]> {
+  /** institutionId: só as publicações dessa instituição (mural do perfil); following: só de quem o usuário segue */
+  async listPosts(page = 1, institutionId?: string, following = false): Promise<Post[]> {
     const qs = new URLSearchParams({ page: String(page) })
     if (institutionId) qs.set('institutionId', institutionId)
+    if (following) qs.set('seguindo', '1')
     return request<Post[]>(`/feed?${qs}`)
   },
 

@@ -17,6 +17,9 @@ export interface Institution {
   mission?: string
   foundedYear?: number
   history?: string
+  /** o usuário segue esta instituição */
+  following?: boolean
+  followersCount?: number
 }
 
 export interface Address {

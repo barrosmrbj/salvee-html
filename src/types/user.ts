@@ -9,6 +9,8 @@ export interface User {
   level: number
   role?: string
   emailVerified?: boolean
+  /** escolhido antes do cadastro (spec 6.3) */
+  accountType?: 'user' | 'institution'
   createdAt: string
 }
 
@@ -27,4 +29,5 @@ export interface RegisterPayload {
   email: string
   password: string
   phone?: string
+  accountType?: 'user' | 'institution'
 }

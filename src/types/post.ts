@@ -16,6 +16,8 @@ export interface Post {
   campaignGoal?: number
   campaignCurrent?: number
   campaignDeadline?: string | null
+  /** só no detalhe: doações confirmadas da campanha */
+  campaignDonations?: number
   // event fields
   eventDate?: string
   eventLocation?: string

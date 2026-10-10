@@ -66,6 +66,7 @@ async function sendVerificationEmail(req, user) {
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body
+    const accountType = req.body.accountType === 'institution' ? 'institution' : 'user'
     if (!name || !email || !password) return res.status(400).json({ error: 'Campos obrigatórios: name, email, password' })
 
     const existing = await db('users').where({ email }).first()
@@ -73,7 +74,7 @@ router.post('/register', async (req, res) => {
 
     const password_hash = await bcrypt.hash(password, 10)
     const id = uuidv4()
-    await db('users').insert({ id, name, email, password_hash })
+    await db('users').insert({ id, name, email, password_hash, account_type: accountType })
 
     const user = await db('users').where({ id }).first()
     // a confirmação por e-mail não pode impedir o cadastro: falha vai só para o log
@@ -243,7 +244,7 @@ router.post('/verify-phone', authMiddleware, async (req, res) => {
 })
 
 function formatUser(u) {
-  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatar_url, xp: u.xp, salves: u.salves, level: u.level, role: u.role || 'user', emailVerified: Boolean(u.email_verified), createdAt: u.created_at }
+  return { id: u.id, name: u.name, email: u.email, avatarUrl: u.avatar_url, xp: u.xp, salves: u.salves, level: u.level, role: u.role || 'user', emailVerified: Boolean(u.email_verified), accountType: u.account_type || 'user', createdAt: u.created_at }
 }
 
 module.exports = router

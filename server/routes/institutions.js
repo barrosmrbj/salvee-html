@@ -85,8 +85,46 @@ router.get('/:id', authMiddleware, async (req, res) => {
     if (inst.status !== 'approved' && !(await canManage(req.userId, inst))) {
       return res.status(404).json({ error: 'Instituição não encontrada' })
     }
-    res.json(formatInst(inst))
+    const [follow, count] = await Promise.all([
+      db('institution_follows').where({ institution_id: inst.id, user_id: req.userId }).first(),
+      db('institution_follows').where({ institution_id: inst.id }).count({ n: '*' }).first(),
+    ])
+    res.json({ ...formatInst(inst), following: Boolean(follow), followersCount: Number(count?.n || 0) })
   } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+async function followersCount(institutionId) {
+  const row = await db('institution_follows').where({ institution_id: institutionId }).count({ n: '*' }).first()
+  return Number(row?.n || 0)
+}
+
+// POST /institutions/:id/follow — seguir (só aprovadas; repetir não duplica)
+router.post('/:id/follow', authMiddleware, async (req, res) => {
+  try {
+    const inst = await db('institutions').where({ id: req.params.id, status: 'approved' }).first()
+    if (!inst) return res.status(404).json({ error: 'Instituição não encontrada' })
+    const exists = await db('institution_follows').where({ institution_id: inst.id, user_id: req.userId }).first()
+    if (!exists) {
+      await db('institution_follows').insert({ id: uuidv4(), institution_id: inst.id, user_id: req.userId })
+        .catch(err => { if (!/unique|duplicate/i.test(err.message)) throw err })
+    }
+    res.json({ following: true, followersCount: await followersCount(inst.id) })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// DELETE /institutions/:id/follow — deixar de seguir
+router.delete('/:id/follow', authMiddleware, async (req, res) => {
+  try {
+    await db('institution_follows').where({ institution_id: req.params.id, user_id: req.userId }).delete()
+    res.json({ following: false, followersCount: await followersCount(req.params.id) })
+  } catch (err) {
+    console.error(err)
     res.status(500).json({ error: 'Erro interno' })
   }
 })

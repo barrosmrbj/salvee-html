@@ -1,6 +1,54 @@
 {
-  "versaoAtual": "1.12.1",
+  "versaoAtual": "1.13.0",
   "historico": [
+    {
+      "versao": "1.13.0",
+      "data": "2026-10-10",
+      "tipo": "minor",
+      "titulo": "Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro",
+      "modulos": [
+        "Doação",
+        "Feed",
+        "Instituição",
+        "Onboarding",
+        "Autenticação",
+        "Configurações",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Tela da campanha (#/campanha/:id): imagens, título, instituição, arrecadado de quanto, barra de progresso, doações confirmadas, prazo (faltam X dias / encerrada), descrição, comentários e botão Doar fixo (spec 15.4)",
+        "Seguir instituições: botão Seguir/Seguindo com o número de seguidores no perfil da instituição (só aprovadas) e aba \"Seguindo\" no feed com as publicações de quem a pessoa segue (spec 11.2 e 23.1); tabela institution_follows",
+        "Escolha Usuário/Instituição antes do cadastro: \"Comece aqui\" → Qual é o seu perfil? → cadastro com o tipo; depois da confirmação, usuário vai direto ao feed e conta de instituição segue para o cadastro da instituição (spec 6.2, 6.3 e 7.6); coluna users.account_type",
+        "Configurações ganha \"Cadastrar minha instituição\" para quem ainda não tem uma",
+        "Script opcional para o phpMyAdmin em docs/sql/v1.13.0-seguir-e-tipo-de-conta.sql"
+      ],
+      "fontes": [
+        "src/screens/campaign.ts",
+        "src/components/PostCard.ts",
+        "src/screens/institution-profile.ts",
+        "src/screens/feed.ts",
+        "src/screens/welcome.ts",
+        "src/screens/onboarding/choose-profile.ts",
+        "src/screens/onboarding/welcome-success.ts",
+        "src/screens/auth/register.ts",
+        "src/screens/settings.ts",
+        "src/services/institution.service.ts",
+        "src/services/feed.service.ts",
+        "src/types/user.ts",
+        "src/types/institution.ts",
+        "src/types/post.ts",
+        "src/router.ts",
+        "server/db.js",
+        "server/routes/institutions.js",
+        "server/routes/feed.js",
+        "server/routes/auth.js",
+        "server/routes/users.js",
+        "docs/sql/v1.13.0-seguir-e-tipo-de-conta.sql",
+        "CLAUDE.md",
+        "docs/PENDENCIAS.md"
+      ]
+    },
     {
       "versao": "1.12.1",
       "data": "2026-10-08",

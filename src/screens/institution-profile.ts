@@ -1,5 +1,5 @@
 // src/screens/institution-profile.ts
-import { Button, PostCard, Spinner } from '@/components'
+import { Button, PostCard, Spinner, showToast } from '@/components'
 import { feedService, institutionService } from '@/services'
 import type { Institution } from '@/types'
 
@@ -101,6 +101,7 @@ function renderProfile(inst: Institution): void {
   catSpan.className = 'text-sm text-gray-500'
   catSpan.textContent = inst.category
   nameSection.appendChild(catSpan)
+  if (inst.status === 'approved') nameSection.appendChild(followRow(inst))
   content.appendChild(nameSection)
 
   // Tabs
@@ -139,6 +140,42 @@ function renderProfile(inst: Institution): void {
     fullWidth: true,
     onClick: () => { window.location.hash = `/donate/${inst.id}` },
   }))
+}
+
+// Seguir (spec 23.1): as publicações dela aparecem na aba "Seguindo" do feed
+function followRow(inst: Institution): HTMLElement {
+  const row = document.createElement('div')
+  row.className = 'flex items-center gap-3 mt-3'
+  let following = Boolean(inst.following)
+  let count = inst.followersCount ?? 0
+  const btn = document.createElement('button')
+  btn.type = 'button'
+  const counter = document.createElement('span')
+  counter.className = 'text-xs text-gray-500'
+  const paint = () => {
+    btn.className = following
+      ? 'px-4 py-1.5 rounded-full text-sm font-semibold border border-gray-200 text-gray-600 bg-white'
+      : 'px-4 py-1.5 rounded-full text-sm font-semibold bg-salvee-orange text-white'
+    btn.textContent = following ? '✓ Seguindo' : 'Seguir'
+    counter.textContent = `${count} ${count === 1 ? 'seguidor' : 'seguidores'}`
+  }
+  paint()
+  btn.addEventListener('click', async () => {
+    btn.disabled = true
+    try {
+      const r = following ? await institutionService.unfollow(inst.id) : await institutionService.follow(inst.id)
+      following = r.following
+      count = r.followersCount
+      paint()
+      if (following) showToast('Você segue esta instituição. As publicações dela aparecem em "Seguindo" no feed.', 'success', 3500)
+    } catch {
+      showToast('Não foi possível atualizar agora', 'error')
+    } finally {
+      btn.disabled = false
+    }
+  })
+  row.append(btn, counter)
+  return row
 }
 
 function renderTab(inst: Institution, tabContent: HTMLElement): void {

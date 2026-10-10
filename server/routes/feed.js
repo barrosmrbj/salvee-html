@@ -52,6 +52,10 @@ router.get('/', authMiddleware, async (req, res) => {
     const limit = 20
     let query = postsQuery()
     if (req.query.institutionId) query = query.where('posts.institution_id', String(req.query.institutionId))
+    // aba "Seguindo": só instituições que o usuário segue (spec 11.2)
+    if (req.query.seguindo === '1') {
+      query = query.whereIn('posts.institution_id', db('institution_follows').where({ user_id: req.userId }).select('institution_id'))
+    }
     const posts = await query.orderBy('posts.created_at', 'desc').limit(limit).offset((page - 1) * limit)
     const stats = await postStats(req.userId, posts)
     res.json(posts.map(p => formatPost(p, req.userId, stats)))
@@ -66,7 +70,13 @@ router.get('/:id', authMiddleware, async (req, res) => {
   try {
     const post = await visiblePost(req.params.id)
     if (!post) return res.status(404).json({ error: 'Post não encontrado' })
-    res.json(formatPost(post, req.userId, await postStats(req.userId, [post])))
+    const result = formatPost(post, req.userId, await postStats(req.userId, [post]))
+    // tela da campanha (spec 15.4): quantas doações confirmadas ela recebeu
+    if (post.type === 'campaign') {
+      const row = await db('donations').where({ post_id: post.id, status: 'confirmed' }).count({ n: '*' }).first()
+      result.campaignDonations = Number(row?.n || 0)
+    }
+    res.json(result)
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })

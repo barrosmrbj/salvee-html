@@ -20,6 +20,7 @@ export function render(): HTMLElement {
     </header>
 
     <div class="overflow-y-auto pb-28 px-4 pt-2">
+      <div id="feed-tabs" class="flex gap-2 mb-4"></div>
       <div id="feed-list" class="flex flex-col gap-4"></div>
     </div>
 
@@ -33,6 +34,7 @@ export function mount(): void {
   document.getElementById('app')!.appendChild(nav)
 
   loadGreeting()
+  buildTabs()
   loadFeedPosts()
   // botão "+" só para o responsável por instituição aprovada (spec 5 e 12.2)
   institutionService.listMine()
@@ -53,16 +55,43 @@ function loadGreeting(): void {
     .catch(() => { greeting.textContent = 'Olá!' })
 }
 
+// "Para você" (todas) ou "Seguindo" (só instituições que a pessoa segue, spec 11.2)
+let onlyFollowing = false
+
+function buildTabs(): void {
+  const tabs = document.getElementById('feed-tabs')!
+  tabs.innerHTML = ''
+  ;[{ label: 'Para você', following: false }, { label: 'Seguindo', following: true }].forEach(t => {
+    const chip = document.createElement('button')
+    chip.type = 'button'
+    const active = t.following === onlyFollowing
+    chip.className = `px-4 py-1.5 rounded-full text-sm font-semibold border transition-colors ${active ? 'bg-salvee-orange text-white border-salvee-orange' : 'bg-white text-gray-600 border-gray-200'}`
+    chip.textContent = t.label
+    chip.addEventListener('click', () => {
+      if (onlyFollowing === t.following) return
+      onlyFollowing = t.following
+      buildTabs()
+      loadFeedPosts()
+    })
+    tabs.appendChild(chip)
+  })
+}
+
 function loadFeedPosts(): void {
   const container = document.getElementById('feed-list')!
+  container.innerHTML = ''
   const spinner = document.createElement('div')
   spinner.className = 'flex justify-center py-8'
   spinner.appendChild(Spinner())
   container.appendChild(spinner)
 
-  feedService.listPosts().then(posts => {
+  feedService.listPosts(1, undefined, onlyFollowing).then(posts => {
     spinner.remove()
-    if (posts.length === 0) return showEmpty(container, 'Ainda não há publicações. Volte em breve!')
+    if (posts.length === 0) {
+      return showEmpty(container, onlyFollowing
+        ? 'Você ainda não segue nenhuma instituição (ou elas ainda não publicaram). Toque em "Seguir" no perfil de uma instituição.'
+        : 'Ainda não há publicações. Volte em breve!')
+    }
     posts.forEach(p => container.appendChild(PostCard(p, {
       onDeleted: () => { if (!container.querySelector('article')) showEmpty(container, 'Ainda não há publicações.') },
     })))
@@ -162,5 +191,6 @@ function closeFab(): void {
 }
 
 export function unmount(): void {
+  onlyFollowing = false
   document.getElementById('bottom-nav')?.remove()
 }

@@ -60,8 +60,9 @@ export function PostCard(post: Post, options: PostCardOptions = {}): HTMLElement
 
   if (post.title) {
     const title = document.createElement('h3')
-    title.className = 'font-bold text-gray-900'
+    title.className = `font-bold text-gray-900 ${options.detail ? '' : 'cursor-pointer'}`
     title.textContent = post.title
+    if (!options.detail) title.addEventListener('click', () => { window.location.hash = post.type === 'campaign' ? `/campanha/${post.id}` : `/post/${post.id}` })
     card.appendChild(title)
   }
 
@@ -69,7 +70,9 @@ export function PostCard(post: Post, options: PostCardOptions = {}): HTMLElement
   content.className = `text-sm text-gray-600 leading-relaxed whitespace-pre-line ${options.detail ? '' : 'line-clamp-6 cursor-pointer'}`
   content.textContent = post.content
   // tocar no texto abre o detalhe da publicação (spec 11.9)
-  if (!options.detail) content.addEventListener('click', () => { window.location.hash = `/post/${post.id}` })
+  // campanha abre a tela da campanha (spec 15.4); os demais, o detalhe
+  const detailHash = post.type === 'campaign' ? `/campanha/${post.id}` : `/post/${post.id}`
+  if (!options.detail) content.addEventListener('click', () => { window.location.hash = detailHash })
   card.appendChild(content)
 
   const images = post.images?.length ? post.images : (post.imageUrl ? [post.imageUrl] : [])

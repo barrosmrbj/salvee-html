@@ -30,7 +30,8 @@ export function mount(): void {
       label: 'Comece aqui',
       variant: 'secondary',
       fullWidth: true,
-      onClick: () => { window.location.hash = '/register' },
+      // primeiro a escolha Usuário/Instituição, depois o cadastro (spec 6.2 e 6.3)
+      onClick: () => { window.location.hash = '/choose-profile' },
     })
   )
 

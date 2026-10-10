@@ -12,6 +12,14 @@ export const institutionService = {
     return request<MyInstitutionForEdit>(`/institutions/mine/${id}`)
   },
 
+  async follow(id: string): Promise<{ following: boolean; followersCount: number }> {
+    return request(`/institutions/${id}/follow`, { method: 'POST' })
+  },
+
+  async unfollow(id: string): Promise<{ following: boolean; followersCount: number }> {
+    return request(`/institutions/${id}/follow`, { method: 'DELETE' })
+  },
+
   /** depois de corrigir: volta para análise (needs_revision → pending) */
   async resubmit(id: string): Promise<void> {
     await request<void>(`/institutions/${id}/resubmit`, { method: 'POST' })

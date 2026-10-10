@@ -1,3 +1,4 @@
+import { authService } from '@/services'
 import bgImg from '../../../.Documentacao/inicio.jpg'
 
 export function render(): HTMLElement {
@@ -21,9 +22,11 @@ export function render(): HTMLElement {
 export function mount(): void {
   const container = document.getElementById('profile-options')!
 
+  const loggedIn = authService.isAuthenticated()
   const profiles = [
-    { title: 'Usuário', description: 'Quero apoiar causas, fazer doações e participar de eventos.', hash: '/feed', icon: '👤' },
-    { title: 'Instituição', description: 'Represento uma ONG, abrigo ou projeto social.', hash: '/register/institution', icon: '🏢' },
+    // sem conta: vai para o cadastro levando o tipo; já logado: segue direto (spec 6.3)
+    { title: 'Usuário', description: 'Quero ajudar e acompanhar causas.', hash: loggedIn ? '/feed' : '/register?tipo=usuario', icon: '👤' },
+    { title: 'Instituição', description: 'Sou uma instituição e quero divulgar meu trabalho.', hash: loggedIn ? '/register/institution' : '/register?tipo=instituicao', icon: '🏢' },
   ]
 
   profiles.forEach(p => {

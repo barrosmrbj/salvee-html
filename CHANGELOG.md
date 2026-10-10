@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.12.1**
+**Versão atual: 1.13.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.13.0** | 10/10/2026 | Minor | Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro | Doação, Feed, Instituição, Onboarding, Autenticação, Configurações, Servidor, Banco de dados |
 | **1.12.1** | 08/10/2026 | Patch | Situação do cadastro da instituição no Perfil | Perfil, Instituição |
 | **1.12.0** | 08/10/2026 | Minor | Situação da instituição no login, pedido de revisão e reenvio de correções | Onboarding, Instituição, Admin, Autenticação, Feed, Configurações, Servidor, Banco de dados |
 | **1.11.0** | 08/10/2026 | Minor | Curtir e comentar publicações, com tela de detalhe do post | Feed, Servidor, Banco de dados |
@@ -49,6 +50,18 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.13.0 — Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro
+
+*10/10/2026 · Minor · Doação, Feed, Instituição, Onboarding, Autenticação, Configurações, Servidor, Banco de dados*
+
+- Tela da campanha (#/campanha/:id): imagens, título, instituição, arrecadado de quanto, barra de progresso, doações confirmadas, prazo (faltam X dias / encerrada), descrição, comentários e botão Doar fixo (spec 15.4)
+- Seguir instituições: botão Seguir/Seguindo com o número de seguidores no perfil da instituição (só aprovadas) e aba "Seguindo" no feed com as publicações de quem a pessoa segue (spec 11.2 e 23.1); tabela institution_follows
+- Escolha Usuário/Instituição antes do cadastro: "Comece aqui" → Qual é o seu perfil? → cadastro com o tipo; depois da confirmação, usuário vai direto ao feed e conta de instituição segue para o cadastro da instituição (spec 6.2, 6.3 e 7.6); coluna users.account_type
+- Configurações ganha "Cadastrar minha instituição" para quem ainda não tem uma
+- Script opcional para o phpMyAdmin em docs/sql/v1.13.0-seguir-e-tipo-de-conta.sql
+
+Fontes: `src/screens/campaign.ts` · `src/components/PostCard.ts` · `src/screens/institution-profile.ts` · `src/screens/feed.ts` · `src/screens/welcome.ts` · `src/screens/onboarding/choose-profile.ts` · `src/screens/onboarding/welcome-success.ts` · `src/screens/auth/register.ts` · `src/screens/settings.ts` · `src/services/institution.service.ts` · `src/services/feed.service.ts` · `src/types/user.ts` · `src/types/institution.ts` · `src/types/post.ts` · `src/router.ts` · `server/db.js` · `server/routes/institutions.js` · `server/routes/feed.js` · `server/routes/auth.js` · `server/routes/users.js` · `docs/sql/v1.13.0-seguir-e-tipo-de-conta.sql` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.12.1 — Situação do cadastro da instituição no Perfil
 

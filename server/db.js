@@ -218,6 +218,24 @@ async function initDb() {
     })
   }
 
+  // seguir instituições (spec 11.2 e 23.1): uma vez por pessoa
+  if (!(await db.schema.hasTable('institution_follows'))) {
+    await db.schema.createTable('institution_follows', t => {
+      sameCollation(t)
+      t.string('id', 36).primary()
+      t.string('institution_id', 36).notNullable().index()
+      t.string('user_id', 36).notNullable().index()
+      t.unique(['institution_id', 'user_id'])
+      t.timestamps(true, true)
+    })
+  }
+
+  // tipo de conta escolhido antes do cadastro (spec 6.3): user | institution.
+  // Define só o caminho depois do cadastro; quem publica continua sendo o responsável por instituição aprovada.
+  if (!(await db.schema.hasColumn('users', 'account_type'))) {
+    await db.schema.alterTable('users', t => t.string('account_type').defaultTo('user'))
+  }
+
   // falha aqui não pode impedir o servidor de subir: só registra no log
   if (isProduction) await unifyMysqlCollation().catch(err => console.error('Falha ao unificar a collation:', err.message))
   await normalizeUploadUrls()

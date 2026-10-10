@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 08/10/2026 (v1.12.0). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 10/10/2026 (v1.13.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -38,18 +38,18 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 |---|---|---|
 | 5 Navegação | 🟡 | Abas devem ser Feed, Busca, **Gamificação**, Calendário (+ Configurações no topo); hoje Feed, Buscar, Agenda, Perfil. Botão "+" só para instituição aprovada ✅ (v1.10.0). |
 | 6.1 Splash | ✅ | — |
-| 6.2/6.3 Boas-vindas e tipo de conta | 🟡 | "Comece aqui" deve ir para a escolha Usuário/Instituição **antes** do cadastro, e a escolha deve ser gravada na conta. |
+| 6.2/6.3 Boas-vindas e tipo de conta | ✅ | Escolha antes do cadastro, gravada em `users.account_type` (v1.13.0). |
 | 7 Cadastro de usuário | 🟡 | Validar tamanho mínimo de senha e formato do e-mail no cadastro. Login social ✅ (sem duplicar por e-mail). |
 | 8 Cadastro de instituição | 🟡 | 3 etapas (PDF sugere 6). Documento salvo e visível no admin, cidade/estado e etapa 1 sem duplicar ✅ (v1.12.0). Faltam horários de funcionamento e **várias fotos** (só 1). |
 | 8.6/8.7 Status | ✅ | "Pedir revisão" no admin (com o que corrigir) e a instituição corrige e reenvia (v1.12.0). |
 | 9.3 Recuperar senha | ✅ | Falta só o e-mail do cliente (SMTP). |
 | 9.4/10 Login de instituição por status | ✅ | Tela de situação depois do login, aviso no feed e atalho em Configurações (v1.12.0). Falta avisar por e-mail/notificação quando o status muda (21). |
-| 11 Feed | 🟡 | Botões Ajudar / Doar / Participar ✅ e tipo visível ✅ (v1.10.0); **curtir, comentar** e tela de detalhe do post ✅ (v1.11.0). Faltam **seguir** instituições e algoritmo com impulsionamento (hoje só por data). |
+| 11 Feed | 🟡 | Botões Ajudar / Doar / Participar ✅ (v1.10.0); curtir, comentar e detalhe ✅ (v1.11.0); seguir instituições e aba "Seguindo" ✅ (v1.13.0). Falta o **algoritmo com impulsionamento** de instituições menos ajudadas (hoje só por data). |
 | 11.6 Mídia | 🟡 | Carrossel de até 5 imagens ✅ (v1.10.0). Falta vídeo. |
 | 12 Criação de conteúdo | ✅ | Post, evento e campanha; editar/excluir (v1.10.0). Falta vídeo. |
 | 13 Perfil da instituição | 🟡 | Mural com as publicações ✅ (v1.10.0). Faltam carrossel de fotos da instituição, barra de meta de arrecadação, mapa + rota (Maps/Waze), conferir discador do telefone. |
 | 14 Doação | 🟡 | Só PIX e sem anônima ✅ (v1.9.1). Falta **PIX real** e doação ligada a campanha. |
-| 15 Campanhas | 🟡 | Criação, barra de progresso, prazo, Doar ligado à campanha e arrecadado somado na confirmação ✅ (v1.10.0). Falta a tela de detalhe da campanha (15.4) e aparecer na busca. |
+| 15 Campanhas | 🟡 | Criação, progresso, prazo, Doar ligado e arrecadado somado ✅ (v1.10.0); tela da campanha ✅ (v1.13.0). Falta aparecer na **busca** e em "Causas perto de você". |
 | 16 Eventos | 🟡 | Criação e **Participar** (entra na agenda) ✅ (v1.10.0). Falta avisar o participante quando o evento muda. |
 | 17 Busca | 🟡 | "Causas perto de você" usa dados fixos: geolocalização real + fallback por cidade. |
 | 18 Gamificação | 🟡 | Resgate não fica registrado; QR é só texto (sem validação/uso único); falta "Minhas recompensas", requisito de nível e **regra de XP/Salves configurável** (hoje fixa: valor/2 e valor/4). |
@@ -63,11 +63,12 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 ## Próximas funções (ordem sugerida)
 - [x] Criação de conteúdo, mural, botões Doar/Participar/Ajudar (v1.10.0).
 - [x] Curtir, comentar e tela de detalhe do post (v1.11.0).
-- [ ] **Tela de detalhe da campanha** (15.4); vídeo nas publicações (11.6); **seguir** instituições (23.1).
+- [x] Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro (v1.13.0).
+- [ ] Vídeo nas publicações (11.6); campanhas na busca (15.2).
 - [x] Telas de status da instituição no login, pedir revisão e reenviar correções (v1.12.0).
 - [ ] **Recompensas com QR Code** de uso único e "Minhas recompensas"; XP/Salves configurável (18).
 - [ ] **PIX real**: integrar provedor (Mercado Pago, Asaas, Efí…); o webhook substitui a confirmação manual de doações.
-- [ ] Navegação com aba de **Gamificação** (5); escolha do tipo de conta antes do cadastro (6.3).
+- [ ] Navegação com aba de **Gamificação** (5).
 - [ ] "Perto de você" com **geolocalização real** (17.6); detalhe do evento com mapa (19.6); notificações (21).
 - [ ] **SMS** para verificar celular (opcional; hoje a confirmação é por e-mail). Tela `/verify-phone` mantida.
 - [ ] Backup periódico de `~/salvee-uploads` e do MySQL (hPanel → Backups).

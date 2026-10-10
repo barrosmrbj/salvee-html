@@ -31,9 +31,11 @@ export function mount(): void {
 
   // responsável por alguma instituição: atalho para a situação dela (spec 10)
   institutionService.listMine().then(mine => {
-    if (!mine.length) return
     const container = document.getElementById('settings-list')!
-    const group = buildGroup({ items: [{ label: 'Minha instituição', icon: '🏢', action: () => { window.location.hash = '/institution-status' } }] })
+    const item = mine.length
+      ? { label: 'Minha instituição', icon: '🏢', action: () => { window.location.hash = '/institution-status' } }
+      : { label: 'Cadastrar minha instituição', icon: '🏢', action: () => { window.location.hash = '/register/institution' } }
+    const group = buildGroup({ items: [item] })
     const divider = document.createElement('div')
     divider.className = 'h-2'
     container.insertBefore(divider, container.firstChild)

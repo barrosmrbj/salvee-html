@@ -1,4 +1,5 @@
 import { Button } from '@/components'
+import { authService } from '@/services'
 import girlSvg from '../../../.Documentacao/ilustracoes_salvee/__girl_salvee_006.svg?url'
 
 export function render(): HTMLElement {
@@ -30,7 +31,12 @@ export function mount(): void {
       label: 'Continuar',
       variant: 'secondary',
       fullWidth: true,
-      onClick: () => { window.location.hash = '/choose-profile' },
+      // usuário comum entra direto no feed (spec 7.6); conta de instituição segue para o cadastro dela
+      onClick: () => {
+        authService.getMe()
+          .then(u => { window.location.hash = u.accountType === 'institution' ? '/register/institution' : '/feed' })
+          .catch(() => { window.location.hash = '/feed' })
+      },
     })
   )
 }
