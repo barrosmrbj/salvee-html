@@ -66,6 +66,8 @@ router.get('/institutions', authMiddleware, requireGestor, async (req, res) => {
         'users.name as responsible_user_name',
         'users.email as responsible_user_email'
       )
+    // rascunho não enviado não é da conta do admin
+    query = query.whereNot('institutions.status', 'draft')
     if (req.query.status) query = query.where('institutions.status', req.query.status)
     if (req.query.name) query = query.where('institutions.name', 'like', `%${req.query.name}%`)
     const list = await query.orderBy('institutions.created_at', 'desc')
@@ -86,6 +88,7 @@ router.patch('/institutions/:id/status', authMiddleware, requireGestor, async (r
     }
     const inst = await db('institutions').where({ id: req.params.id }).first()
     if (!inst) return res.status(404).json({ error: 'Instituição não encontrada' })
+    if (inst.status === 'draft') return res.status(409).json({ error: 'Cadastro ainda não enviado para análise' })
 
     const text = typeof reason === 'string' ? reason.trim() : ''
     // pedir revisão sem dizer o que corrigir deixa a instituição sem saída (spec 10.2)

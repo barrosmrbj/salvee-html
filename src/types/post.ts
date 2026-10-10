@@ -64,7 +64,7 @@ export interface PostPayload {
 export interface MyInstitution {
   id: string
   name: string
-  status: 'pending' | 'approved' | 'rejected' | 'needs_revision'
+  status: 'draft' | 'pending' | 'approved' | 'rejected' | 'needs_revision'
   logoUrl: string | null
   /** motivo da reprovação ou o que corrigir (needs_revision) */
   rejectionReason: string | null

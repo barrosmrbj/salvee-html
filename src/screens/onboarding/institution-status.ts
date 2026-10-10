@@ -7,6 +7,10 @@ import { institutionService } from '@/services'
 import type { MyInstitution } from '@/types'
 
 const STATUS = {
+  draft: {
+    icon: '📝', title: 'Cadastro não concluído', badge: 'bg-gray-100 text-gray-600',
+    text: 'O cadastro foi começado, mas ainda não foi enviado. A equipe do Salvee só analisa depois que você toca em "Enviar para análise" na última etapa.',
+  },
   pending: {
     icon: '⏳', title: 'Em análise', badge: 'bg-amber-50 text-amber-700',
     text: 'A equipe do Salvee está analisando o cadastro. Enquanto isso, a instituição não aparece na busca nem no feed e ainda não pode publicar nem receber doações. Volte aqui para acompanhar a análise.',
@@ -61,7 +65,7 @@ export function mount(): void {
       return
     }
     // as que precisam de ação primeiro
-    const order = { needs_revision: 0, pending: 1, rejected: 2, approved: 3 }
+    const order = { draft: 0, needs_revision: 1, pending: 2, rejected: 3, approved: 4 }
     mine.sort((a, b) => order[a.status] - order[b.status]).forEach(i => list.appendChild(card(i)))
     addFooterButton('Continuar para o Salvee', 'secondary', '/feed')
   }).catch(() => {
@@ -128,10 +132,14 @@ function card(inst: MyInstitution): HTMLElement {
   const when = document.createElement('p')
   when.className = 'text-xs text-gray-400'
   const date = (iso: string) => new Date(iso).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
-  when.textContent = inst.status === 'pending' ? `Enviado em ${date(inst.updatedAt || inst.createdAt)}` : `Atualizado em ${date(inst.updatedAt || inst.createdAt)}`
+  when.textContent = inst.status === 'pending' ? `Enviado em ${date(inst.updatedAt || inst.createdAt)}`
+    : inst.status === 'draft' ? `Começado em ${date(inst.createdAt)}` : `Atualizado em ${date(inst.updatedAt || inst.createdAt)}`
   el.appendChild(when)
 
-  if (inst.status === 'needs_revision') {
+  if (inst.status === 'draft') {
+    el.appendChild(Button({ label: 'Continuar cadastro', variant: 'primary', fullWidth: true,
+      onClick: () => { window.location.hash = `/register/institution?corrigir=${encodeURIComponent(inst.id)}` } }))
+  } else if (inst.status === 'needs_revision') {
     el.appendChild(Button({ label: 'Corrigir cadastro', variant: 'primary', fullWidth: true,
       onClick: () => { window.location.hash = `/register/institution?corrigir=${encodeURIComponent(inst.id)}` } }))
   } else if (inst.status === 'rejected') {

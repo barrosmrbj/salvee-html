@@ -93,7 +93,7 @@ function renderStep(): void {
   const isLast = currentStep === TOTAL_STEPS
 
   actions.appendChild(Button({
-    label: isLast ? (editId ? 'Reenviar para análise' : 'Enviar para análise') : 'Avançar',
+    label: isLast ? (editId && editStatus === 'needs_revision' ? 'Reenviar para análise' : editId && editStatus !== 'draft' ? 'Salvar alterações' : 'Enviar para análise') : 'Avançar',
     variant: 'primary',
     fullWidth: true,
     onClick: () => void handleAdvance(),
@@ -493,20 +493,29 @@ async function submitStep3(): Promise<void> {
   await institutionService.registerStep({ step: 3, data, institutionId: instId })
 }
 
+// Fim do cadastro. Cadastro novo, rascunho ou corrigido: "Enviar para análise" leva para a fila de
+// aprovação de admin/gestor (até aqui era só rascunho). Instituição já aprovada/em análise: só salva.
 async function finish(): Promise<void> {
   const instId = sessionStorage.getItem(SESSION_KEY)
-  sessionStorage.removeItem(SESSION_KEY)
-  if (editId && editStatus === 'needs_revision' && instId) {
+  const mustSubmit = !editId || editStatus === 'draft' || editStatus === 'needs_revision'
+  if (mustSubmit) {
+    if (!instId) { showToast('Preencha a primeira etapa antes de enviar', 'error'); currentStep = 1; renderStep(); return }
+    const overlay = LoadingOverlay()
+    document.body.appendChild(overlay)
     try {
-      await institutionService.resubmit(instId)
-      showToast('Correções enviadas para análise!', 'success')
+      await institutionService.submit(instId)
+      showToast(editStatus === 'needs_revision' ? 'Correções enviadas para análise!' : 'Cadastro enviado para análise!', 'success')
     } catch (err) {
-      showToast(err instanceof ApiError ? err.message : 'Erro ao reenviar. Tente novamente.', 'error')
+      // mantém o rascunho para tentar de novo
+      showToast(err instanceof ApiError ? err.message : 'Erro ao enviar. Tente novamente.', 'error', 5000)
       return
+    } finally {
+      overlay.remove()
     }
   } else {
-    showToast(editId ? 'Cadastro atualizado!' : 'Cadastro enviado para análise!', 'success')
+    showToast('Cadastro atualizado!', 'success')
   }
+  sessionStorage.removeItem(SESSION_KEY)
   // mostra a situação (Em análise) em vez de voltar direto ao feed
   window.location.hash = '/institution-status'
 }

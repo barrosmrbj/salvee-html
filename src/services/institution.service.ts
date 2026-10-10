@@ -20,9 +20,9 @@ export const institutionService = {
     return request(`/institutions/${id}/follow`, { method: 'DELETE' })
   },
 
-  /** depois de corrigir: volta para análise (needs_revision → pending) */
-  async resubmit(id: string): Promise<void> {
-    await request<void>(`/institutions/${id}/resubmit`, { method: 'POST' })
+  /** "Enviar para análise": rascunho ou cadastro corrigido vai para a fila de aprovação */
+  async submit(id: string): Promise<void> {
+    await request<void>(`/institutions/${id}/submit`, { method: 'POST' })
   },
 
   async getById(id: string): Promise<Institution> {

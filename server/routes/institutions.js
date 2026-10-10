@@ -60,19 +60,30 @@ router.get('/mine/:id', authMiddleware, async (req, res) => {
   }
 })
 
-// POST /institutions/:id/resubmit — depois de corrigir, volta para análise (spec 8.7 needs_revision)
-router.post('/:id/resubmit', authMiddleware, async (req, res) => {
+// POST /institutions/:id/submit — "Enviar para análise" no fim do cadastro: rascunho (draft) ou
+// cadastro corrigido (needs_revision) vai para a fila de aprovação de admin/gestor (pending)
+const REQUIRED = { name: 'nome da instituição', responsible: 'nome do responsável', category: 'categoria', description: 'descrição' }
+
+async function submitForReview(req, res) {
   try {
     const inst = await db('institutions').where({ id: req.params.id }).first()
     if (!inst || inst.responsible_user_id !== req.userId) return res.status(404).json({ error: 'Instituição não encontrada' })
-    if (inst.status !== 'needs_revision') return res.status(409).json({ error: 'Esta instituição não está aguardando correção' })
+    if (!['draft', 'needs_revision'].includes(inst.status)) {
+      return res.status(409).json({ error: 'Este cadastro já foi enviado para análise' })
+    }
+    const missing = Object.entries(REQUIRED).filter(([f]) => !String(inst[f] || '').trim()).map(([, label]) => label)
+    if (!inst.contact_email && !inst.contact_phone) missing.push('e-mail ou telefone de contato')
+    if (missing.length) return res.status(400).json({ error: `Falta preencher: ${missing.join(', ')}` })
+
     await db('institutions').where({ id: inst.id }).update({ status: 'pending', rejection_reason: null, updated_at: new Date() })
     res.json({ ok: true, status: 'pending' })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
   }
-})
+}
+router.post('/:id/submit', authMiddleware, submitForReview)
+router.post('/:id/resubmit', authMiddleware, submitForReview) // nome antigo (v1.12)
 
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
@@ -133,7 +144,8 @@ router.post('/register/step', authMiddleware, async (req, res) => {
 
     if (!id) {
       id = uuidv4()
-      await db('institutions').insert({ id, name: data.name || '', status: 'pending', responsible_user_id: req.userId, ...flattenStep(step, data) })
+      // rascunho: só entra na fila de aprovação ao "Enviar para análise" no fim (POST /:id/submit)
+      await db('institutions').insert({ id, name: data.name || '', status: 'draft', responsible_user_id: req.userId, ...flattenStep(step, data) })
     } else {
       // só o responsável (ou admin/gestor) altera os dados da instituição
       const inst = await db('institutions').where({ id }).first()

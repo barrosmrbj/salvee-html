@@ -1,4 +1,5 @@
-export type InstitutionStatus = 'pending' | 'approved' | 'rejected' | 'needs_revision'
+// draft: cadastro começado e ainda não enviado (não aparece para admin/gestor)
+export type InstitutionStatus = 'draft' | 'pending' | 'approved' | 'rejected' | 'needs_revision'
 
 export interface Institution {
   id: string

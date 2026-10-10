@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.15.0**
+**Versão atual: 1.16.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.16.0** | 10/10/2026 | Minor | Cadastro de instituição só vai para aprovação ao "Enviar para análise" | Onboarding, Instituição, Admin, Perfil, Feed, Servidor |
 | **1.15.0** | 10/10/2026 | Minor | Localização no mapa: instituição marca o local e "Perto de mim" com GPS | Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | **1.14.0** | 10/10/2026 | Minor | Feed com impulsionamento, perfil da instituição completo e busca reformulada | Feed, Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | **1.13.1** | 10/10/2026 | Patch | Escolha Usuário/Instituição depois de criar a conta | Onboarding, Autenticação, Servidor |
@@ -53,6 +54,18 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.16.0 — Cadastro de instituição só vai para aprovação ao "Enviar para análise"
+
+*10/10/2026 · Minor · Onboarding, Instituição, Admin, Perfil, Feed, Servidor*
+
+- As etapas do cadastro gravam um rascunho (status draft): admin e gestores não veem nem podem aprovar; antes a instituição já ia para a fila de aprovação na etapa 1, mesmo se a pessoa desistisse no meio
+- Só ao tocar em "Enviar para análise" na última etapa o cadastro vai para a fila (pending); o servidor confere antes nome, responsável, contato, categoria e descrição e diz o que falta
+- Cadastro começado e não enviado aparece como "Cadastro não concluído" na tela Minha instituição (botão "Continuar cadastro" com os dados preenchidos), "NÃO ENVIADO" no Perfil e aviso no topo do feed
+- Correção: se o envio falhasse, o app perdia a referência do rascunho e tentar de novo criava outra instituição; agora ela só é apagada depois do envio dar certo
+- Rota POST /api/institutions/:id/submit (rascunho ou cadastro corrigido → em análise); /resubmit continua funcionando
+
+Fontes: `server/routes/institutions.js` · `server/routes/admin.js` · `src/screens/onboarding/institution-register.ts` · `src/screens/onboarding/institution-status.ts` · `src/screens/profile.ts` · `src/screens/feed.ts` · `src/screens/admin/institution-approvals.ts` · `src/services/institution.service.ts` · `src/types/institution.ts` · `src/types/post.ts` · `CLAUDE.md`
 
 ### 1.15.0 — Localização no mapa: instituição marca o local e "Perto de mim" com GPS
 

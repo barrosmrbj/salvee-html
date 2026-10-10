@@ -325,6 +325,7 @@ function getMockDonations(): Donation[] {
 // Cartão "Minha instituição" no perfil: situação de cada cadastro (em análise, aprovado...).
 // Tocar leva à tela completa (#/institution-status), com o que corrigir e as ações.
 const INSTITUTION_STATUS: Record<MyInstitution['status'], { label: string; text: string; className: string; icon: string }> = {
+  draft: { icon: '📝', label: 'NÃO ENVIADO', text: 'Seu cadastro de instituição ainda não foi enviado para análise.', className: 'bg-gray-50 text-gray-600 border-gray-200' },
   pending: { icon: '⏳', label: 'EM ANÁLISE', text: 'Seu cadastro de instituição está em análise.', className: 'bg-amber-50 text-amber-700 border-amber-200' },
   approved: { icon: '✅', label: 'APROVADO', text: 'Seu cadastro de instituição está aprovado.', className: 'bg-green-50 text-green-700 border-green-200' },
   needs_revision: { icon: '✏️', label: 'CORREÇÃO NECESSÁRIA', text: 'Seu cadastro de instituição precisa de correções.', className: 'bg-blue-50 text-blue-700 border-blue-200' },

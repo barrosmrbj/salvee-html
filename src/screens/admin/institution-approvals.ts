@@ -12,6 +12,7 @@ const TABS: Array<{ label: string; status: InstitutionStatus | 'all' }> = [
 ]
 
 const STATUS_LABEL: Record<InstitutionStatus, string> = {
+  draft: 'Rascunho',
   pending: 'Pendente',
   approved: 'Aprovada',
   rejected: 'Rejeitada',
@@ -19,6 +20,7 @@ const STATUS_LABEL: Record<InstitutionStatus, string> = {
 }
 
 const STATUS_CLASS: Record<InstitutionStatus, string> = {
+  draft: 'bg-gray-100 text-gray-500',
   pending: 'bg-amber-50 text-amber-600',
   approved: 'bg-green-50 text-green-600',
   rejected: 'bg-red-50 text-red-600',

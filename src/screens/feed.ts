@@ -104,6 +104,7 @@ function loadFeedPosts(): void {
 // experiência limitada da instituição em validação (spec 9.4): aviso fixo no topo do feed
 function showInstitutionBanner(status: string): void {
   const text: Record<string, string> = {
+    draft: '📝 Seu cadastro de instituição não foi concluído',
     pending: '⏳ Sua instituição está em análise',
     needs_revision: '✏️ Sua instituição precisa de correções',
     rejected: '❌ Sua instituição não foi aprovada',
@@ -112,7 +113,7 @@ function showInstitutionBanner(status: string): void {
   const banner = document.createElement('button')
   banner.type = 'button'
   banner.className = `w-full mb-4 flex items-center justify-between gap-2 rounded-2xl px-4 py-3 text-left text-sm font-semibold ${
-    status === 'needs_revision' ? 'bg-blue-50 text-blue-700' : status === 'rejected' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-700'
+    status === 'needs_revision' ? 'bg-blue-50 text-blue-700' : status === 'rejected' ? 'bg-red-50 text-red-600' : status === 'draft' ? 'bg-gray-100 text-gray-700' : 'bg-amber-50 text-amber-700'
   }`
   const label = document.createElement('span')
   label.textContent = text[status]
