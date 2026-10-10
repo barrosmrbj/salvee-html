@@ -1,5 +1,5 @@
 import { request } from './api'
-import type { AdminDonation, AdminInstitution, AdminUser, DonationStatus, InstitutionStatus } from '@/types'
+import type { AdminDonation, AdminInstitution, AdminPromotion, AdminUser, DonationStatus, InstitutionStatus, PromotionPayload } from '@/types'
 
 export const adminService = {
   async listInstitutions(status?: InstitutionStatus): Promise<AdminInstitution[]> {
@@ -27,6 +27,22 @@ export const adminService = {
       method: 'PATCH',
       body: JSON.stringify({ role }),
     })
+  },
+
+  async listPromotions(): Promise<AdminPromotion[]> {
+    return request<AdminPromotion[]>('/admin/promotions')
+  },
+
+  async createPromotion(payload: PromotionPayload): Promise<AdminPromotion> {
+    return request<AdminPromotion>('/admin/promotions', { method: 'POST', body: JSON.stringify(payload) })
+  },
+
+  async updatePromotion(id: string, payload: PromotionPayload): Promise<AdminPromotion> {
+    return request<AdminPromotion>(`/admin/promotions/${id}`, { method: 'PATCH', body: JSON.stringify(payload) })
+  },
+
+  async deletePromotion(id: string): Promise<void> {
+    await request<void>(`/admin/promotions/${id}`, { method: 'DELETE' })
   },
 
   async listDonations(status?: DonationStatus): Promise<AdminDonation[]> {

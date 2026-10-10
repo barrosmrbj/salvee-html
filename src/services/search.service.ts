@@ -31,6 +31,18 @@ export interface SearchCampaign {
   distanceKm?: number | null
 }
 
+/** banner do carrossel "Promoções & metas" (do admin ou campanha em destaque) */
+export interface PromoItem {
+  id: string
+  kind: 'promo' | 'campaign'
+  title: string
+  subtitle: string
+  imageUrl: string | null
+  /** rota do app (#...) ou null */
+  link: string | null
+  progress: { current: number; goal: number } | null
+}
+
 export interface SearchResult {
   institutions: Institution[]
   campaigns: SearchCampaign[]
@@ -43,6 +55,10 @@ export const searchService = {
     if (query) qs.set('q', query)
     if (category) qs.set('category', category)
     return request<SearchResult>(`/search?${qs}`)
+  },
+
+  async listPromos(): Promise<PromoItem[]> {
+    return request<PromoItem[]>('/search/promocoes')
   },
 
   async listCategories(): Promise<SearchCategory[]> {

@@ -93,6 +93,51 @@ router.get('/', authMiddleware, async (req, res) => {
   }
 })
 
+// GET /search/promocoes → carrossel "Promoções & metas" do topo da busca.
+// Banners ativos cadastrados pelo admin (dentro do período); sem nenhum, as campanhas em destaque
+// (perto do prazo e de quem recebeu menos ajuda), para o carrossel nunca ficar vazio.
+router.get('/promocoes', authMiddleware, async (req, res) => {
+  try {
+    const today = new Date().toISOString().slice(0, 10)
+    const banners = (await db('promotions').where({ active: true }).orderBy('sort_order').orderBy('created_at', 'desc'))
+      .filter(p => (!p.starts_at || p.starts_at <= today) && (!p.ends_at || p.ends_at >= today))
+
+    if (banners.length) {
+      // link para campanha/instituição: só se ainda estiver visível
+      const out = []
+      for (const b of banners) {
+        let link = null
+        let progress = null
+        if (b.link_type === 'campaign' && b.link_id) {
+          const c = await db('posts').join('institutions', 'posts.institution_id', 'institutions.id')
+            .where({ 'posts.id': b.link_id, 'posts.type': 'campaign', 'institutions.status': 'approved' }).first('posts.*')
+          if (c) { link = '/campanha/' + c.id; progress = { current: c.campaign_current || 0, goal: c.campaign_goal || 0 } }
+        } else if (b.link_type === 'institution' && b.link_id) {
+          const i = await db('institutions').where({ id: b.link_id, status: 'approved' }).first('id')
+          if (i) link = '/institution/' + i.id
+        }
+        out.push({ id: b.id, kind: 'promo', title: b.title, subtitle: b.subtitle || '', imageUrl: b.image_url || null, link, progress })
+      }
+      return res.json(out)
+    }
+
+    const [campaigns, attention] = await Promise.all([activeCampaigns(), attentionRanking()])
+    const need = p => attention.need.get(p.institution_id) ?? 0
+    const deadline = p => p.campaign_deadline || '9999-12-31'
+    campaigns.sort((a, b) => deadline(a).localeCompare(deadline(b)) || need(b) - need(a))
+    res.json(campaigns.slice(0, 5).map(p => {
+      const c = formatCampaign(p)
+      return {
+        id: c.id, kind: 'campaign', title: c.title, subtitle: c.institutionName, imageUrl: c.imageUrl,
+        link: '/campanha/' + c.id, progress: { current: c.current, goal: c.goal },
+      }
+    }))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
 // GET /search/categories → [{ name, count }] das instituições aprovadas (as mais usadas primeiro)
 router.get('/categories', authMiddleware, async (req, res) => {
   try {

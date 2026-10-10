@@ -46,3 +46,20 @@ export interface AdminDonation {
   createdAt: string
   confirmedAt: string | null
 }
+
+/** banner "Promoções & metas" do topo da busca */
+export interface AdminPromotion {
+  id: string
+  title: string
+  subtitle: string
+  imageUrl: string | null
+  linkType: 'none' | 'campaign' | 'institution'
+  linkId: string | null
+  startsAt: string | null
+  endsAt: string | null
+  active: boolean
+  sortOrder: number
+  createdAt: string
+}
+
+export type PromotionPayload = Partial<Omit<AdminPromotion, 'id' | 'createdAt'>>

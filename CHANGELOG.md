@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.16.0**
+**Versão atual: 1.17.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.17.0** | 10/10/2026 | Minor | Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin | Busca, Admin, Configurações, Servidor, Banco de dados |
 | **1.16.0** | 10/10/2026 | Minor | Cadastro de instituição só vai para aprovação ao "Enviar para análise" | Onboarding, Instituição, Admin, Perfil, Feed, Servidor |
 | **1.15.0** | 10/10/2026 | Minor | Localização no mapa: instituição marca o local e "Perto de mim" com GPS | Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | **1.14.0** | 10/10/2026 | Minor | Feed com impulsionamento, perfil da instituição completo e busca reformulada | Feed, Busca, Instituição, Onboarding, Servidor, Banco de dados |
@@ -54,6 +55,18 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.17.0 — Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin
+
+*10/10/2026 · Minor · Busca, Admin, Configurações, Servidor, Banco de dados*
+
+- Topo da tela Buscar volta a ser o carrossel "Promoções & metas" do mockup dos designers: banners grandes com imagem, texto, barra de meta e bolinhas; passa sozinho a cada 6 segundos e abre a campanha ou instituição ao tocar
+- Origem dos banners (opção C): promoções cadastradas por admin/gestor e, quando não há nenhuma ativa, as campanhas em destaque (prazo mais próximo e quem recebeu menos)
+- Nova tela Configurações → Administração → Promoções da busca: criar, editar, ativar/desativar e excluir banners com título, texto, imagem, link (campanha ou instituição), período (início/fim) e ordem; tabela promotions
+- As categorias saem do topo e viram o filtro de "Causas perto de você" (ícone ao lado do título, como no mockup); a pesquisa por categoria pela barra continua funcionando
+- Rotas GET /api/search/promocoes e /api/admin/promotions (GET, POST, PATCH, DELETE); script opcional docs/sql/v1.17.0-promocoes.sql
+
+Fontes: `server/db.js` · `server/routes/search.js` · `server/routes/admin.js` · `src/screens/search.ts` · `src/screens/admin/promotions.ts` · `src/services/search.service.ts` · `src/services/admin.service.ts` · `src/types/admin.ts` · `src/router.ts` · `src/screens/settings.ts` · `docs/sql/v1.17.0-promocoes.sql` · `CLAUDE.md`
 
 ### 1.16.0 — Cadastro de instituição só vai para aprovação ao "Enviar para análise"
 

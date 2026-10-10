@@ -182,6 +182,101 @@ router.patch('/donations/:id/status', authMiddleware, requireGestor, async (req,
   }
 })
 
+// ---- Promoções da busca (banners do topo; admin e gestor) ----
+const LINK_TYPES = ['none', 'campaign', 'institution']
+const DATE = /^\d{4}-\d{2}-\d{2}$/
+
+function formatPromotion(p) {
+  return {
+    id: p.id, title: p.title, subtitle: p.subtitle || '', imageUrl: p.image_url || null,
+    linkType: p.link_type || 'none', linkId: p.link_id || null, startsAt: p.starts_at || null, endsAt: p.ends_at || null,
+    active: Boolean(p.active), sortOrder: p.sort_order || 0, createdAt: p.created_at,
+  }
+}
+
+// valida o corpo; parcial = PATCH (só os campos enviados)
+async function promotionFields(body, partial) {
+  const f = {}
+  const has = k => body[k] !== undefined
+  if (!partial || has('title')) {
+    const title = String(body.title || '').trim()
+    if (!title) return { error: 'Informe o título' }
+    if (title.length > 80) return { error: 'Título muito longo (máximo 80 caracteres)' }
+    f.title = title
+  }
+  if (has('subtitle')) f.subtitle = String(body.subtitle || '').trim().slice(0, 140) || null
+  if (has('imageUrl')) {
+    if (body.imageUrl && !/^\/uploads\/[\w.-]+$/.test(body.imageUrl)) return { error: 'Imagem inválida' }
+    f.image_url = body.imageUrl || null
+  }
+  if (!partial || has('linkType') || has('linkId')) {
+    const type = LINK_TYPES.includes(body.linkType) ? body.linkType : 'none'
+    const id = type === 'none' ? null : String(body.linkId || '')
+    if (type === 'campaign' && !(await db('posts').where({ id, type: 'campaign' }).first())) return { error: 'Campanha não encontrada' }
+    if (type === 'institution' && !(await db('institutions').where({ id, status: 'approved' }).first())) return { error: 'Instituição não encontrada' }
+    f.link_type = type
+    f.link_id = id
+  }
+  for (const [key, col] of [['startsAt', 'starts_at'], ['endsAt', 'ends_at']]) {
+    if (has(key)) {
+      if (body[key] && !DATE.test(body[key])) return { error: 'Data inválida' }
+      f[col] = body[key] || null
+    }
+  }
+  const starts = f.starts_at ?? body.startsAt, ends = f.ends_at ?? body.endsAt
+  if (starts && ends && starts > ends) return { error: 'A data de fim é antes da data de início' }
+  if (has('active')) f.active = Boolean(body.active)
+  if (has('sortOrder')) f.sort_order = Number.isInteger(Number(body.sortOrder)) ? Number(body.sortOrder) : 0
+  return { fields: f }
+}
+
+router.get('/promotions', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const list = await db('promotions').orderBy('sort_order').orderBy('created_at', 'desc')
+    res.json(list.map(formatPromotion))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+router.post('/promotions', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const { fields, error } = await promotionFields(req.body, false)
+    if (error) return res.status(400).json({ error })
+    const id = require('uuid').v4()
+    await db('promotions').insert({ id, active: true, sort_order: 0, ...fields, created_by: req.userId })
+    res.status(201).json(formatPromotion(await db('promotions').where({ id }).first()))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+router.patch('/promotions/:id', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const promo = await db('promotions').where({ id: req.params.id }).first()
+    if (!promo) return res.status(404).json({ error: 'Promoção não encontrada' })
+    const { fields, error } = await promotionFields({ startsAt: promo.starts_at, endsAt: promo.ends_at, ...req.body }, true)
+    if (error) return res.status(400).json({ error })
+    if (Object.keys(fields).length) await db('promotions').where({ id: promo.id }).update({ ...fields, updated_at: new Date() })
+    res.json(formatPromotion(await db('promotions').where({ id: promo.id }).first()))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+router.delete('/promotions/:id', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    await db('promotions').where({ id: req.params.id }).delete()
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
 function formatAdminInst(i) {
   return {
     id: i.id,

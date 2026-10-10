@@ -243,6 +243,26 @@ async function initDb() {
     })
   }
 
+  // banners "Promoções & metas" do topo da busca (mockup dos designers), cadastrados por admin/gestor.
+  // Sem nenhum ativo, a busca mostra as campanhas em destaque no lugar.
+  if (!(await db.schema.hasTable('promotions'))) {
+    await db.schema.createTable('promotions', t => {
+      sameCollation(t)
+      t.string('id', 36).primary()
+      t.string('title').notNullable()
+      t.string('subtitle')
+      t.string('image_url')
+      t.string('link_type').defaultTo('none') // none | campaign | institution
+      t.string('link_id', 36)
+      t.string('starts_at') // AAAA-MM-DD (opcional)
+      t.string('ends_at')   // AAAA-MM-DD (opcional)
+      t.boolean('active').defaultTo(true)
+      t.integer('sort_order').defaultTo(0)
+      t.string('created_by', 36)
+      t.timestamps(true, true)
+    })
+  }
+
   // tipo de conta escolhido antes do cadastro (spec 6.3): user | institution.
   // Define só o caminho depois do cadastro; quem publica continua sendo o responsável por instituição aprovada.
   if (!(await db.schema.hasColumn('users', 'account_type'))) {

@@ -1,6 +1,40 @@
 {
-  "versaoAtual": "1.16.0",
+  "versaoAtual": "1.17.0",
   "historico": [
+    {
+      "versao": "1.17.0",
+      "data": "2026-10-10",
+      "tipo": "minor",
+      "titulo": "Carrossel \"Promoções & metas\" na busca, com banners cadastrados pelo admin",
+      "modulos": [
+        "Busca",
+        "Admin",
+        "Configurações",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Topo da tela Buscar volta a ser o carrossel \"Promoções & metas\" do mockup dos designers: banners grandes com imagem, texto, barra de meta e bolinhas; passa sozinho a cada 6 segundos e abre a campanha ou instituição ao tocar",
+        "Origem dos banners (opção C): promoções cadastradas por admin/gestor e, quando não há nenhuma ativa, as campanhas em destaque (prazo mais próximo e quem recebeu menos)",
+        "Nova tela Configurações → Administração → Promoções da busca: criar, editar, ativar/desativar e excluir banners com título, texto, imagem, link (campanha ou instituição), período (início/fim) e ordem; tabela promotions",
+        "As categorias saem do topo e viram o filtro de \"Causas perto de você\" (ícone ao lado do título, como no mockup); a pesquisa por categoria pela barra continua funcionando",
+        "Rotas GET /api/search/promocoes e /api/admin/promotions (GET, POST, PATCH, DELETE); script opcional docs/sql/v1.17.0-promocoes.sql"
+      ],
+      "fontes": [
+        "server/db.js",
+        "server/routes/search.js",
+        "server/routes/admin.js",
+        "src/screens/search.ts",
+        "src/screens/admin/promotions.ts",
+        "src/services/search.service.ts",
+        "src/services/admin.service.ts",
+        "src/types/admin.ts",
+        "src/router.ts",
+        "src/screens/settings.ts",
+        "docs/sql/v1.17.0-promocoes.sql",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.16.0",
       "data": "2026-10-10",

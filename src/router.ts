@@ -39,6 +39,7 @@ const ROUTES: RouteDefinition[] = [
   { path: '/post/new', load: () => import('@/screens/post-editor'), protected: true },
   { path: '/post/:id', load: () => import('@/screens/post-detail'), protected: true },
   { path: '/post/:id/edit', load: () => import('@/screens/post-editor'), protected: true },
+  { path: '/admin/promotions', load: () => import('@/screens/admin/promotions'), protected: true },
   { path: '/admin/donations', load: () => import('@/screens/admin/donation-approvals'), protected: true },
 ]
 

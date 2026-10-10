@@ -1,12 +1,13 @@
 // src/screens/search.ts — busca e descoberta (spec 17)
 // 1. barra de pesquisa (instituições e campanhas, por nome, categoria ou palavra-chave)
-// 2. carrossel de categorias (as que existem nas instituições aprovadas)
+// 2. carrossel "Promoções & metas" (mockup dos designers): banners do admin ou campanhas em destaque
+//    (as categorias do PDF 17.4 ficam no filtro de "Causas perto de você", como no mockup)
 // 3. Destaques: instituições com menos ajuda recente
 // 4. Causas perto de você: campanhas em andamento, primeiro as da cidade escolhida
 import { BottomNav, ProgressBar, Spinner, VerifiedBadge, showToast } from '@/components'
 import { searchService } from '@/services'
 import { request } from '@/services/api'
-import type { SearchCampaign } from '@/services/search.service'
+import type { PromoItem, SearchCampaign } from '@/services/search.service'
 import type { Institution } from '@/types'
 
 const CITY_KEY = 'salvee_cidade'
@@ -33,7 +34,10 @@ export function render(): HTMLElement {
     </header>
 
     <div class="flex-1 overflow-y-auto pb-24">
-      <div id="category-track" class="flex gap-3 overflow-x-auto px-4 pt-4 pb-1 scrollbar-hide"></div>
+      <section id="promo-section" class="px-4 pt-4">
+        <div id="promo-track" class="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide"></div>
+        <div id="promo-dots" class="flex justify-center gap-1.5 mt-2"></div>
+      </section>
 
       <div id="search-results" class="hidden p-4 flex flex-col gap-5"></div>
 
@@ -49,8 +53,14 @@ export function render(): HTMLElement {
         <section class="mt-6">
           <div class="flex items-center justify-between gap-2 px-4 mb-1">
             <h2 class="text-base font-bold text-gray-900">Causas perto de você</h2>
-            <button id="gps-toggle" type="button" class="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border"></button>
+            <div class="flex items-center gap-2">
+              <button id="gps-toggle" type="button" class="flex-shrink-0 px-3 py-1 rounded-full text-xs font-semibold border"></button>
+              <button id="category-toggle" type="button" class="w-8 h-8 flex items-center justify-center rounded-full text-gray-500 hover:bg-gray-100" aria-label="Filtrar por categoria" aria-expanded="false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="7" y1="12" x2="17" y2="12"/><line x1="10" y1="18" x2="14" y2="18"/></svg>
+              </button>
+            </div>
           </div>
+          <div id="category-chips" class="hidden flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide"></div>
           <div class="flex items-center justify-between gap-2 px-4 mb-3">
             <p id="gps-status" class="text-[11px] text-gray-400"></p>
             <label id="city-label" class="flex items-center gap-1 text-xs text-gray-500">
@@ -69,6 +79,7 @@ export function render(): HTMLElement {
 export function mount(): void {
   document.getElementById('app')!.appendChild(BottomNav())
 
+  buildPromos()
   buildCategories()
   buildDestaques()
   setupGps()
@@ -81,51 +92,127 @@ export function mount(): void {
   })
 }
 
-// termo ou categoria escolhidos → resultados; nenhum → descoberta
+// termo digitado → resultados; vazio → descoberta (promoções, destaques, causas)
 function refresh(): void {
   const results = document.getElementById('search-results')!
   const discovery = document.getElementById('discovery-content')!
-  const searching = Boolean(query || category)
+  const searching = Boolean(query)
   results.classList.toggle('hidden', !searching)
   discovery.classList.toggle('hidden', searching)
+  document.getElementById('promo-section')!.classList.toggle('hidden', searching)
   if (searching) void performSearch()
 }
 
-// ---- categorias (spec 17.4) ----
+// ---- Promoções & metas (topo, mockup) ----
+let promoTimer: ReturnType<typeof setInterval> | undefined
+
+function buildPromos(): void {
+  const section = document.getElementById('promo-section')!
+  const track = document.getElementById('promo-track')!
+  const dots = document.getElementById('promo-dots')!
+  searchService.listPromos().then(items => {
+    if (!items.length) { section.classList.add('hidden'); return }
+    items.forEach((p, i) => {
+      track.appendChild(promoCard(p))
+      const dot = document.createElement('span')
+      dot.className = `w-2 h-2 rounded-full transition-colors ${i === 0 ? 'bg-salvee-orange' : 'bg-gray-300'}`
+      dots.appendChild(dot)
+    })
+    if (items.length === 1) dots.classList.add('hidden')
+    const current = () => Math.round(track.scrollLeft / Math.max(1, track.clientWidth))
+    track.addEventListener('scroll', () => {
+      const idx = current()
+      dots.querySelectorAll('span').forEach((d, i) => {
+        d.className = `w-2 h-2 rounded-full transition-colors ${i === idx ? 'bg-salvee-orange' : 'bg-gray-300'}`
+      })
+    })
+    // passa sozinho a cada 6 s
+    if (items.length > 1) {
+      promoTimer = setInterval(() => {
+        const next = (current() + 1) % items.length
+        track.scrollTo({ left: next * track.clientWidth, behavior: 'smooth' })
+      }, 6000)
+    }
+  }).catch(() => section.classList.add('hidden'))
+}
+
+function promoCard(p: PromoItem): HTMLElement {
+  const card = document.createElement(p.link ? 'button' : 'div') as HTMLElement
+  if (p.link) (card as HTMLButtonElement).type = 'button'
+  card.className = 'relative flex-shrink-0 w-full snap-center h-40 rounded-2xl overflow-hidden bg-salvee-orange text-left'
+  if (p.imageUrl) {
+    const img = document.createElement('img')
+    img.src = p.imageUrl
+    img.alt = ''
+    img.className = 'absolute inset-0 w-full h-full object-cover'
+    card.appendChild(img)
+  }
+  const overlay = document.createElement('div')
+  overlay.className = 'absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/70 via-black/20 to-transparent'
+  const tag = document.createElement('span')
+  tag.className = 'self-start text-[10px] font-bold uppercase tracking-wide text-white/90 bg-white/20 rounded-full px-2 py-0.5 mb-1'
+  tag.textContent = p.kind === 'promo' ? 'Promoção' : 'Meta'
+  const title = document.createElement('p')
+  title.className = 'text-white font-bold text-lg leading-tight'
+  title.textContent = p.title
+  overlay.append(tag, title)
+  if (p.subtitle) {
+    const sub = document.createElement('p')
+    sub.className = 'text-white/80 text-xs mt-0.5 truncate'
+    sub.textContent = p.subtitle
+    overlay.appendChild(sub)
+  }
+  if (p.progress && p.progress.goal > 0) {
+    const pct = Math.min(100, Math.round((p.progress.current / p.progress.goal) * 100))
+    const bar = document.createElement('div')
+    bar.className = 'mt-2 h-1.5 rounded-full bg-white/30 overflow-hidden'
+    const fill = document.createElement('div')
+    fill.className = 'h-full bg-salvee-orange rounded-full'
+    fill.style.width = `${pct}%`
+    bar.appendChild(fill)
+    const label = document.createElement('p')
+    label.className = 'text-white/80 text-[11px] mt-1'
+    label.textContent = `${pct}% · R$ ${p.progress.current.toLocaleString('pt-BR')} de R$ ${p.progress.goal.toLocaleString('pt-BR')}`
+    overlay.append(bar, label)
+  }
+  card.appendChild(overlay)
+  if (p.link) card.addEventListener('click', () => { window.location.hash = p.link! })
+  return card
+}
+
+// ---- categorias (spec 17.4): filtro de "Causas perto de você" (ícone ao lado do título, como no mockup) ----
 function buildCategories(): void {
-  const track = document.getElementById('category-track')!
+  const chips = document.getElementById('category-chips')!
+  const toggle = document.getElementById('category-toggle')!
+  toggle.addEventListener('click', () => {
+    const open = chips.classList.toggle('hidden') === false
+    toggle.setAttribute('aria-expanded', String(open))
+    toggle.classList.toggle('text-salvee-orange', open || Boolean(category))
+  })
   searchService.listCategories().then(list => {
-    track.innerHTML = ''
-    const items = [{ name: '', label: 'Todas', icon: '✨' }, ...list.map(c => ({ name: c.name, label: c.name, icon: CATEGORY_ICONS[c.name] ?? '💛' }))]
+    const items = [{ name: '', label: 'Todas' }, ...list.map(c => ({ name: c.name, label: `${CATEGORY_ICONS[c.name] ?? '💛'} ${c.name}` }))]
     items.forEach(item => {
-      const btn = document.createElement('button')
-      btn.type = 'button'
-      btn.dataset['category'] = item.name
-      btn.className = 'flex-shrink-0 flex flex-col items-center gap-1 w-20'
-      const circle = document.createElement('span')
-      circle.className = 'w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border-2 transition-colors'
-      circle.textContent = item.icon
-      const label = document.createElement('span')
-      label.className = 'text-[11px] font-medium text-gray-600 text-center leading-tight truncate w-full'
-      label.textContent = item.label
-      btn.append(circle, label)
-      btn.addEventListener('click', () => {
+      const chip = document.createElement('button')
+      chip.type = 'button'
+      chip.dataset['category'] = item.name
+      chip.textContent = item.label
+      chip.addEventListener('click', () => {
         category = item.name
         paintCategories()
-        refresh()
+        toggle.classList.toggle('text-salvee-orange', Boolean(category))
+        void buildCausas()
       })
-      track.appendChild(btn)
+      chips.appendChild(chip)
     })
     paintCategories()
-  }).catch(() => track.classList.add('hidden'))
+  }).catch(() => toggle.classList.add('hidden'))
 }
 
 function paintCategories(): void {
-  document.querySelectorAll<HTMLButtonElement>('#category-track [data-category]').forEach(btn => {
-    const active = btn.dataset['category'] === category
-    const circle = btn.firstElementChild as HTMLElement
-    circle.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border-2 transition-colors ${
-      active ? 'border-salvee-orange bg-salvee-orange-bg' : 'border-transparent bg-white shadow-sm'
+  document.querySelectorAll<HTMLButtonElement>('#category-chips [data-category]').forEach(chip => {
+    const active = chip.dataset['category'] === category
+    chip.className = `flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+      active ? 'bg-salvee-orange text-white border-salvee-orange' : 'bg-white text-gray-600 border-gray-200'
     }`
   })
 }
@@ -267,10 +354,10 @@ async function buildCausas(): Promise<void> {
     paintGps('Localização indisponível. Mostrando pela cidade escolhida.')
   }
   const city = (document.getElementById('city-select') as HTMLSelectElement).value
-  const params = gpsOn && position ? { lat: position.lat, lng: position.lng } : { city }
+  const params = gpsOn && position ? { lat: position.lat, lng: position.lng, category } : { city, category }
   searchService.listCausas(params).then(causas => {
     list.innerHTML = ''
-    if (!causas.length) return emptyText(list, 'Nenhuma campanha em andamento no momento.')
+    if (!causas.length) return emptyText(list, category ? `Nenhuma campanha em andamento em ${category}.` : 'Nenhuma campanha em andamento no momento.')
     if (gpsOn && !causas.some(c => c.nearby)) emptyText(list, 'Nenhuma campanha a até 30 km. Veja as mais próximas:')
     else if (!gpsOn && city && !causas.some(c => c.nearby)) emptyText(list, `Ainda não há campanhas em ${city}. Veja as de outras cidades:`)
     causas.forEach(c => list.appendChild(campaignItem(c)))
@@ -327,10 +414,10 @@ async function performSearch(): Promise<void> {
   results.innerHTML = ''
   results.appendChild(Spinner())
   try {
-    const { institutions, campaigns } = await searchService.search(query, category)
+    const { institutions, campaigns } = await searchService.search(query)
     results.innerHTML = ''
     if (!institutions.length && !campaigns.length) {
-      emptyText(results, query ? `Nada encontrado para "${query}"${category ? ` em ${category}` : ''}.` : `Ainda não há nada em ${category}.`)
+      emptyText(results, `Nada encontrado para "${query}".`)
       return
     }
     if (campaigns.length) {
@@ -402,6 +489,7 @@ function emptyText(container: HTMLElement, text: string): void {
 
 export function unmount(): void {
   clearTimeout(searchTimeout)
+  clearInterval(promoTimer)
   query = ''
   category = ''
   position = null
