@@ -50,7 +50,12 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Rota não encontrad
 // frontend: build do Vite em server/public (npm run build na raiz). O router é por hash (#/...),
 // então qualquer outro GET devolve o index.html.
 const PUBLIC_DIR = path.join(__dirname, 'public')
-app.use(express.static(PUBLIC_DIR))
+app.use(express.static(PUBLIC_DIR, {
+  // o mime do Express não conhece .webmanifest (sairia text/plain): tipo certo para o "Instalar app" (PWA)
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.webmanifest')) res.setHeader('Content-Type', 'application/manifest+json; charset=utf-8')
+  },
+}))
 app.get('*', (req, res, next) => {
   res.sendFile(path.join(PUBLIC_DIR, 'index.html'), err => err && next())
 })

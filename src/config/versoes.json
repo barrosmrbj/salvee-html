@@ -1,6 +1,22 @@
 {
-  "versaoAtual": "1.18.0",
+  "versaoAtual": "1.18.1",
   "historico": [
+    {
+      "versao": "1.18.1",
+      "data": "2026-10-10",
+      "tipo": "patch",
+      "titulo": "Manifesto do app com o tipo certo para \"Instalar app\"",
+      "modulos": [
+        "Servidor",
+        "Sistema"
+      ],
+      "itens": [
+        "O servidor entregava /manifest.webmanifest como text/plain; agora vai como application/manifest+json, para os navegadores oferecerem \"Instalar app\" / \"Adicionar à tela inicial\""
+      ],
+      "fontes": [
+        "server/index.js"
+      ]
+    },
     {
       "versao": "1.18.0",
       "data": "2026-10-10",

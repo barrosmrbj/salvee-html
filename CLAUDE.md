@@ -188,10 +188,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.18.0** · 35 versões
+Versão atual: **1.18.1** · 36 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.18.1 | 10/10/2026 | Patch | Manifesto do app com o tipo certo para "Instalar app" | Servidor, Sistema |
 | 1.18.0 | 10/10/2026 | Minor | Visual responsivo para celular, tablet e computador e app instalável na tela inicial | Sistema |
 | 1.17.0 | 10/10/2026 | Minor | Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin | Busca, Admin, Configurações, Servidor, Banco de dados |
 | 1.16.0 | 10/10/2026 | Minor | Cadastro de instituição só vai para aprovação ao "Enviar para análise" | Onboarding, Instituição, Admin, Perfil, Feed, Servidor |

@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.18.0**
+**Versão atual: 1.18.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.18.1** | 10/10/2026 | Patch | Manifesto do app com o tipo certo para "Instalar app" | Servidor, Sistema |
 | **1.18.0** | 10/10/2026 | Minor | Visual responsivo para celular, tablet e computador e app instalável na tela inicial | Sistema |
 | **1.17.0** | 10/10/2026 | Minor | Carrossel "Promoções & metas" na busca, com banners cadastrados pelo admin | Busca, Admin, Configurações, Servidor, Banco de dados |
 | **1.16.0** | 10/10/2026 | Minor | Cadastro de instituição só vai para aprovação ao "Enviar para análise" | Onboarding, Instituição, Admin, Perfil, Feed, Servidor |
@@ -56,6 +57,14 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.18.1 — Manifesto do app com o tipo certo para "Instalar app"
+
+*10/10/2026 · Patch · Servidor, Sistema*
+
+- O servidor entregava /manifest.webmanifest como text/plain; agora vai como application/manifest+json, para os navegadores oferecerem "Instalar app" / "Adicionar à tela inicial"
+
+Fontes: `server/index.js`
 
 ### 1.18.0 — Visual responsivo para celular, tablet e computador e app instalável na tela inicial
 
