@@ -1,30 +1,23 @@
-// src/screens/search.ts
-import { BottomNav, Spinner, showToast } from '@/components'
+// src/screens/search.ts — busca e descoberta (spec 17)
+// 1. barra de pesquisa (instituições e campanhas, por nome, categoria ou palavra-chave)
+// 2. carrossel de categorias (as que existem nas instituições aprovadas)
+// 3. Destaques: instituições com menos ajuda recente
+// 4. Causas perto de você: campanhas em andamento, primeiro as da cidade escolhida
+import { BottomNav, ProgressBar, Spinner, VerifiedBadge } from '@/components'
 import { searchService } from '@/services'
 import { request } from '@/services/api'
+import type { SearchCampaign } from '@/services/search.service'
 import type { Institution } from '@/types'
 
-const MOCK_PROMOS = [
-  { title: 'Promoções & metas do dia 5', subtitle: 'Doe hoje e ganhe o dobro de Salves', progress: 60, image: '/promos/promo-dia5.svg' },
-  { title: 'Campanha de Inverno', subtitle: 'Agasalhos para famílias em vulnerabilidade', progress: 35, image: '/promos/promo-inverno.svg' },
-  { title: 'Desafio 100 Doadores', subtitle: 'Juntos somos mais fortes!', progress: 82, image: '/promos/promo-100.svg' },
-]
+const CITY_KEY = 'salvee_cidade'
+const CATEGORY_ICONS: Record<string, string> = {
+  'Saúde': '🏥', 'Crianças': '🧒', 'Idosos': '👵', 'Educação': '📚', 'Animais': '🐾', 'Alimentação': '🍲',
+  'Meio Ambiente': '🌱', 'Moradia': '🏠', 'Abrigos': '🏠', 'Asilos': '👵', 'Creches': '🧸', 'Igrejas': '⛪', 'Outros': '💛',
+}
 
-const DESTAQUES_FALLBACK = [
-  { id: 'inst-lar-sao-jose',   name: 'Lar São José',     logoUrl: '/logos/lar-sao-jose.svg' },
-  { id: 'inst-casa-esperanca', name: 'Casa Esperança',   logoUrl: '/logos/casa-esperanca.svg' },
-  { id: 'inst-ong-raizes',     name: 'ONG Raízes',       logoUrl: '/logos/ong-raizes.svg' },
-  { id: 'inst-proj-sementes',  name: 'Projeto Sementes', logoUrl: '/logos/proj-sementes.svg' },
-  { id: 'inst-instituto-luz',  name: 'Instituto Luz',    logoUrl: '/logos/instituto-luz.svg' },
-]
-
-const MOCK_CAUSAS = [
-  { id: 'c1', institutionId: 'inst3', category: 'Reforma', title: 'Reforma da Igreja', institution: 'ONG Verde', distance: '1,2 km' },
-  { id: 'c2', institutionId: 'inst2', category: 'Saúde', title: 'Medicamentos para idosos', institution: 'Lar dos Idosos Felizes', distance: '2,5 km' },
-  { id: 'c3', institutionId: 'inst1', category: 'Educação', title: 'Material escolar 2025', institution: 'Instituto Esperança', distance: '3,8 km' },
-]
-
-const FILTROS = ['Todos', 'Saúde', 'Crianças', 'Idosos', 'Educação', 'Animais']
+let query = ''
+let category = ''
+let searchTimeout: ReturnType<typeof setTimeout> | undefined
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -33,40 +26,35 @@ export function render(): HTMLElement {
     <header class="bg-white px-4 pt-4 pb-3 border-b border-gray-100 sticky top-0 z-30">
       <div class="relative">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input id="search-input" type="search" placeholder="Procure uma instituição" class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-100 text-gray-900 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-salvee-orange/30 transition-all" />
+        <input id="search-input" type="search" placeholder="Busque instituições, campanhas ou causas" aria-label="Buscar"
+          class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-100 text-gray-900 text-sm outline-none focus:bg-white focus:ring-2 focus:ring-salvee-orange/30 transition-all" />
       </div>
     </header>
 
     <div class="flex-1 overflow-y-auto pb-24">
-      <div id="search-results" class="hidden p-4 flex flex-col gap-3"></div>
+      <div id="category-track" class="flex gap-3 overflow-x-auto px-4 pt-4 pb-1 scrollbar-hide"></div>
+
+      <div id="search-results" class="hidden p-4 flex flex-col gap-5"></div>
 
       <div id="discovery-content">
-        <!-- Promoções carousel -->
-        <div class="px-4 pt-4">
-          <div id="promo-track" class="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-1"></div>
-          <div id="promo-dots" class="flex justify-center gap-1.5 mt-2"></div>
-        </div>
-
-        <!-- Destaques -->
-        <div class="mt-5">
-          <div class="flex items-center justify-between px-4 mb-3">
-            <span class="text-base font-bold text-gray-900">Destaques</span>
-            <button class="text-xs font-semibold text-salvee-orange">Veja todos</button>
+        <section class="mt-5">
+          <div class="px-4 mb-3">
+            <h2 class="text-base font-bold text-gray-900">Destaques</h2>
+            <p class="text-xs text-gray-400">Instituições que receberam pouca ajuda recentemente</p>
           </div>
           <div id="destaques-list" class="flex gap-4 overflow-x-auto px-4 pb-1 scrollbar-hide"></div>
-        </div>
+        </section>
 
-        <!-- Causas perto de você -->
-        <div class="mt-5">
-          <div class="flex items-center justify-between px-4 mb-3">
-            <span class="text-base font-bold text-gray-900">Causas perto de você</span>
-            <button id="filter-btn" class="flex items-center gap-1 text-gray-500">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><polyline points="7 18 3 14 7 10"/></svg>
-            </button>
+        <section class="mt-6">
+          <div class="flex items-center justify-between gap-2 px-4 mb-3">
+            <h2 class="text-base font-bold text-gray-900">Causas perto de você</h2>
+            <label class="flex items-center gap-1 text-xs text-gray-500">
+              <span aria-hidden="true">📍</span>
+              <select id="city-select" class="bg-transparent text-xs font-semibold text-salvee-orange outline-none max-w-[9rem]" aria-label="Cidade"></select>
+            </label>
           </div>
-          <div id="filter-chips" class="flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide"></div>
-          <div id="causas-list" class="flex flex-col gap-0 px-4"></div>
-        </div>
+          <div id="causas-list" class="flex flex-col gap-3 px-4"></div>
+        </section>
       </div>
     </div>
   `
@@ -76,211 +64,268 @@ export function render(): HTMLElement {
 export function mount(): void {
   document.getElementById('app')!.appendChild(BottomNav())
 
-  buildPromos()
+  buildCategories()
   buildDestaques()
-  buildFilterChips()
-  buildCausas(null)
+  void buildCities().then(buildCausas)
 
-  let searchTimeout: ReturnType<typeof setTimeout>
-  document.getElementById('search-input')!.addEventListener('input', (e) => {
+  document.getElementById('search-input')!.addEventListener('input', e => {
     clearTimeout(searchTimeout)
-    const q = (e.target as HTMLInputElement).value.trim()
-    searchTimeout = setTimeout(() => performSearch(q), 400)
+    query = (e.target as HTMLInputElement).value.trim()
+    searchTimeout = setTimeout(refresh, 400)
   })
 }
 
-function buildPromos(): void {
-  const track = document.getElementById('promo-track')!
-  const dots = document.getElementById('promo-dots')!
+// termo ou categoria escolhidos → resultados; nenhum → descoberta
+function refresh(): void {
+  const results = document.getElementById('search-results')!
+  const discovery = document.getElementById('discovery-content')!
+  const searching = Boolean(query || category)
+  results.classList.toggle('hidden', !searching)
+  discovery.classList.toggle('hidden', searching)
+  if (searching) void performSearch()
+}
 
-  MOCK_PROMOS.forEach((p, i) => {
-    const card = document.createElement('div')
-    card.className = 'flex-shrink-0 w-[calc(100vw-2rem)] max-w-sm snap-start rounded-2xl overflow-hidden relative h-40'
-    card.innerHTML = `
-      <img src="${p.image}" alt="${p.title}" class="absolute inset-0 w-full h-full object-cover" />
-      <div class="absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/60 to-transparent">
-        <p class="text-white font-bold text-lg leading-tight">${p.title}</p>
-        <p class="text-white/80 text-xs mt-0.5">${p.subtitle}</p>
-        <div class="mt-2 h-1 rounded-full bg-white/30 overflow-hidden">
-          <div class="h-full bg-salvee-orange rounded-full" style="width:${p.progress}%"></div>
-        </div>
-      </div>
-    `
-    track.appendChild(card)
-
-    const dot = document.createElement('div')
-    dot.className = `w-2 h-2 rounded-full transition-colors ${i === 0 ? 'bg-salvee-orange' : 'bg-gray-300'}`
-    dot.dataset.index = String(i)
-    dots.appendChild(dot)
-  })
-
-  track.addEventListener('scroll', () => {
-    const idx = Math.round(track.scrollLeft / track.clientWidth)
-    dots.querySelectorAll('div').forEach((d, i) => {
-      d.className = `w-2 h-2 rounded-full transition-colors ${i === idx ? 'bg-salvee-orange' : 'bg-gray-300'}`
+// ---- categorias (spec 17.4) ----
+function buildCategories(): void {
+  const track = document.getElementById('category-track')!
+  searchService.listCategories().then(list => {
+    track.innerHTML = ''
+    const items = [{ name: '', label: 'Todas', icon: '✨' }, ...list.map(c => ({ name: c.name, label: c.name, icon: CATEGORY_ICONS[c.name] ?? '💛' }))]
+    items.forEach(item => {
+      const btn = document.createElement('button')
+      btn.type = 'button'
+      btn.dataset['category'] = item.name
+      btn.className = 'flex-shrink-0 flex flex-col items-center gap-1 w-20'
+      const circle = document.createElement('span')
+      circle.className = 'w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border-2 transition-colors'
+      circle.textContent = item.icon
+      const label = document.createElement('span')
+      label.className = 'text-[11px] font-medium text-gray-600 text-center leading-tight truncate w-full'
+      label.textContent = item.label
+      btn.append(circle, label)
+      btn.addEventListener('click', () => {
+        category = item.name
+        paintCategories()
+        refresh()
+      })
+      track.appendChild(btn)
     })
+    paintCategories()
+  }).catch(() => track.classList.add('hidden'))
+}
+
+function paintCategories(): void {
+  document.querySelectorAll<HTMLButtonElement>('#category-track [data-category]').forEach(btn => {
+    const active = btn.dataset['category'] === category
+    const circle = btn.firstElementChild as HTMLElement
+    circle.className = `w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border-2 transition-colors ${
+      active ? 'border-salvee-orange bg-salvee-orange-bg' : 'border-transparent bg-white shadow-sm'
+    }`
   })
 }
 
+// ---- destaques (spec 17.5) ----
 function buildDestaques(): void {
   const list = document.getElementById('destaques-list')!
-
-  request<Array<{ id: string; name: string; logoUrl: string | null }>>('/institutions/destaques')
-    .then(insts => renderDestaques(list, insts.length ? insts : DESTAQUES_FALLBACK))
-    .catch(() => renderDestaques(list, DESTAQUES_FALLBACK))
-}
-
-function renderDestaques(list: HTMLElement, insts: Array<{ id: string; name: string; logoUrl?: string | null }>): void {
-  list.innerHTML = ''
-  insts.forEach(inst => {
-    const item = document.createElement('div')
-    item.className = 'flex-shrink-0 flex flex-col items-center gap-2 cursor-pointer'
-    const logoHtml = inst.logoUrl
-      ? `<img src="${inst.logoUrl}" alt="${inst.name}" class="w-full h-full object-cover" />`
-      : `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
-    item.innerHTML = `
-      <div class="w-16 h-16 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-        ${logoHtml}
-      </div>
-      <span class="text-xs text-gray-700 text-center w-16 truncate">${inst.name}</span>
-    `
-    item.addEventListener('click', () => { window.location.hash = `/institution/${inst.id}` })
-    list.appendChild(item)
-  })
-}
-
-let activeFilter: string | null = null
-
-function buildFilterChips(): void {
-  const container = document.getElementById('filter-chips')!
-  FILTROS.forEach(f => {
-    const chip = document.createElement('button')
-    chip.dataset.filter = f
-    chip.className = `flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-      f === 'Todos' ? 'bg-salvee-orange text-white border-salvee-orange' : 'bg-white text-gray-600 border-gray-200'
-    }`
-    chip.textContent = f
-    chip.addEventListener('click', () => {
-      activeFilter = f === 'Todos' ? null : f
-      container.querySelectorAll('button').forEach(b => {
-        const active = b.dataset.filter === f
-        b.className = `flex-shrink-0 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-          active ? 'bg-salvee-orange text-white border-salvee-orange' : 'bg-white text-gray-600 border-gray-200'
-        }`
-      })
-      buildCausas(activeFilter)
+  list.appendChild(Spinner())
+  request<Array<{ id: string; name: string; logoUrl: string | null }>>('/institutions/destaques').then(insts => {
+    list.innerHTML = ''
+    if (!insts.length) return emptyText(list, 'Ainda não há instituições aprovadas.')
+    insts.forEach(inst => {
+      const item = document.createElement('button')
+      item.type = 'button'
+      item.className = 'flex-shrink-0 flex flex-col items-center gap-2 w-16'
+      const logo = document.createElement('div')
+      logo.className = 'w-16 h-16 rounded-full bg-white shadow-sm overflow-hidden flex items-center justify-center text-2xl'
+      if (inst.logoUrl) {
+        const img = document.createElement('img')
+        img.src = inst.logoUrl
+        img.alt = ''
+        img.className = 'w-full h-full object-cover'
+        logo.appendChild(img)
+      } else {
+        logo.textContent = '🏢'
+      }
+      const name = document.createElement('span')
+      name.className = 'text-xs text-gray-700 text-center w-16 truncate'
+      name.textContent = inst.name
+      item.append(logo, name)
+      item.addEventListener('click', () => { window.location.hash = `/institution/${inst.id}` })
+      list.appendChild(item)
     })
-    container.appendChild(chip)
+  }).catch(() => {
+    list.innerHTML = ''
+    emptyText(list, 'Não foi possível carregar os destaques.')
   })
 }
 
-function buildCausas(filter: string | null): void {
+// ---- causas perto de você (spec 17.6) ----
+function getCity(): string {
+  try { return localStorage.getItem(CITY_KEY) ?? '' } catch { return '' }
+}
+function setCity(city: string): void {
+  try { city ? localStorage.setItem(CITY_KEY, city) : localStorage.removeItem(CITY_KEY) } catch { /* sem armazenamento */ }
+}
+
+// sem coordenadas no cadastro: "perto" = cidade escolhida (fallback do PDF: pedir a cidade)
+async function buildCities(): Promise<void> {
+  const select = document.getElementById('city-select') as HTMLSelectElement
+  const all = document.createElement('option')
+  all.value = ''
+  all.textContent = 'Todas as cidades'
+  select.appendChild(all)
+  try {
+    const cities = await searchService.listCities()
+    cities.forEach(c => {
+      const o = document.createElement('option')
+      o.value = c.city
+      o.textContent = c.state ? `${c.city} - ${c.state}` : c.city
+      select.appendChild(o)
+    })
+  } catch { /* só "Todas" */ }
+  const saved = getCity()
+  if ([...select.options].some(o => o.value === saved)) select.value = saved
+  select.addEventListener('change', () => { setCity(select.value); buildCausas() })
+}
+
+function buildCausas(): void {
   const list = document.getElementById('causas-list')!
   list.innerHTML = ''
-  const filtered = filter ? MOCK_CAUSAS.filter(c => c.category === filter) : MOCK_CAUSAS
-
-  if (filtered.length === 0) {
-    list.innerHTML = '<p class="text-xs text-gray-400 py-4 text-center">Nenhuma causa nesta categoria.</p>'
-    return
-  }
-
-  filtered.forEach(causa => {
-    const item = document.createElement('div')
-    item.className = 'flex items-center gap-3 bg-white rounded-xl p-3 mb-2 shadow-sm border border-gray-100 cursor-pointer'
-    item.innerHTML = `
-      <div class="w-14 h-14 rounded-xl bg-gray-200 flex-shrink-0 flex items-center justify-center">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9l4-4 4 4 4-5 4 5"/></svg>
-      </div>
-      <div class="flex-1 min-w-0">
-        <span class="text-xs text-salvee-orange font-semibold">${causa.category}</span>
-        <p class="text-sm font-semibold text-gray-900 truncate">${causa.title}</p>
-        <p class="text-xs text-gray-400 truncate">${causa.institution} · ${causa.distance}</p>
-      </div>
-      <button class="text-gray-300 flex-shrink-0">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-      </button>
-    `
-    item.addEventListener('click', () => { window.location.hash = `/institution/${causa.institutionId}` })
-    list.appendChild(item)
+  list.appendChild(Spinner())
+  const city = (document.getElementById('city-select') as HTMLSelectElement).value
+  searchService.listCausas({ city }).then(causas => {
+    list.innerHTML = ''
+    if (!causas.length) return emptyText(list, 'Nenhuma campanha em andamento no momento.')
+    if (city && !causas.some(c => c.nearby)) emptyText(list, `Ainda não há campanhas em ${city}. Veja as de outras cidades:`)
+    causas.forEach(c => list.appendChild(campaignItem(c)))
+  }).catch(() => {
+    list.innerHTML = ''
+    emptyText(list, 'Não foi possível carregar as campanhas.')
   })
 }
 
-async function performSearch(query: string): Promise<void> {
-  const resultsEl = document.getElementById('search-results')!
-  const discoveryEl = document.getElementById('discovery-content')!
+// item de campanha: imagem, categoria, título, instituição, progresso e arrecadado (spec 17.6)
+function campaignItem(c: SearchCampaign): HTMLElement {
+  const item = document.createElement('button')
+  item.type = 'button'
+  item.className = 'w-full flex gap-3 bg-white rounded-2xl p-3 shadow-sm border border-gray-100 text-left'
+  const thumb = document.createElement('div')
+  thumb.className = 'w-20 h-20 rounded-xl bg-salvee-orange-bg flex-shrink-0 overflow-hidden flex items-center justify-center text-2xl'
+  if (c.imageUrl) {
+    const img = document.createElement('img')
+    img.src = c.imageUrl
+    img.alt = ''
+    img.className = 'w-full h-full object-cover'
+    thumb.appendChild(img)
+  } else {
+    thumb.textContent = '🎯'
+  }
+  const info = document.createElement('div')
+  info.className = 'flex-1 min-w-0 flex flex-col gap-1'
+  const cat = document.createElement('span')
+  cat.className = 'text-[11px] text-salvee-orange font-semibold'
+  cat.textContent = [c.category, c.nearby ? '📍 perto de você' : ''].filter(Boolean).join(' · ') || 'Campanha'
+  const title = document.createElement('p')
+  title.className = 'text-sm font-semibold text-gray-900 truncate'
+  title.textContent = c.title
+  const inst = document.createElement('p')
+  inst.className = 'text-xs text-gray-400 truncate'
+  inst.textContent = [c.institutionName, c.city].filter(Boolean).join(' · ')
+  info.append(cat, title, inst)
+  if (c.goal > 0) {
+    info.appendChild(ProgressBar(c.current, c.goal, false))
+    const raised = document.createElement('p')
+    raised.className = 'text-[11px] text-gray-500'
+    raised.textContent = `R$ ${c.current.toLocaleString('pt-BR')} de R$ ${c.goal.toLocaleString('pt-BR')}`
+    info.appendChild(raised)
+  }
+  item.append(thumb, info)
+  item.addEventListener('click', () => { window.location.hash = `/campanha/${c.id}` })
+  return item
+}
 
-  if (!query) { resultsEl.classList.add('hidden'); discoveryEl.classList.remove('hidden'); return }
-  resultsEl.classList.remove('hidden')
-  discoveryEl.classList.add('hidden')
-  resultsEl.innerHTML = ''
-  resultsEl.appendChild(Spinner())
-
+// ---- resultados (spec 17.3) ----
+async function performSearch(): Promise<void> {
+  const results = document.getElementById('search-results')!
+  results.innerHTML = ''
+  results.appendChild(Spinner())
   try {
-    const results = await searchService.search(query)
-    resultsEl.innerHTML = ''
-    if (results.length === 0) {
-      const empty = document.createElement('p')
-      empty.className = 'text-center text-gray-400 py-8'
-      empty.textContent = 'Nenhum resultado encontrado.'
-      resultsEl.appendChild(empty)
-    } else {
-      results.forEach(inst => resultsEl.appendChild(renderInstitutionCard(inst)))
+    const { institutions, campaigns } = await searchService.search(query, category)
+    results.innerHTML = ''
+    if (!institutions.length && !campaigns.length) {
+      emptyText(results, query ? `Nada encontrado para "${query}"${category ? ` em ${category}` : ''}.` : `Ainda não há nada em ${category}.`)
+      return
+    }
+    if (campaigns.length) {
+      results.appendChild(sectionTitle(`Campanhas (${campaigns.length})`))
+      const list = document.createElement('div')
+      list.className = 'flex flex-col gap-3'
+      campaigns.forEach(c => list.appendChild(campaignItem(c)))
+      results.appendChild(list)
+    }
+    if (institutions.length) {
+      results.appendChild(sectionTitle(`Instituições (${institutions.length})`))
+      const list = document.createElement('div')
+      list.className = 'flex flex-col gap-3'
+      institutions.forEach(i => list.appendChild(institutionItem(i)))
+      results.appendChild(list)
     }
   } catch {
-    resultsEl.innerHTML = ''
-    showToast('Erro na busca', 'error')
+    results.innerHTML = ''
+    emptyText(results, 'Erro na busca. Tente novamente.')
   }
 }
 
-function renderInstitutionCard(inst: Institution): HTMLElement {
+function institutionItem(inst: Institution): HTMLElement {
   const card = document.createElement('button')
+  card.type = 'button'
   card.className = 'w-full bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-3 text-left hover:border-salvee-orange transition-colors'
-
-  const logoDiv = document.createElement('div')
-  logoDiv.className = 'w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center text-gray-400'
+  const logo = document.createElement('div')
+  logo.className = 'w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 flex items-center justify-center text-gray-400'
   if (inst.logoUrl) {
     const img = document.createElement('img')
     img.src = inst.logoUrl
-    img.alt = inst.name
+    img.alt = ''
     img.className = 'w-full h-full object-cover'
-    logoDiv.appendChild(img)
+    logo.appendChild(img)
   } else {
-    logoDiv.textContent = '🏢'
+    logo.textContent = '🏢'
   }
-  card.appendChild(logoDiv)
-
   const info = document.createElement('div')
   info.className = 'flex-1 min-w-0'
-
   const nameRow = document.createElement('div')
   nameRow.className = 'flex items-center gap-1 mb-0.5'
-  const nameSpan = document.createElement('span')
-  nameSpan.className = 'font-semibold text-gray-900 text-sm truncate'
-  nameSpan.textContent = inst.name
-  nameRow.appendChild(nameSpan)
-
-  if (inst.verified) {
-    const badge = document.createElement('span')
-    badge.className = 'inline-flex items-center justify-center w-4 h-4 bg-salvee-orange rounded-full flex-shrink-0'
-    badge.innerHTML = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5l2 2 4-4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-    nameRow.appendChild(badge)
-  }
-  info.appendChild(nameRow)
-
-  const catSpan = document.createElement('span')
-  catSpan.className = 'text-xs text-gray-500'
-  catSpan.textContent = inst.category
-  info.appendChild(catSpan)
-  card.appendChild(info)
-
-  const chevron = document.createElement('div')
-  chevron.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-300 flex-shrink-0"><path d="M9 18l6-6-6-6"/></svg>'
-  card.appendChild(chevron)
-
+  const name = document.createElement('span')
+  name.className = 'font-semibold text-gray-900 text-sm truncate'
+  name.textContent = inst.name
+  nameRow.appendChild(name)
+  if (inst.verified) nameRow.appendChild(VerifiedBadge())
+  const meta = document.createElement('span')
+  meta.className = 'text-xs text-gray-500'
+  meta.textContent = [inst.category, inst.city].filter(Boolean).join(' · ')
+  info.append(nameRow, meta)
+  card.append(logo, info)
   card.addEventListener('click', () => { window.location.hash = `/institution/${inst.id}` })
   return card
 }
 
+function sectionTitle(text: string): HTMLElement {
+  const h = document.createElement('h2')
+  h.className = 'text-sm font-bold text-gray-900'
+  h.textContent = text
+  return h
+}
+
+function emptyText(container: HTMLElement, text: string): void {
+  const p = document.createElement('p')
+  p.className = 'text-xs text-gray-400 py-4 text-center w-full'
+  p.textContent = text
+  container.appendChild(p)
+}
+
 export function unmount(): void {
+  clearTimeout(searchTimeout)
+  query = ''
+  category = ''
   document.getElementById('bottom-nav')?.remove()
 }

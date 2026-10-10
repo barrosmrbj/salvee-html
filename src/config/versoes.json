@@ -1,6 +1,48 @@
 {
-  "versaoAtual": "1.13.1",
+  "versaoAtual": "1.14.0",
   "historico": [
+    {
+      "versao": "1.14.0",
+      "data": "2026-10-10",
+      "tipo": "minor",
+      "titulo": "Feed com impulsionamento, perfil da instituição completo e busca reformulada",
+      "modulos": [
+        "Feed",
+        "Busca",
+        "Instituição",
+        "Onboarding",
+        "Servidor",
+        "Banco de dados"
+      ],
+      "itens": [
+        "Feed \"Para você\" deixa de ser só por data: soma novidade, instituições que a pessoa segue, urgência (campanha perto do prazo, evento próximo), curtidas/comentários e um impulso para quem recebeu menos ajuda nos últimos 30 dias, com a etiqueta \"✨ Precisa de apoio\" (spec 1.4, 4.4, 11.3 e 11.4)",
+        "Destaques da busca: instituições com menos doações confirmadas recentes e menos seguidores (spec 17.5)",
+        "Perfil da instituição: carrossel com até 6 fotos e barra da campanha ativa no topo (spec 13.3 a 13.6); a instituição aprovada edita dados e fotos pela tela \"Minha instituição\"",
+        "Aba Info: endereço com CEP, dias e horários de funcionamento, telefone que abre o discador, e-mail, mapa e botões de rota Google Maps e Waze (spec 13.10)",
+        "Cadastro da instituição: várias fotos (até 6) e o campo \"Dias e horários de funcionamento\"; colunas institutions.photos e opening_hours",
+        "Busca reformulada (spec 17): pesquisa instituições e campanhas por nome, categoria, cidade ou palavra-chave; carrossel com as categorias reais (tocar mostra o que há nela); Causas perto de você com campanhas reais em andamento, primeiro as da cidade escolhida; saem todos os dados de exemplo e o carrossel de promoções fictícias",
+        "Perfil de instituição que não carrega mostra aviso em vez de dados de exemplo",
+        "Rotas GET /api/search (instituições + campanhas), /api/search/categories, /api/search/cities e /api/search/causas; server/attention.js"
+      ],
+      "fontes": [
+        "server/attention.js",
+        "server/routes/feed.js",
+        "server/routes/search.js",
+        "server/routes/institutions.js",
+        "server/db.js",
+        "src/screens/search.ts",
+        "src/services/search.service.ts",
+        "src/screens/institution-profile.ts",
+        "src/screens/onboarding/institution-register.ts",
+        "src/screens/onboarding/institution-status.ts",
+        "src/components/PostCard.ts",
+        "src/types/institution.ts",
+        "src/types/post.ts",
+        "docs/sql/v1.14.0-fotos-e-horarios.sql",
+        "CLAUDE.md",
+        "docs/PENDENCIAS.md"
+      ]
+    },
     {
       "versao": "1.13.1",
       "data": "2026-10-10",

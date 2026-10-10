@@ -1,5 +1,5 @@
 // src/screens/institution-profile.ts
-import { Button, PostCard, Spinner, showToast } from '@/components'
+import { Button, PostCard, ProgressBar, Spinner, showToast } from '@/components'
 import { feedService, institutionService } from '@/services'
 import type { Institution } from '@/types'
 
@@ -33,7 +33,11 @@ export function mount(): void {
 
   institutionService.getById(id).then(renderProfile).catch(() => {
     loadingEl.remove()
-    renderProfile(getMockInstitution(id))
+    const p = document.createElement('p')
+    p.className = 'text-center text-gray-400 text-sm py-16 px-4'
+    p.textContent = 'Não foi possível carregar esta instituição.'
+    document.getElementById('profile-content')!.classList.remove('hidden')
+    document.getElementById('profile-content')!.appendChild(p)
   })
 }
 
@@ -49,19 +53,8 @@ function renderProfile(inst: Institution): void {
   const hero = document.createElement('div')
   hero.className = 'relative'
 
-  const heroBg = document.createElement('div')
-  heroBg.className = 'h-40 bg-salvee-orange-bg flex items-center justify-center overflow-hidden'
-  if (inst.photos[0]) {
-    const img = document.createElement('img')
-    img.src = inst.photos[0]
-    img.alt = ''
-    img.className = 'w-full h-full object-cover'
-    heroBg.appendChild(img)
-  } else {
-    heroBg.textContent = '🏢'
-    heroBg.style.fontSize = '3.75rem'
-  }
-  hero.appendChild(heroBg)
+  // carrossel com as fotos da instituição, não as do mural (spec 13.3 e 13.4)
+  hero.appendChild(photoCarousel(inst))
 
   const logoWrapper = document.createElement('div')
   logoWrapper.className = 'absolute -bottom-6 left-4 w-16 h-16 rounded-2xl bg-white shadow-md overflow-hidden flex items-center justify-center border border-gray-100'
@@ -103,6 +96,7 @@ function renderProfile(inst: Institution): void {
   nameSection.appendChild(catSpan)
   if (inst.status === 'approved') nameSection.appendChild(followRow(inst))
   content.appendChild(nameSection)
+  if (inst.activeCampaign) content.appendChild(campaignGoal(inst.activeCampaign))
 
   // Tabs
   const tabs = ['mural', 'sobre', 'info'] as Tab[]
@@ -246,96 +240,126 @@ function renderTab(inst: Institution, tabContent: HTMLElement): void {
       tabContent.appendChild(p)
     }
   } else {
-    const hasInfo = inst.address || inst.cnpj || inst.phone
-    if (!hasInfo) {
-      const p = document.createElement('p')
-      p.className = 'text-center text-gray-400 py-8'
-      p.textContent = 'Sem informações de contato.'
-      tabContent.appendChild(p)
-      return
-    }
-    const infoList = document.createElement('div')
-    infoList.className = 'flex flex-col gap-3 text-sm'
-
-    if (inst.address) {
-      const row = document.createElement('div')
-      row.className = 'flex items-start gap-3 p-3 bg-gray-50 rounded-xl'
-      const icon = document.createElement('span')
-      icon.textContent = '📍'
-      icon.className = 'text-xl'
-      const details = document.createElement('div')
-      const label = document.createElement('p')
-      label.className = 'font-medium text-gray-900'
-      label.textContent = 'Endereço'
-      const val = document.createElement('p')
-      val.className = 'text-gray-500'
-      val.textContent = `${inst.address.street}, ${inst.address.city} - ${inst.address.state}`
-      details.appendChild(label)
-      details.appendChild(val)
-      row.appendChild(icon)
-      row.appendChild(details)
-      infoList.appendChild(row)
-    }
-
-    if (inst.cnpj) {
-      const row = document.createElement('div')
-      row.className = 'flex items-center gap-3 p-3 bg-gray-50 rounded-xl'
-      const icon = document.createElement('span')
-      icon.textContent = '📄'
-      icon.className = 'text-xl'
-      const details = document.createElement('div')
-      const label = document.createElement('p')
-      label.className = 'font-medium text-gray-900'
-      label.textContent = 'CNPJ'
-      const val = document.createElement('p')
-      val.className = 'text-gray-500'
-      val.textContent = inst.cnpj
-      details.appendChild(label)
-      details.appendChild(val)
-      row.appendChild(icon)
-      row.appendChild(details)
-      infoList.appendChild(row)
-    }
-
-    if (inst.phone) {
-      const link = document.createElement('a')
-      link.href = `tel:${inst.phone}`
-      link.className = 'flex items-center gap-3 p-3 bg-gray-50 rounded-xl'
-      const icon = document.createElement('span')
-      icon.textContent = '📞'
-      icon.className = 'text-xl'
-      const details = document.createElement('div')
-      const label = document.createElement('p')
-      label.className = 'font-medium text-gray-900'
-      label.textContent = 'Telefone'
-      const val = document.createElement('p')
-      val.className = 'text-salvee-orange'
-      val.textContent = inst.phone
-      details.appendChild(label)
-      details.appendChild(val)
-      link.appendChild(icon)
-      link.appendChild(details)
-      infoList.appendChild(link)
-    }
-
-    tabContent.appendChild(infoList)
+    renderInfo(inst, tabContent)
   }
 }
 
-function getMockInstitution(id: string): Institution {
-  return {
-    id,
-    name: 'Instituto Esperança',
-    category: 'Crianças',
-    verified: true,
-    status: 'approved',
-    description: 'Trabalhamos para transformar a vida de crianças em situação de vulnerabilidade.',
-    photos: [],
-    mission: 'Garantir um futuro melhor para crianças carentes.',
-    history: 'Fundada em 2010 por um grupo de voluntários apaixonados pela causa.',
-    foundedYear: 2010,
-    phone: '(92) 99999-9999',
-    cnpj: '00.000.000/0000-00',
+function photoCarousel(inst: Institution): HTMLElement {
+  const wrap = document.createElement('div')
+  wrap.className = 'relative h-48 bg-salvee-orange-bg'
+  if (!inst.photos.length) {
+    wrap.className += ' flex items-center justify-center text-6xl'
+    wrap.textContent = '🏢'
+    return wrap
+  }
+  const track = document.createElement('div')
+  track.className = 'flex h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide'
+  inst.photos.forEach(src => {
+    const img = document.createElement('img')
+    img.src = src
+    img.alt = ''
+    img.className = 'w-full h-full object-cover flex-shrink-0 snap-center'
+    track.appendChild(img)
+  })
+  wrap.appendChild(track)
+  if (inst.photos.length > 1) {
+    const dots = document.createElement('div')
+    dots.className = 'absolute bottom-2 right-3 flex gap-1.5'
+    const paint = (active: number) => dots.querySelectorAll('span').forEach((d, i) => {
+      d.className = `w-2 h-2 rounded-full ${i === active ? 'bg-white' : 'bg-white/50'}`
+    })
+    inst.photos.forEach(() => dots.appendChild(document.createElement('span')))
+    paint(0)
+    track.addEventListener('scroll', () => paint(Math.round(track.scrollLeft / Math.max(1, track.clientWidth))))
+    wrap.appendChild(dots)
+  }
+  return wrap
+}
+
+// barra da meta ativa (spec 13.6): aqui sempre campanha específica (meta mensal ainda não existe)
+function campaignGoal(c: NonNullable<Institution['activeCampaign']>): HTMLElement {
+  const box = document.createElement('button')
+  box.type = 'button'
+  box.className = 'mx-4 mb-4 w-[calc(100%-2rem)] text-left bg-salvee-orange-bg rounded-2xl p-4 flex flex-col gap-2'
+  const head = document.createElement('div')
+  head.className = 'flex items-center justify-between gap-2'
+  const label = document.createElement('span')
+  label.className = 'text-[11px] font-semibold text-salvee-orange uppercase tracking-wide'
+  label.textContent = '🎯 Campanha ativa'
+  const more = document.createElement('span')
+  more.className = 'text-xs font-semibold text-salvee-orange'
+  more.textContent = 'Ver campanha ›'
+  head.append(label, more)
+  const title = document.createElement('p')
+  title.className = 'font-bold text-gray-900 text-sm'
+  title.textContent = c.title
+  box.append(head, title, ProgressBar(c.current, c.goal))
+  box.addEventListener('click', () => { window.location.hash = `/campanha/${c.id}` })
+  return box
+}
+
+// aba Info (spec 13.10): dados práticos, discador, e-mail, mapa e rota
+function renderInfo(inst: Institution, tabContent: HTMLElement): void {
+  const list = document.createElement('div')
+  list.className = 'flex flex-col gap-3 text-sm'
+  const addRow = (icon: string, label: string, value: string, href?: string) => {
+    const row = document.createElement(href ? 'a' : 'div') as HTMLElement
+    if (href) (row as HTMLAnchorElement).href = href
+    row.className = 'flex items-start gap-3 p-3 bg-gray-50 rounded-xl'
+    const i = document.createElement('span')
+    i.className = 'text-xl'
+    i.textContent = icon
+    const d = document.createElement('div')
+    d.className = 'min-w-0'
+    const l = document.createElement('p')
+    l.className = 'font-medium text-gray-900'
+    l.textContent = label
+    const v = document.createElement('p')
+    v.className = `${href ? 'text-salvee-orange' : 'text-gray-500'} break-words`
+    v.textContent = value
+    d.append(l, v)
+    row.append(i, d)
+    list.appendChild(row)
+  }
+
+  addRow('🏢', 'Instituição', inst.category ? `${inst.name} · ${inst.category}` : inst.name)
+  const a = inst.address
+  const street = a?.street || ''
+  const cityState = [inst.city || a?.city, inst.state || a?.state].filter(Boolean).join(' - ')
+  const fullAddress = [street, cityState, a?.zipCode ? `CEP ${a.zipCode}` : ''].filter(Boolean).join(', ')
+  if (fullAddress) addRow('📍', 'Endereço', fullAddress)
+  if (inst.openingHours) addRow('🕒', 'Dias e horários', inst.openingHours)
+  if (inst.phone) addRow('📞', 'Telefone', inst.phone, `tel:${inst.phone.replace(/[^\d+]/g, '')}`)
+  if (inst.email) addRow('✉️', 'E-mail', inst.email, `mailto:${inst.email}`)
+  if (inst.cnpj) addRow('📄', 'CNPJ', inst.cnpj)
+  tabContent.appendChild(list)
+
+  // mapa com marcação + rota (spec 13.10): sem chave de API, pelo endereço
+  const mapQuery = [street, cityState, a?.zipCode].filter(Boolean).join(', ')
+  if (mapQuery) {
+    const q = encodeURIComponent(mapQuery)
+    const map = document.createElement('iframe')
+    map.title = 'Mapa da instituição'
+    map.loading = 'lazy'
+    map.referrerPolicy = 'no-referrer-when-downgrade'
+    map.className = 'w-full h-56 rounded-xl border-0 mt-3 bg-gray-100'
+    map.src = `https://maps.google.com/maps?q=${q}&z=15&output=embed`
+    tabContent.appendChild(map)
+
+    const routes = document.createElement('div')
+    routes.className = 'grid grid-cols-2 gap-2 mt-3'
+    const routeBtn = (label: string, href: string) => {
+      const link = document.createElement('a')
+      link.href = href
+      link.target = '_blank'
+      link.rel = 'noopener'
+      link.className = 'py-2.5 rounded-xl border border-gray-200 text-center text-sm font-semibold text-gray-700 bg-white'
+      link.textContent = label
+      routes.appendChild(link)
+    }
+    routeBtn('🗺️ Google Maps', `https://www.google.com/maps/dir/?api=1&destination=${q}`)
+    routeBtn('🚗 Waze', `https://waze.com/ul?q=${q}&navigate=yes`)
+    tabContent.appendChild(routes)
   }
 }
 

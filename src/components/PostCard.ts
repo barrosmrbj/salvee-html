@@ -50,6 +50,15 @@ export function PostCard(post: Post, options: PostCardOptions = {}): HTMLElement
   if (post.canEdit) header.appendChild(authorMenu(post, card, options))
   card.appendChild(header)
 
+  // publicação impulsionada: instituição com pouca ajuda recente (spec 11.2 e 11.4)
+  if (post.boosted) {
+    const boost = document.createElement('span')
+    boost.className = 'self-start text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700'
+    boost.textContent = '✨ Precisa de apoio'
+    boost.title = 'Instituição que recebeu pouca ajuda recentemente'
+    card.appendChild(boost)
+  }
+
   const tag = TYPE_TAG[post.type]
   if (tag) {
     const pill = document.createElement('span')

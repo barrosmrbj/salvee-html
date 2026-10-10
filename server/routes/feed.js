@@ -2,11 +2,51 @@ const express = require('express')
 const { v4: uuidv4 } = require('uuid')
 const { db } = require('../db')
 const { authMiddleware } = require('../middleware/auth')
+const { attentionRanking, toTime } = require('../attention')
 
 const router = express.Router()
 
 const POST_TYPES = ['common', 'event', 'campaign']
 const MAX_IMAGES = 5
+
+// ---- algoritmo do feed "Para você" (spec 11.3 e 11.4) ----
+// Não é só cronológico nem só popularidade: soma novidade, afinidade (segue a instituição),
+// urgência (campanha perto do prazo, evento próximo), engajamento e o impulsionamento de quem
+// recebeu menos ajuda nos últimos 30 dias. Pesos simples e ajustáveis aqui.
+const FEED_POOL = 120 // publicações recentes consideradas no ranking
+const WEIGHTS = { recency: 1, follow: 0.6, boost: 0.5, urgency: 0.3, engagement: 0.3 }
+const DAY = 86400000
+
+function feedScore(p, stats, attention, followed) {
+  const now = Date.now()
+  const ageDays = Math.max(0, (now - toTime(p.created_at)) / DAY)
+  const recency = 1 / (1 + ageDays) // 1 hoje, 0,5 ontem, 0,25 há 3 dias...
+
+  const follow = followed.has(p.institution_id) ? 1 : 0
+  const need = attention.need.get(p.institution_id) ?? 0
+  const boost = attention.balanced ? 0 : need
+
+  let urgency = 0
+  if (p.type === 'campaign' && p.campaign_deadline) {
+    const left = (toTime(p.campaign_deadline + 'T23:59:59') - now) / DAY
+    if (left >= 0 && left <= 7) urgency = 1
+    else if (left < 0) urgency = -1 // encerrada desce
+  }
+  if (p.type === 'event' && p.event_date) {
+    const until = (toTime(p.event_date) - now) / DAY
+    if (until >= 0 && until <= 7) urgency = 1
+    else if (until < 0) urgency = -1.5 // evento que já passou desce bastante
+  }
+
+  const likes = stats.likes.get(p.id) || 0
+  const comments = stats.comments.get(p.id) || 0
+  const engagement = Math.min(1, (likes + 2 * comments) / 20)
+
+  const score = WEIGHTS.recency * recency + WEIGHTS.follow * follow + WEIGHTS.boost * boost
+    + WEIGHTS.urgency * urgency + WEIGHTS.engagement * engagement
+  // etiqueta "Precisa de apoio": só quem está bem abaixo das outras em atenção
+  return { score, boosted: !attention.balanced && need >= 0.7 }
+}
 
 function postsQuery() {
   return db('posts')
@@ -56,9 +96,26 @@ router.get('/', authMiddleware, async (req, res) => {
     if (req.query.seguindo === '1') {
       query = query.whereIn('posts.institution_id', db('institution_follows').where({ user_id: req.userId }).select('institution_id'))
     }
-    const posts = await query.orderBy('posts.created_at', 'desc').limit(limit).offset((page - 1) * limit)
-    const stats = await postStats(req.userId, posts)
-    res.json(posts.map(p => formatPost(p, req.userId, stats)))
+    // mural e "Seguindo": ordem cronológica
+    if (req.query.institutionId || req.query.seguindo === '1') {
+      const posts = await query.orderBy('posts.created_at', 'desc').limit(limit).offset((page - 1) * limit)
+      const stats = await postStats(req.userId, posts)
+      return res.json(posts.map(p => formatPost(p, req.userId, stats)))
+    }
+
+    // "Para você": ranqueado (spec 11.2 a 11.4)
+    const pool = await query.orderBy('posts.created_at', 'desc').limit(FEED_POOL)
+    const [stats, attention, follows] = await Promise.all([
+      postStats(req.userId, pool),
+      attentionRanking(),
+      db('institution_follows').where({ user_id: req.userId }).select('institution_id'),
+    ])
+    const followed = new Set(follows.map(f => f.institution_id))
+    const ranked = pool
+      .map(p => ({ p, ...feedScore(p, stats, attention, followed) }))
+      .sort((a, b) => b.score - a.score)
+      .slice((page - 1) * limit, page * limit)
+    res.json(ranked.map(({ p, boosted }) => ({ ...formatPost(p, req.userId, stats), boosted })))
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })

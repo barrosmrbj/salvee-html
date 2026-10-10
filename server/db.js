@@ -189,6 +189,14 @@ async function initDb() {
     await db.schema.alterTable('donations', t => t.string('post_id'))
   }
 
+  // fotos do carrossel do perfil (spec 13.3; JSON com até 6 links /uploads/...) e dias/horários (spec 8.3 etapa 5, 13.10)
+  if (!(await db.schema.hasColumn('institutions', 'photos'))) {
+    await db.schema.alterTable('institutions', t => t.text('photos'))
+  }
+  if (!(await db.schema.hasColumn('institutions', 'opening_hours'))) {
+    await db.schema.alterTable('institutions', t => t.string('opening_hours'))
+  }
+
   // documento enviado na última etapa do cadastro da instituição, para a análise (spec 8.3, etapa 6)
   if (!(await db.schema.hasColumn('institutions', 'documents_url'))) {
     await db.schema.alterTable('institutions', t => t.string('documents_url'))

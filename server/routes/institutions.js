@@ -2,6 +2,7 @@ const express = require('express')
 const { v4: uuidv4 } = require('uuid')
 const { db } = require('../db')
 const { authMiddleware } = require('../middleware/auth')
+const { attentionRanking } = require('../attention')
 
 const router = express.Router()
 
@@ -16,16 +17,12 @@ router.get('/', authMiddleware, async (req, res) => {
 
 router.get('/destaques', authMiddleware, async (req, res) => {
   try {
-    const list = await db('institutions')
-      .leftJoin('donations', 'institutions.id', 'donations.institution_id')
-      .where('institutions.status', 'approved')
-      .groupBy('institutions.id')
-      .select('institutions.*')
-      .sum({ total_donated: 'donations.amount' })
-      // COALESCE no lugar de NULLS FIRST, que o MySQL não aceita (quem nunca recebeu vem primeiro)
-      .orderByRaw('COALESCE(SUM(donations.amount), 0) ASC')
-      .limit(10)
-    res.json(list.map(i => ({ ...formatInst(i), totalDonated: Number(i.total_donated) || 0 })))
+    // spec 17.5: instituições com menos ajuda recente (doações confirmadas em 30 dias + seguidores)
+    const { ranked, stats } = await attentionRanking()
+    const ids = ranked.slice(0, 10)
+    const rows = ids.length ? await db('institutions').whereIn('id', ids) : []
+    const byId = new Map(rows.map(i => [i.id, i]))
+    res.json(ids.filter(id => byId.has(id)).map(id => ({ ...formatInst(byId.get(id)), recentDonated: stats.get(id).recentDonated })))
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -51,7 +48,7 @@ router.get('/mine/:id', authMiddleware, async (req, res) => {
   try {
     const inst = await db('institutions').where({ id: req.params.id }).first()
     if (!inst || !(await canManage(req.userId, inst))) return res.status(404).json({ error: 'Instituição não encontrada' })
-    const fields = ['name', 'responsible', 'contact_email', 'contact_phone', 'category', 'subcategory', 'description',
+    const fields = ['name', 'responsible', 'contact_email', 'contact_phone', 'category', 'subcategory', 'description', 'opening_hours', 'photos',
       'audience', 'cnpj', 'street', 'city', 'state', 'zip', 'mission', 'founded_year', 'history', 'logo_url', 'photo_url', 'documents_url']
     res.json({
       id: inst.id, status: inst.status, rejectionReason: inst.rejection_reason || null,
@@ -89,7 +86,7 @@ router.get('/:id', authMiddleware, async (req, res) => {
       db('institution_follows').where({ institution_id: inst.id, user_id: req.userId }).first(),
       db('institution_follows').where({ institution_id: inst.id }).count({ n: '*' }).first(),
     ])
-    res.json({ ...formatInst(inst), following: Boolean(follow), followersCount: Number(count?.n || 0) })
+    res.json({ ...formatInst(inst), following: Boolean(follow), followersCount: Number(count?.n || 0), activeCampaign: await activeCampaign(inst.id) })
   } catch (err) {
     console.error(err)
     res.status(500).json({ error: 'Erro interno' })
@@ -163,11 +160,36 @@ async function canManage(userId, inst) {
 function flattenStep(step, data) {
   const maps = {
     1: { name: data.name, responsible: data.responsible, contact_email: data.contact_email, contact_phone: data.contact_phone, category: data.category, subcategory: data.subcategory },
-    2: { description: data.description, city: data.city, state: data.state, audience: data.audience, cnpj: data.cnpj, street: data.street, zip: data.zip, mission: data.mission, founded_year: data.founded_year ? Number(data.founded_year) : null },
-    3: { logo_url: data.logo_url, photo_url: data.photo_url, history: data.history, documents_url: data.documents_url },
+    2: { description: data.description, city: data.city, state: data.state, audience: data.audience, cnpj: data.cnpj, street: data.street, zip: data.zip, mission: data.mission, founded_year: data.founded_year ? Number(data.founded_year) : null, opening_hours: data.opening_hours },
+    3: { logo_url: data.logo_url, history: data.history, documents_url: data.documents_url, ...photoFields(data.photos) },
   }
   const flat = maps[step] || {}
   return Object.fromEntries(Object.entries(flat).filter(([, v]) => v !== undefined && v !== null && v !== ''))
+}
+
+// fotos do carrossel: só links enviados pelo app, até 6; a primeira também vai para photo_url (telas antigas)
+const MAX_PHOTOS = 6
+function photoFields(photos) {
+  if (!Array.isArray(photos)) return {}
+  const list = photos.filter(u => typeof u === 'string' && /^\/uploads\/[\w.-]+$/.test(u)).slice(0, MAX_PHOTOS)
+  if (!list.length) return {}
+  return { photos: JSON.stringify(list), photo_url: list[0] }
+}
+
+function parsePhotos(i) {
+  try {
+    const list = JSON.parse(i.photos || '[]')
+    if (Array.isArray(list) && list.length) return list
+  } catch { /* coluna vazia ou antiga */ }
+  return i.photo_url ? [i.photo_url] : []
+}
+
+// campanha em andamento mais recente (dentro do prazo e sem ter batido a meta)
+async function activeCampaign(institutionId) {
+  const today = new Date().toISOString().slice(0, 10)
+  const list = await db('posts').where({ institution_id: institutionId, type: 'campaign' }).orderBy('created_at', 'desc').limit(20)
+  const c = list.find(p => (!p.campaign_deadline || p.campaign_deadline >= today) && (p.campaign_current || 0) < (p.campaign_goal || 0))
+  return c ? { id: c.id, title: c.title || 'Campanha', goal: c.campaign_goal, current: c.campaign_current || 0, deadline: c.campaign_deadline || null } : null
 }
 
 function formatInst(i) {
@@ -179,10 +201,15 @@ function formatInst(i) {
     status: i.status,
     description: i.description || '',
     logoUrl: i.logo_url,
-    photos: i.photo_url ? [i.photo_url] : [],
+    photos: parsePhotos(i),
     cnpj: i.cnpj,
     phone: i.contact_phone,
-    address: i.street ? { street: i.street, city: i.city || '', state: i.state || '' } : undefined,
+    address: (i.street || i.city) ? { street: i.street || '', city: i.city || '', state: i.state || '', zipCode: i.zip || '' } : undefined,
+    city: i.city || '',
+    state: i.state || '',
+    email: i.contact_email || undefined,
+    openingHours: i.opening_hours || undefined,
+    audience: i.audience || undefined,
     mission: i.mission,
     history: i.history,
     foundedYear: i.founded_year,

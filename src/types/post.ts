@@ -26,6 +26,8 @@ export interface Post {
   registered?: boolean
   /** o usuário é responsável pela instituição: pode editar/excluir */
   canEdit?: boolean
+  /** "Para você": instituição com pouca ajuda recente (spec 11.4) */
+  boosted?: boolean
   /** o usuário curtiu */
   liked?: boolean
   likeCount?: number

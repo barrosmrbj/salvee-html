@@ -17,6 +17,12 @@ export interface Institution {
   mission?: string
   foundedYear?: number
   history?: string
+  city?: string
+  state?: string
+  openingHours?: string
+  audience?: string
+  /** campanha em andamento para a barra de meta do perfil (spec 13.6) */
+  activeCampaign?: { id: string; title: string; goal: number; current: number; deadline: string | null } | null
   /** o usuário segue esta instituição */
   following?: boolean
   followersCount?: number

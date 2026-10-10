@@ -140,6 +140,9 @@ function card(inst: MyInstitution): HTMLElement {
   } else if (inst.status === 'approved') {
     el.appendChild(Button({ label: 'Ver perfil público', variant: 'secondary', fullWidth: true,
       onClick: () => { window.location.hash = `/institution/${inst.id}` } }))
+    // aprovada continua gerenciando dados e fotos do perfil (spec 13.3 e 23.2)
+    el.appendChild(Button({ label: 'Editar dados e fotos', variant: 'ghost', fullWidth: true,
+      onClick: () => { window.location.hash = `/register/institution?corrigir=${encodeURIComponent(inst.id)}` } }))
   }
   return el
 }

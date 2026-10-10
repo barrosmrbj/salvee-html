@@ -158,6 +158,7 @@ function renderStep2(container: HTMLElement): void {
   appendInput(container, { id: 'city', label: 'Cidade (opcional)', placeholder: 'Manaus' })
   appendInput(container, { id: 'state', label: 'Estado (opcional)', placeholder: 'AM' })
   appendInput(container, { id: 'zip', label: 'CEP (opcional)', placeholder: '69000-000' })
+  appendInput(container, { id: 'opening_hours', label: 'Dias e horários de funcionamento (opcional)', placeholder: 'Seg a sex, 8h às 17h' })
   appendTextarea(container, { id: 'mission', label: 'Missão (opcional)', placeholder: 'Nossa missão é...' })
   appendInput(container, { id: 'founded_year', label: 'Ano de fundação (opcional)', type: 'number', placeholder: '2010' })
 }
@@ -173,9 +174,93 @@ function renderStep3(container: HTMLElement): void {
   container.appendChild(intro)
 
   appendFileInput(container, { id: 'logo', label: 'Logo da instituição', hint: 'JPG ou PNG · máx. 1 MB' })
-  appendFileInput(container, { id: 'photo', label: 'Foto principal do local', hint: 'JPG ou PNG · máx. 1 MB' })
+  appendPhotoPicker(container)
   appendTextarea(container, { id: 'history', label: 'História (opcional)', placeholder: 'Conte como a instituição surgiu...' })
   appendFileInput(container, { id: 'docs', label: 'Documentos para análise', hint: 'PDF, JPG ou PNG · máx. 1 MB', accept: '.pdf,image/jpeg,image/png' })
+}
+
+// ── Fotos do perfil (carrossel, spec 8.3 etapa 4 e 13.3) ──────────────────────
+const MAX_PHOTOS = 6
+let photos: string[] = []
+let photosLoaded = false
+
+function appendPhotoPicker(container: HTMLElement): void {
+  // modo correção: começa com as fotos já salvas
+  if (!photosLoaded) {
+    photosLoaded = true
+    try {
+      const saved = JSON.parse(String(editData?.['photos'] ?? '[]'))
+      photos = Array.isArray(saved) ? saved : []
+    } catch { photos = [] }
+    if (!photos.length && editData?.['photo_url']) photos = [String(editData['photo_url'])]
+  }
+
+  const w = document.createElement('div')
+  w.className = 'flex flex-col gap-1'
+  const label = document.createElement('span')
+  label.className = 'text-sm font-medium text-gray-700'
+  label.textContent = `Fotos do local e das ações (até ${MAX_PHOTOS})`
+  const hint = document.createElement('span')
+  hint.className = 'text-xs text-gray-400'
+  hint.textContent = 'Aparecem no topo do perfil da instituição. JPG ou PNG, até 1 MB cada.'
+  const grid = document.createElement('div')
+  grid.className = 'grid grid-cols-3 gap-2 mt-1'
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = 'image/jpeg,image/png'
+  input.multiple = true
+  input.className = 'hidden'
+
+  const paint = () => {
+    grid.innerHTML = ''
+    photos.forEach((src, i) => {
+      const cell = document.createElement('div')
+      cell.className = 'relative aspect-square'
+      const img = document.createElement('img')
+      img.src = src
+      img.alt = ''
+      img.className = 'w-full h-full object-cover rounded-xl bg-gray-100'
+      const remove = document.createElement('button')
+      remove.type = 'button'
+      remove.className = 'absolute top-1 right-1 w-6 h-6 rounded-full bg-black/60 text-white text-xs'
+      remove.setAttribute('aria-label', 'Remover foto')
+      remove.textContent = '✕'
+      remove.addEventListener('click', () => { photos.splice(i, 1); paint() })
+      cell.append(img, remove)
+      grid.appendChild(cell)
+    })
+    if (photos.length < MAX_PHOTOS) {
+      const add = document.createElement('button')
+      add.type = 'button'
+      add.className = 'aspect-square rounded-xl border-2 border-dashed border-gray-200 text-gray-400 flex flex-col items-center justify-center text-xs gap-1 hover:border-salvee-orange'
+      add.innerHTML = '<span class="text-2xl leading-none">+</span><span>Adicionar</span>'
+      add.addEventListener('click', () => input.click())
+      grid.appendChild(add)
+    }
+  }
+
+  input.addEventListener('change', async () => {
+    const files = Array.from(input.files ?? []).slice(0, MAX_PHOTOS - photos.length)
+    input.value = ''
+    if (!files.length) return
+    const overlay = LoadingOverlay()
+    document.body.appendChild(overlay)
+    try {
+      for (const file of files) {
+        if (file.size > 1_048_576) { showToast(`${file.name}: maior que 1 MB`, 'error'); continue }
+        photos.push(await institutionService.uploadFile(file))
+      }
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : 'Erro ao enviar a foto', 'error')
+    } finally {
+      overlay.remove()
+      paint()
+    }
+  })
+
+  w.append(label, hint, grid, input)
+  paint()
+  container.appendChild(w)
 }
 
 // ── Helpers de campo ─────────────────────────────────────────────────────────
@@ -251,7 +336,7 @@ function appendFileInput(container: HTMLElement, opts: { id: string; label: stri
     <div id="${opts.id}-preview" class="hidden mt-1"></div>
   `
 
-  const already = saved({ logo: 'logo_url', photo: 'photo_url', docs: 'documents_url' }[opts.id] ?? '')
+  const already = saved({ logo: 'logo_url', docs: 'documents_url' }[opts.id] ?? '')
   if (already) (w.querySelector(`#${opts.id}-name`) as HTMLElement).textContent = 'Já enviado · toque para trocar'
 
   const fileInput = w.querySelector(`#${opts.id}-file`) as HTMLInputElement
@@ -360,7 +445,7 @@ async function submitStep1(): Promise<void> {
 
 async function submitStep2(): Promise<void> {
   const data: Record<string, string> = {}
-  ;['description', 'audience', 'cnpj', 'street', 'city', 'state', 'zip', 'mission', 'founded_year'].forEach(id => {
+  ;['description', 'audience', 'cnpj', 'street', 'city', 'state', 'zip', 'opening_hours', 'mission', 'founded_year'].forEach(id => {
     const el = document.getElementById(id) as HTMLInputElement | HTMLTextAreaElement
     if (el?.value) data[id] = el.value
   })
@@ -369,19 +454,14 @@ async function submitStep2(): Promise<void> {
 }
 
 async function submitStep3(): Promise<void> {
-  const data: Record<string, string> = {}
+  const data: Record<string, unknown> = { photos }
 
   const historyEl = document.getElementById('history') as HTMLTextAreaElement
   if (historyEl?.value) data['history'] = historyEl.value
 
-  for (const id of ['logo', 'photo']) {
-    const fileInput = document.getElementById(`${id}-file`) as HTMLInputElement
-    const file = fileInput?.files?.[0]
-    if (file) {
-      const url = await institutionService.uploadFile(file)
-      data[id === 'logo' ? 'logo_url' : 'photo_url'] = url
-    }
-  }
+  const logoInput = document.getElementById('logo-file') as HTMLInputElement
+  const logo = logoInput?.files?.[0]
+  if (logo) data['logo_url'] = await institutionService.uploadFile(logo)
 
   // documento para a análise: o link fica na instituição e aparece para o admin
   const docsInput = document.getElementById('docs-file') as HTMLInputElement
@@ -417,4 +497,6 @@ export function unmount(): void {
   editId = null
   editStatus = null
   editData = null
+  photos = []
+  photosLoaded = false
 }

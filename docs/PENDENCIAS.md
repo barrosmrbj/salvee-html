@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 10/10/2026 (v1.13.1). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 10/10/2026 (v1.14.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -32,7 +32,7 @@ O cliente ainda não tem **domínio próprio** nem **e-mail do projeto**. Com o 
       Pular por enquanto (verificação), Criar nova senha e Confirme seu e-mail.
 
 ## 25. Funcionalidades da versão 1 (checklist do PDF)
-Conferido em 10/10/2026 (v1.13.1): **9 completas, 7 parciais, 3 sem funcionar de verdade** (de 19 + painel admin).
+Conferido em 10/10/2026 (v1.14.0): **14 completas, 3 parciais, 2 sem funcionar de verdade** (de 19 + painel admin).
 ✅ completo · 🟡 parcial · ❌ não funciona de verdade.
 
 | # | Funcionalidade (seção 25) | Situação | O que falta |
@@ -42,15 +42,15 @@ Conferido em 10/10/2026 (v1.13.1): **9 completas, 7 parciais, 3 sem funcionar de
 | 3 | Cadastro de usuário comum | 🟡 | Validar senha mínima e formato do e-mail no cadastro. |
 | 4 | Cadastro institucional com validação | ✅ | Aprovar / pedir revisão / rejeitar / corrigir e reenviar / telas de situação. Faltam horário de funcionamento e várias fotos. |
 | 5 | Login e recuperação de senha | 🟡 | Código pronto; falta a caixa de e-mail do cliente (domínio próprio). |
-| 6 | Feed | 🟡 | Algoritmo só por data; falta impulsionar instituições menos ajudadas (1.4 e 11.4). |
+| 6 | Feed | ✅ | "Para você" ranqueado com impulsionamento de quem recebeu menos e etiqueta "Precisa de apoio" (v1.14.0). |
 | 7 | Curtidas e comentários | ✅ | — |
 | 8 | Posts, campanhas e eventos | ✅ | Vídeo (opcional no PDF). |
-| 9 | Perfil institucional | 🟡 | Carrossel de várias fotos e barra da meta ativa no topo. Telefone abre o discador ✅. |
-| 10 | Mural, Sobre e Info | 🟡 | Falta mapa com rota (Google Maps/Waze) na aba Info. |
-| 11 | Busca | ✅ | Por nome, só instituições aprovadas. |
-| 12 | Categorias | 🟡 | Filtram só os dados de exemplo de "Causas perto de você". |
-| 13 | Destaques | ✅ | Instituições que menos receberam. |
-| 14 | Causas perto de você | ❌ | Dados fixos de exemplo: sem localização nem campanhas reais. |
+| 9 | Perfil institucional | ✅ | Carrossel de até 6 fotos, barra da campanha ativa e edição de dados/fotos pela instituição aprovada (v1.14.0). Meta mensal (além de campanha) ainda não existe. |
+| 10 | Mural, Sobre e Info | ✅ | Info com endereço, CEP, horário, telefone, e-mail, mapa e rota Google Maps/Waze (v1.14.0). |
+| 11 | Busca | ✅ | Instituições e campanhas por nome, categoria, cidade ou palavra-chave; menos ajudadas primeiro (v1.14.0). |
+| 12 | Categorias | ✅ | Carrossel com as categorias reais; tocar mostra instituições e campanhas da categoria (v1.14.0). |
+| 13 | Destaques | ✅ | Menos ajuda recente (30 dias) e menos seguidores primeiro (v1.14.0). |
+| 14 | Causas perto de você | 🟡 | Campanhas reais em andamento, primeiro as da cidade escolhida (v1.14.0). Falta GPS (precisa de coordenadas das instituições). |
 | 15 | Doação com método realmente suportado | 🟡 | Só PIX na tela, mas sem cobrança real: o admin confirma à mão. Falta integrar provedor. |
 | 16 | Gamificação básica com XP e Salves | ✅ | Pontos só com doação confirmada. Faltam aba própria na navegação e regra de pontos configurável. |
 | 17 | Recompensas e QR Code | ❌ | Resgate desconta Salves e não guarda nada; QR é só texto; sem "Minhas recompensas" nem validação no parceiro. |
@@ -58,7 +58,7 @@ Conferido em 10/10/2026 (v1.13.1): **9 completas, 7 parciais, 3 sem funcionar de
 | 19 | Configurações | ❌ | 7 itens sem ação: Notificações, Geral, Acessibilidade, Pagamentos, Segurança (alterar senha), Ajuda, Sobre (termos e privacidade). |
 | — | Painel administrativo mínimo | ✅ | Instituições, doações, usuários, moderação. Faltam recompensas/parceiros e categorias. |
 
-**Prioridade sugerida:** 17 + aba Gamificação → 19 (alterar senha, termos, privacidade, ajuda, sobre) → 3 → 12/14 (campanhas reais por categoria/cidade) → 6 (impulsionamento) → 9/10/18 (mapa, carrossel, meta).
+**Prioridade sugerida:** 17 + aba Gamificação → 19 (alterar senha, termos, privacidade, ajuda, sobre) → 3 → 18 (detalhe do evento com mapa) → GPS em 14.
 **Dependem do cliente:** 5 (e-mail/domínio), 15 (provedor de PIX), login social (credenciais).
 
 ## Comparação com a especificação (`.Documentacao/Especificação SALVEE.pdf`)

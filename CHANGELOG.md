@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.13.1**
+**Versão atual: 1.14.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.14.0** | 10/10/2026 | Minor | Feed com impulsionamento, perfil da instituição completo e busca reformulada | Feed, Busca, Instituição, Onboarding, Servidor, Banco de dados |
 | **1.13.1** | 10/10/2026 | Patch | Escolha Usuário/Instituição depois de criar a conta | Onboarding, Autenticação, Servidor |
 | **1.13.0** | 10/10/2026 | Minor | Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro | Doação, Feed, Instituição, Onboarding, Autenticação, Configurações, Servidor, Banco de dados |
 | **1.12.1** | 08/10/2026 | Patch | Situação do cadastro da instituição no Perfil | Perfil, Instituição |
@@ -51,6 +52,21 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.14.0 — Feed com impulsionamento, perfil da instituição completo e busca reformulada
+
+*10/10/2026 · Minor · Feed, Busca, Instituição, Onboarding, Servidor, Banco de dados*
+
+- Feed "Para você" deixa de ser só por data: soma novidade, instituições que a pessoa segue, urgência (campanha perto do prazo, evento próximo), curtidas/comentários e um impulso para quem recebeu menos ajuda nos últimos 30 dias, com a etiqueta "✨ Precisa de apoio" (spec 1.4, 4.4, 11.3 e 11.4)
+- Destaques da busca: instituições com menos doações confirmadas recentes e menos seguidores (spec 17.5)
+- Perfil da instituição: carrossel com até 6 fotos e barra da campanha ativa no topo (spec 13.3 a 13.6); a instituição aprovada edita dados e fotos pela tela "Minha instituição"
+- Aba Info: endereço com CEP, dias e horários de funcionamento, telefone que abre o discador, e-mail, mapa e botões de rota Google Maps e Waze (spec 13.10)
+- Cadastro da instituição: várias fotos (até 6) e o campo "Dias e horários de funcionamento"; colunas institutions.photos e opening_hours
+- Busca reformulada (spec 17): pesquisa instituições e campanhas por nome, categoria, cidade ou palavra-chave; carrossel com as categorias reais (tocar mostra o que há nela); Causas perto de você com campanhas reais em andamento, primeiro as da cidade escolhida; saem todos os dados de exemplo e o carrossel de promoções fictícias
+- Perfil de instituição que não carrega mostra aviso em vez de dados de exemplo
+- Rotas GET /api/search (instituições + campanhas), /api/search/categories, /api/search/cities e /api/search/causas; server/attention.js
+
+Fontes: `server/attention.js` · `server/routes/feed.js` · `server/routes/search.js` · `server/routes/institutions.js` · `server/db.js` · `src/screens/search.ts` · `src/services/search.service.ts` · `src/screens/institution-profile.ts` · `src/screens/onboarding/institution-register.ts` · `src/screens/onboarding/institution-status.ts` · `src/components/PostCard.ts` · `src/types/institution.ts` · `src/types/post.ts` · `docs/sql/v1.14.0-fotos-e-horarios.sql` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.13.1 — Escolha Usuário/Instituição depois de criar a conta
 
