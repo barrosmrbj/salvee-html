@@ -4,7 +4,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 ## Visão geral
 
-**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). **Especificação oficial: `.Documentacao/Especificação SALVEE.pdf`** (37 páginas; em caso de conflito, vale o PDF). `salvee_especificacao.md` é um resumo antigo e marca como "(implementado)" partes incompletas: não usar como referência de status. **Pendências, comparação com o PDF e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`.
+**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). **Especificação oficial: `.Documentacao/Especificação SALVEE.pdf`** (37 páginas; em caso de conflito, vale o PDF). `salvee_especificacao.md` é um resumo antigo e marca como "(implementado)" partes incompletas: não usar como referência de status. **Pendências, comparação com o PDF e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`. **Protótipo visual dos designers (Figma, mockups das telas):** https://www.figma.com/proto/E6qAZObrdwAH1WoCLOk8f2/Salvee?node-id=4-340&t=6UThrBMosZ7Zzatf-1 (referência de layout; em conflito de regra, vale o PDF). Imagem estática dos mockups: `.Documentacao/mockups_projeto_salvee.png`.
 
 - **Frontend:** Vite 6 + TypeScript (vanilla, sem framework) + Tailwind 3, em `src/`.
 - **Backend:** Node.js + Express 4 (CommonJS) em `server/`, banco via Knex (SQLite em dev, MySQL em produção).
