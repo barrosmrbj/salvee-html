@@ -127,7 +127,7 @@ function renderUserCard(user: AdminUser): HTMLElement {
   info.innerHTML = `
     <div class="flex items-center gap-2">
       <p class="font-semibold text-gray-900 text-sm truncate">${user.name}</p>
-      <span class="flex-shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${ROLE_CLASS[user.role] ?? ROLE_CLASS.user}">${ROLE_LABEL[user.role] ?? user.role}</span>
+      <span class="flex-shrink-0 text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full ${ROLE_CLASS[user.role] ?? ROLE_CLASS.user}">${ROLE_LABEL[user.role] ?? user.role}</span>
     </div>
     <p class="text-xs text-gray-400 truncate mt-0.5">${user.email}</p>
   `

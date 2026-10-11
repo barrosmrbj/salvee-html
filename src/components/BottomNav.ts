@@ -42,7 +42,7 @@ export function BottomNav(): HTMLElement {
     const isActive = window.location.hash === item.hash
     btn.className = `flex flex-col items-center gap-0.5 py-2 px-4 transition-colors ${isActive ? 'text-salvee-orange' : 'text-gray-400'}`
     if (isActive) btn.setAttribute('aria-current', 'page')
-    btn.innerHTML = `${item.icon}<span class="text-[10px] font-medium">${item.label}</span>`
+    btn.innerHTML = `${item.icon}<span class="text-[0.625rem] font-medium">${item.label}</span>`
     btn.addEventListener('click', () => { window.location.hash = item.hash })
     nav.appendChild(btn)
   })

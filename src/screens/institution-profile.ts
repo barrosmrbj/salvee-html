@@ -284,7 +284,7 @@ function campaignGoal(c: NonNullable<Institution['activeCampaign']>): HTMLElemen
   const head = document.createElement('div')
   head.className = 'flex items-center justify-between gap-2'
   const label = document.createElement('span')
-  label.className = 'text-[11px] font-semibold text-salvee-orange uppercase tracking-wide'
+  label.className = 'text-[0.6875rem] font-semibold text-salvee-orange uppercase tracking-wide'
   label.textContent = '🎯 Campanha ativa'
   const more = document.createElement('span')
   more.className = 'text-xs font-semibold text-salvee-orange'

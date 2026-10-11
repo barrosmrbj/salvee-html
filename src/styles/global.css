@@ -5,10 +5,14 @@
 @tailwind utilities;
 
 /*
-  Layout responsivo (celular primeiro):
-  - celular (< 768px): o app ocupa a tela inteira;
-  - tablet (>= 768px): coluna central de 640px com sombra;
-  - computador (>= 1024px): coluna de 680px e a barra de baixo vira menu lateral (ver #bottom-nav abaixo).
+  Layout responsivo (celular primeiro). As telas foram desenhadas para celular: em telas maiores
+  a interface é AMPLIADA (fonte base maior → tudo em rem cresce junto: texto, espaços, botões,
+  imagens) e a coluna mantém a proporção de celular. Só alargar a coluna deixava tudo "esticado e pequeno".
+  Coluna de 26rem = proporção de um celular de ~416px, só que ampliado.
+  - celular (< 768px): fonte 16px, app na tela inteira;
+  - tablet (>= 768px): fonte 18px, coluna 26rem (468px);
+  - computador (>= 1024px): fonte 20px, coluna 520px e a barra de baixo vira menu lateral;
+  - monitor grande (>= 1600px): fonte 22px (572px).
   --app-max alimenta a classe max-w-app (tailwind.config.ts), usada também pelas barras fixas das telas.
 */
 :root {
@@ -16,10 +20,15 @@
   --nav-rail: 0px;
 }
 @media (min-width: 768px) {
-  :root { --app-max: 640px; }
+  html { font-size: 18px; }
+  :root { --app-max: 26rem; }
 }
 @media (min-width: 1024px) {
-  :root { --app-max: 680px; --nav-rail: 112px; }
+  html { font-size: 20px; }
+  :root { --nav-rail: 7.5rem; }
+}
+@media (min-width: 1600px) {
+  html { font-size: 22px; }
 }
 
 @layer base {
@@ -77,13 +86,13 @@
   #bottom-nav {
     top: 0;
     bottom: 0;
-    left: calc(50% - var(--app-max) / 2 - var(--nav-rail) - 16px);
+    left: calc(50% - var(--app-max) / 2 - var(--nav-rail) - 1rem);
     width: var(--nav-rail);
     transform: none;
     flex-direction: column;
     justify-content: flex-start;
-    gap: 4px;
-    padding: 24px 8px;
+    gap: 0.25rem;
+    padding: 1.5rem 0.5rem;
     border-top: 0;
     background: transparent;
   }
@@ -91,11 +100,12 @@
     width: 100%;
     flex-direction: row;
     justify-content: flex-start;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 12px;
+    gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.75rem;
   }
   #bottom-nav button:hover { background: #fff; }
-  #bottom-nav button span { font-size: 14px; }
+  #bottom-nav button span { font-size: 0.875rem; }
+  #bottom-nav button svg { width: 1.4rem; height: 1.4rem; }
   #bottom-nav .nav-logo { display: flex; }
 }

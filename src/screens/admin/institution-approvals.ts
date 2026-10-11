@@ -136,7 +136,7 @@ function renderInstitutionCard(inst: AdminInstitution): HTMLElement {
       <p class="font-bold text-gray-900 text-sm truncate">${inst.name}</p>
       <p class="text-xs text-gray-400 mt-0.5">${inst.category || 'Sem categoria'}${inst.city ? ` · ${inst.city}${inst.state ? `/${inst.state}` : ''}` : ''}</p>
     </div>
-    <span class="flex-shrink-0 text-[11px] font-semibold px-2 py-1 rounded-full ${STATUS_CLASS[inst.status]}">${STATUS_LABEL[inst.status]}</span>
+    <span class="flex-shrink-0 text-[0.6875rem] font-semibold px-2 py-1 rounded-full ${STATUS_CLASS[inst.status]}">${STATUS_LABEL[inst.status]}</span>
   `
   card.appendChild(header)
 

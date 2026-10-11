@@ -53,7 +53,7 @@ export function PostCard(post: Post, options: PostCardOptions = {}): HTMLElement
   // publicação impulsionada: instituição com pouca ajuda recente (spec 11.2 e 11.4)
   if (post.boosted) {
     const boost = document.createElement('span')
-    boost.className = 'self-start text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700'
+    boost.className = 'self-start text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700'
     boost.textContent = '✨ Precisa de apoio'
     boost.title = 'Instituição que recebeu pouca ajuda recentemente'
     card.appendChild(boost)
@@ -62,7 +62,7 @@ export function PostCard(post: Post, options: PostCardOptions = {}): HTMLElement
   const tag = TYPE_TAG[post.type]
   if (tag) {
     const pill = document.createElement('span')
-    pill.className = `self-start text-[11px] font-semibold px-2 py-0.5 rounded-full ${tag.className}`
+    pill.className = `self-start text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full ${tag.className}`
     pill.textContent = tag.label
     card.appendChild(pill)
   }
@@ -274,7 +274,7 @@ function imageGallery(images: string[]): HTMLElement {
     img.loading = 'lazy'
     img.className = 'w-full h-56 object-cover rounded-xl bg-gray-100'
     const count = document.createElement('span')
-    count.className = 'absolute top-2 right-2 text-[11px] font-semibold bg-black/50 text-white px-2 py-0.5 rounded-full'
+    count.className = 'absolute top-2 right-2 text-[0.6875rem] font-semibold bg-black/50 text-white px-2 py-0.5 rounded-full'
     count.textContent = `${i + 1}/${images.length}`
     frame.appendChild(img)
     frame.appendChild(count)

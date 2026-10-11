@@ -100,7 +100,7 @@ function card(inst: MyInstitution): HTMLElement {
   name.className = 'font-bold text-gray-900 truncate'
   name.textContent = inst.name
   const badge = document.createElement('span')
-  badge.className = `inline-block mt-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${s.badge}`
+  badge.className = `inline-block mt-1 text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full ${s.badge}`
   badge.textContent = s.title
   names.append(name, badge)
   head.append(icon, names)

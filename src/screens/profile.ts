@@ -358,7 +358,7 @@ function institutionStatusCard(mine: MyInstitution[]): HTMLElement {
     text.textContent = s.text
     info.append(name, text)
     const badge = document.createElement('span')
-    badge.className = 'text-[10px] font-bold tracking-wide flex-shrink-0'
+    badge.className = 'text-[0.625rem] font-bold tracking-wide flex-shrink-0'
     badge.textContent = s.label
     row.append(icon, info, badge)
     row.addEventListener('click', () => { window.location.hash = '/institution-status' })

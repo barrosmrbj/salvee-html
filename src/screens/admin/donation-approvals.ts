@@ -140,7 +140,7 @@ function renderDonationCard(d: AdminDonation): HTMLElement {
   titleBox.appendChild(line('font-bold text-gray-900 text-base', `R$ ${d.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`))
   titleBox.appendChild(line('text-xs text-gray-500 mt-0.5 truncate', `para ${d.institutionName}`))
   const badge = document.createElement('span')
-  badge.className = `flex-shrink-0 text-[11px] font-semibold px-2 py-1 rounded-full ${STATUS_CLASS[d.status]}`
+  badge.className = `flex-shrink-0 text-[0.6875rem] font-semibold px-2 py-1 rounded-full ${STATUS_CLASS[d.status]}`
   badge.textContent = STATUS_LABEL[d.status]
   header.appendChild(titleBox)
   header.appendChild(badge)

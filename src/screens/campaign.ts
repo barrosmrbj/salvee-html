@@ -65,7 +65,7 @@ function renderCampaign(root: HTMLElement, post: Post): void {
   body.className = 'p-4 flex flex-col gap-4'
 
   const tag = document.createElement('span')
-  tag.className = 'self-start text-[11px] font-semibold px-2 py-0.5 rounded-full bg-salvee-orange-bg text-salvee-orange'
+  tag.className = 'self-start text-[0.6875rem] font-semibold px-2 py-0.5 rounded-full bg-salvee-orange-bg text-salvee-orange'
   tag.textContent = '🎯 Campanha'
   const title = document.createElement('h2')
   title.className = 'text-2xl font-bold text-gray-900 leading-tight'
@@ -109,7 +109,7 @@ function renderCampaign(root: HTMLElement, post: Post): void {
     v.className = 'font-bold text-gray-900'
     v.textContent = value
     const l = document.createElement('p')
-    l.className = 'text-[11px] text-gray-500'
+    l.className = 'text-[0.6875rem] text-gray-500'
     l.textContent = label
     s.append(v, l)
     stats.appendChild(s)

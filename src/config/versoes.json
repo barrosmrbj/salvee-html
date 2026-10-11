@@ -1,6 +1,24 @@
 {
-  "versaoAtual": "1.18.2",
+  "versaoAtual": "1.18.3",
   "historico": [
+    {
+      "versao": "1.18.3",
+      "data": "2026-10-11",
+      "tipo": "patch",
+      "titulo": "Tablet e computador sem tela esticada: interface ampliada na proporção do celular",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "Na 1.18.0 a coluna alargava (640/680px) mas os elementos continuavam no tamanho de celular, e tudo parecia esticado e pequeno; agora a interface inteira é ampliada: fonte base 18px no tablet, 20px no computador e 22px em monitores a partir de 1600px, numa coluna de 26rem (468, 520 e 572px) com a mesma proporção do celular",
+        "Menu lateral do computador e textos pequenos (selos, datas) passam a crescer junto; no celular nada muda"
+      ],
+      "fontes": [
+        "src/styles/global.css",
+        "src/",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.18.2",
       "data": "2026-10-10",

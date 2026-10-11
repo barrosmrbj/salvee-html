@@ -62,7 +62,7 @@ export function render(): HTMLElement {
           </div>
           <div id="category-chips" class="hidden flex gap-2 overflow-x-auto px-4 pb-3 scrollbar-hide"></div>
           <div class="flex items-center justify-between gap-2 px-4 mb-3">
-            <p id="gps-status" class="text-[11px] text-gray-400"></p>
+            <p id="gps-status" class="text-[0.6875rem] text-gray-400"></p>
             <label id="city-label" class="flex items-center gap-1 text-xs text-gray-500">
               <span aria-hidden="true">📍</span>
               <select id="city-select" class="bg-transparent text-xs font-semibold text-salvee-orange outline-none max-w-[9rem]" aria-label="Cidade"></select>
@@ -150,7 +150,7 @@ function promoCard(p: PromoItem): HTMLElement {
   const overlay = document.createElement('div')
   overlay.className = 'absolute inset-0 flex flex-col justify-end p-4 bg-gradient-to-t from-black/70 via-black/20 to-transparent'
   const tag = document.createElement('span')
-  tag.className = 'self-start text-[10px] font-bold uppercase tracking-wide text-white/90 bg-white/20 rounded-full px-2 py-0.5 mb-1'
+  tag.className = 'self-start text-[0.625rem] font-bold uppercase tracking-wide text-white/90 bg-white/20 rounded-full px-2 py-0.5 mb-1'
   tag.textContent = p.kind === 'promo' ? 'Promoção' : 'Meta'
   const title = document.createElement('p')
   title.className = 'text-white font-bold text-lg leading-tight'
@@ -171,7 +171,7 @@ function promoCard(p: PromoItem): HTMLElement {
     fill.style.width = `${pct}%`
     bar.appendChild(fill)
     const label = document.createElement('p')
-    label.className = 'text-white/80 text-[11px] mt-1'
+    label.className = 'text-white/80 text-[0.6875rem] mt-1'
     label.textContent = `${pct}% · R$ ${p.progress.current.toLocaleString('pt-BR')} de R$ ${p.progress.goal.toLocaleString('pt-BR')}`
     overlay.append(bar, label)
   }
@@ -386,7 +386,7 @@ function campaignItem(c: SearchCampaign): HTMLElement {
   const info = document.createElement('div')
   info.className = 'flex-1 min-w-0 flex flex-col gap-1'
   const cat = document.createElement('span')
-  cat.className = 'text-[11px] text-salvee-orange font-semibold'
+  cat.className = 'text-[0.6875rem] text-salvee-orange font-semibold'
   const where = c.distanceKm != null ? `📍 a ${c.distanceKm.toLocaleString('pt-BR')} km` : c.nearby ? '📍 perto de você' : ''
   cat.textContent = [c.category, where].filter(Boolean).join(' · ') || 'Campanha'
   const title = document.createElement('p')
@@ -399,7 +399,7 @@ function campaignItem(c: SearchCampaign): HTMLElement {
   if (c.goal > 0) {
     info.appendChild(ProgressBar(c.current, c.goal, false))
     const raised = document.createElement('p')
-    raised.className = 'text-[11px] text-gray-500'
+    raised.className = 'text-[0.6875rem] text-gray-500'
     raised.textContent = `R$ ${c.current.toLocaleString('pt-BR')} de R$ ${c.goal.toLocaleString('pt-BR')}`
     info.appendChild(raised)
   }

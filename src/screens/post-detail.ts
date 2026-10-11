@@ -133,14 +133,14 @@ function commentItem(c: PostComment): HTMLElement {
   name.className = 'text-xs font-semibold text-gray-900 truncate'
   name.textContent = c.userName
   const time = document.createElement('span')
-  time.className = 'text-[11px] text-gray-400'
+  time.className = 'text-[0.6875rem] text-gray-400'
   time.textContent = new Date(c.createdAt).toLocaleString('pt-BR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
   head.append(name, time)
 
   if (c.canDelete) {
     const del = document.createElement('button')
     del.type = 'button'
-    del.className = 'ml-auto text-[11px] text-red-400 hover:text-red-600'
+    del.className = 'ml-auto text-[0.6875rem] text-red-400 hover:text-red-600'
     del.textContent = 'Apagar'
     del.addEventListener('click', async () => {
       // segundo toque confirma

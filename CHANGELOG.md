@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.18.2**
+**Versão atual: 1.18.3**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.18.3** | 11/10/2026 | Patch | Tablet e computador sem tela esticada: interface ampliada na proporção do celular | Sistema |
 | **1.18.2** | 10/10/2026 | Patch | Manifesto do app passa a ser /manifest.json | Sistema, Servidor |
 | **1.18.1** | 10/10/2026 | Patch | Manifesto do app com o tipo certo para "Instalar app" | Servidor, Sistema |
 | **1.18.0** | 10/10/2026 | Minor | Visual responsivo para celular, tablet e computador e app instalável na tela inicial | Sistema |
@@ -58,6 +59,15 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.18.3 — Tablet e computador sem tela esticada: interface ampliada na proporção do celular
+
+*11/10/2026 · Patch · Sistema*
+
+- Na 1.18.0 a coluna alargava (640/680px) mas os elementos continuavam no tamanho de celular, e tudo parecia esticado e pequeno; agora a interface inteira é ampliada: fonte base 18px no tablet, 20px no computador e 22px em monitores a partir de 1600px, numa coluna de 26rem (468, 520 e 572px) com a mesma proporção do celular
+- Menu lateral do computador e textos pequenos (selos, datas) passam a crescer junto; no celular nada muda
+
+Fontes: `src/styles/global.css` · `src/` · `CLAUDE.md`
 
 ### 1.18.2 — Manifesto do app passa a ser /manifest.json
 

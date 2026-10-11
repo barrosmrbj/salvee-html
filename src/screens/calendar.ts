@@ -114,7 +114,7 @@ function buildDayStrip(): void {
 
     const isSelected = key === selectedDate
     cell.innerHTML = `
-      <span class="text-[10px] font-semibold text-gray-400">${WEEKDAYS[d.getDay()]}</span>
+      <span class="text-[0.625rem] font-semibold text-gray-400">${WEEKDAYS[d.getDay()]}</span>
       <span class="w-8 h-8 flex items-center justify-center rounded-full text-sm font-semibold transition-colors ${
         isSelected ? 'bg-salvee-orange text-white' : 'text-gray-800'
       }">${d.getDate()}</span>

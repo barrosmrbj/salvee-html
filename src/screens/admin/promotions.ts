@@ -103,7 +103,7 @@ function promoRow(p: AdminPromotion): HTMLElement {
   sub.className = 'text-xs text-gray-500 truncate'
   sub.textContent = p.subtitle || '—'
   const meta = document.createElement('p')
-  meta.className = 'text-[11px] text-gray-400'
+  meta.className = 'text-[0.6875rem] text-gray-400'
   const period = p.startsAt || p.endsAt ? `${p.startsAt ? fmt(p.startsAt) : '…'} a ${p.endsAt ? fmt(p.endsAt) : '…'}` : 'sem período'
   const link = p.linkType === 'campaign' ? 'campanha' : p.linkType === 'institution' ? 'instituição' : 'sem link'
   meta.textContent = `${period} · ${link} · ordem ${p.sortOrder}`
