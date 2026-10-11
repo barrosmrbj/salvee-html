@@ -13,6 +13,7 @@
     "test:ui": "vitest --ui",
     "versao:check": "node scripts/versao.mjs check",
     "versao:changelog": "node scripts/versao.mjs changelog",
+    "legal:pdf": "node scripts/legal-pdf.mjs",
     "start": "node server/index.js",
     "postinstall": "npm install --prefix server --omit=dev"
   },

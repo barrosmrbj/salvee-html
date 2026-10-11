@@ -62,7 +62,7 @@ Conferido em 11/10/2026 (v1.20.0): **19 completas, 1 parcial (doação sem PIX r
 **Falta do cliente para os Termos:** razão social, CNPJ, endereço, e-mail de contato e encarregado de dados (`src/config/empresa.ts`) e revisão jurídica do texto.
 **Dependem do cliente:** 5 (e-mail/domínio), 15 (provedor de PIX), login social (credenciais).
 
-## Comparação com a especificação (`.Documentacao/Especificação SALVEE.pdf`)
+## Comparação com a especificação (`Plano de Negócio/referencias/Especificação SALVEE.pdf`)
 Refeita em 11/10/2026 (v1.20.0). ✅ feito · 🟡 parcial · ❌ não existe. Números = seções do PDF.
 
 | Seção | Situação | O que falta |

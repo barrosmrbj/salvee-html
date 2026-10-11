@@ -4,7 +4,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 ## Visão geral
 
-**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). **Especificação oficial: `.Documentacao/Especificação SALVEE.pdf`** (37 páginas; em caso de conflito, vale o PDF). `salvee_especificacao.md` é um resumo antigo e marca como "(implementado)" partes incompletas: não usar como referência de status. **Pendências, comparação com o PDF e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`. **Protótipo visual dos designers (Figma, mockups das telas):** https://www.figma.com/proto/E6qAZObrdwAH1WoCLOk8f2/Salvee?node-id=4-340&t=6UThrBMosZ7Zzatf-1 (referência de layout; em conflito de regra, vale o PDF). Imagem estática dos mockups: `.Documentacao/mockups_projeto_salvee.png`.
+**Salvee** é um app web mobile-first que conecta doadores e voluntários a instituições sociais: descoberta, doações, eventos e gamificação (XP/Salves). **Especificação oficial: `Plano de Negócio/referencias/Especificação SALVEE.pdf`** (37 páginas; em caso de conflito, vale o PDF). `salvee_especificacao.md` é um resumo antigo e marca como "(implementado)" partes incompletas: não usar como referência de status. **Pendências, comparação com o PDF e próximos passos: `docs/PENDENCIAS.md` (ler no início de cada sessão).** Design e planos originais: `docs/superpowers/`. **Protótipo visual dos designers (Figma, mockups das telas):** https://www.figma.com/proto/E6qAZObrdwAH1WoCLOk8f2/Salvee?node-id=4-340&t=6UThrBMosZ7Zzatf-1 (referência de layout; em conflito de regra, vale o PDF). Imagem estática dos mockups: `.Documentacao/mockups_projeto_salvee.png`.
 
 - **Frontend:** Vite 6 + TypeScript (vanilla, sem framework) + Tailwind 3, em `src/`. **Responsivo, celular primeiro** (`src/styles/global.css`): celular = tela inteira (margens seguras de entalhe, campos com 16px contra o zoom do iPhone, altura `100dvh`); em telas maiores a interface é **ampliada** (fonte base 18px no tablet, 20px no computador, 22px a partir de 1600px; tudo em rem cresce junto) numa coluna de 26rem com proporção de celular, e no computador a barra de baixo vira menu lateral. Não usar tamanhos fixos em px (`text-[11px]`): usar rem. A largura vem de `--app-max` (classe `max-w-app`): barra fixa nova deve usar `max-w-app` + `left-1/2 -translate-x-1/2`. Instalável na tela inicial (PWA): `public/manifest.json` (não `.webmanifest`: o LiteSpeed da Hostinger entrega estáticos direto e serviria como text/plain) e ícones em `public/icons/salvee-*.png` + `public/favicon-salvee-32.png`/`-48.png` (aba; a Hostinger guarda `/icons/` em cache por 1 ano: trocou a imagem, **troque o nome do arquivo**): símbolo oficial da logo (coração com as mãos) recortado de `.Documentacao/inicio.jpg`, branco sobre laranja.
 - **Backend:** Node.js + Express 4 (CommonJS) em `server/`, banco via Knex (SQLite em dev, MySQL em produção).
@@ -26,6 +26,7 @@ npx tsc --noEmit       # checagem de tipos
 
 npm run versao:check       # valida src/config/versoes.json e os package.json
 npm run versao:changelog   # sincroniza package.json, gera CHANGELOG.md e o catálogo abaixo
+npm run legal:pdf          # PDFs dos Termos e da Política (src/content/legal.ts) → Plano de Negócio/docs/ (usa o Chrome/Edge)
 
 node server/seed.js              # dados de exemplo
 node server/seed-institutions.js # instituições de exemplo
@@ -67,8 +68,10 @@ server/
   public/                 # BUILD do frontend (npm run build) — gerado, versionado, não editar à mão
   uploads/                # imagens versionadas / pasta padrão em dev (produção usa UPLOAD_DIR)
 docs/                     # PENDENCIAS.md, configuracao/ (email.md, login-social.md), superpowers/ (design original)
-.Documentacao/            # especificação oficial (PDF), logos, ilustrações e mockups
+Plano de Negócio/         # documentos de negócio: CLAUDE.md próprio, docs/ (PDFs dos Termos e da Política, gerados), referencias/ (especificação oficial, leis, lojas), exemplos/
+.Documentacao/            # logos, ilustrações e mockups (a especificação foi para Plano de Negócio/referencias/)
 scripts/versao.mjs        # controle de versão
+scripts/legal-pdf.mjs     # gera os PDFs dos Termos e da Política
 public/                   # arquivos estáticos de origem do Vite (logos, promos, .htaccess) — copiados para server/public no build
 .htaccess                 # site estático da Hostinger: serve server/public/
 ```
