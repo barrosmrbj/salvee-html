@@ -1,4 +1,4 @@
-// Gera os PDFs dos Termos de uso e da Política de privacidade em "Plano de Negócio/docs/",
+// Gera os PDFs dos Termos de uso e da Política de privacidade em "plano-de-negocio/docs/",
 // com o mesmo texto do app (src/content/legal.ts + src/config/empresa.ts).
 // Uso: npm run legal:pdf   (precisa do Google Chrome ou do Microsoft Edge instalado)
 import fs from 'fs'
@@ -9,7 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'url'
 import * as esbuild from 'esbuild'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
-const outDir = path.join(root, 'Plano de Negócio', 'docs')
+const outDir = path.join(root, 'plano-de-negocio', 'docs')
 
 // compila legal.ts (com o atalho @/ → src/) e importa o resultado
 const res = await esbuild.build({

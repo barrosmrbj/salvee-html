@@ -7,7 +7,7 @@ desenvolvimento estão no `CLAUDE.md` da raiz.
 ## Estrutura
 
 ```
-Plano de Negócio/
+plano-de-negocio/
   CLAUDE.md                 # este arquivo
   docs/                     # documentos do Salvee para análise, aprovação e publicação
     Salvee-Termos-de-uso-v<versão>.pdf
