@@ -34,7 +34,7 @@ export function BottomNav(): HTMLElement {
   const logo = document.createElement('a')
   logo.href = '#/feed'
   logo.className = 'nav-logo hidden items-center gap-2 px-3 pb-4 mb-2 border-b border-gray-200 w-full'
-  logo.innerHTML = '<img src="/favicon.svg" alt="" class="w-8 h-8" /><span class="text-lg font-bold text-salvee-orange">Salvee</span>'
+  logo.innerHTML = '<img src="/icons/icon-192.png" alt="" class="w-8 h-8 rounded-lg" /><span class="text-lg font-bold text-salvee-orange">Salvee</span>'
   nav.appendChild(logo)
 
   NAV_ITEMS.forEach(item => {

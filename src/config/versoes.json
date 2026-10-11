@@ -1,6 +1,27 @@
 {
-  "versaoAtual": "1.18.3",
+  "versaoAtual": "1.18.4",
   "historico": [
+    {
+      "versao": "1.18.4",
+      "data": "2026-10-11",
+      "tipo": "patch",
+      "titulo": "Logo oficial como ícone da aba e do app instalado",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "O ícone da aba do navegador, do app instalado (Android e iPhone) e do menu lateral do computador passa a ser o símbolo oficial da logo da abertura (coração com as mãos), em branco sobre laranja, no lugar do coração genérico da 1.18.0",
+        "Ícones gerados a partir de .Documentacao/inicio.jpg: favicon-32/48.png, icon-192/512.png, icon-maskable-512.png (com margem para o recorte do Android) e apple-touch-icon.png"
+      ],
+      "fontes": [
+        "public/favicon-32.png",
+        "public/favicon-48.png",
+        "public/icons/",
+        "index.html",
+        "src/components/BottomNav.ts",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.18.3",
       "data": "2026-10-11",

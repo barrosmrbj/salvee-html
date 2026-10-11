@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.18.3**
+**Versão atual: 1.18.4**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.18.4** | 11/10/2026 | Patch | Logo oficial como ícone da aba e do app instalado | Sistema |
 | **1.18.3** | 11/10/2026 | Patch | Tablet e computador sem tela esticada: interface ampliada na proporção do celular | Sistema |
 | **1.18.2** | 10/10/2026 | Patch | Manifesto do app passa a ser /manifest.json | Sistema, Servidor |
 | **1.18.1** | 10/10/2026 | Patch | Manifesto do app com o tipo certo para "Instalar app" | Servidor, Sistema |
@@ -59,6 +60,15 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.18.4 — Logo oficial como ícone da aba e do app instalado
+
+*11/10/2026 · Patch · Sistema*
+
+- O ícone da aba do navegador, do app instalado (Android e iPhone) e do menu lateral do computador passa a ser o símbolo oficial da logo da abertura (coração com as mãos), em branco sobre laranja, no lugar do coração genérico da 1.18.0
+- Ícones gerados a partir de .Documentacao/inicio.jpg: favicon-32/48.png, icon-192/512.png, icon-maskable-512.png (com margem para o recorte do Android) e apple-touch-icon.png
+
+Fontes: `public/favicon-32.png` · `public/favicon-48.png` · `public/icons/` · `index.html` · `src/components/BottomNav.ts` · `CLAUDE.md`
 
 ### 1.18.3 — Tablet e computador sem tela esticada: interface ampliada na proporção do celular
 
