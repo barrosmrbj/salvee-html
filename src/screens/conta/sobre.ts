@@ -11,7 +11,7 @@ export function render(): HTMLElement {
   box.className = 'p-4 pb-24 flex flex-col gap-4'
   box.innerHTML = `
     <div class="bg-white rounded-2xl border border-gray-100 p-5 flex flex-col items-center gap-3 text-center">
-      <img src="/icons/icon-192.png" alt="" class="w-16 h-16 rounded-2xl" />
+      <img src="/icons/salvee-192.png" alt="" class="w-16 h-16 rounded-2xl" />
       <p class="text-lg font-bold text-salvee-orange">Salvee</p>
       <p class="text-sm text-gray-600">Conecta quem quer ajudar a instituições sociais: descubra causas, doe, participe de eventos e ganhe recompensas por fazer o bem. Instituições que recebem menos atenção ganham mais destaque.</p>
       <p id="about-version" class="text-xs text-gray-400"></p>

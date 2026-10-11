@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.20.0**
+**Versão atual: 1.20.1**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.20.1** | 11/10/2026 | Patch | Logo oficial aparece no menu, na aba e no app instalado (fim do coração antigo em cache) | Sistema |
 | **1.20.0** | 11/10/2026 | Minor | Configurações completas: editar perfil, alterar senha, excluir conta, ajuda, Termos de uso e Política de privacidade | Configurações, Autenticação, Perfil, Servidor, Banco de dados |
 | **1.19.0** | 11/10/2026 | Minor | Recompensas com QR Code, aba Prêmios e regra de pontos configurável pelo admin | Gamificação, Admin, Doação, Perfil, Feed, Configurações, Servidor, Banco de dados |
 | **1.18.4** | 11/10/2026 | Patch | Logo oficial como ícone da aba e do app instalado | Sistema |
@@ -62,6 +63,15 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.20.1 — Logo oficial aparece no menu, na aba e no app instalado (fim do coração antigo em cache)
+
+*11/10/2026 · Patch · Sistema*
+
+- Correção: o menu lateral, a aba do navegador e o app instalado continuavam mostrando o coração branco antigo, porque a Hostinger guarda /icons/ em cache por 1 ano e o arquivo novo tinha o mesmo nome
+- Ícones com nome novo (icons/salvee-192.png, salvee-512.png, salvee-maskable-512.png, salvee-apple-touch.png, favicon-salvee-32/48.png): todo navegador baixa a logo oficial na hora
+
+Fontes: `public/icons/` · `public/favicon-salvee-32.png` · `public/favicon-salvee-48.png` · `public/manifest.json` · `index.html` · `src/components/BottomNav.ts` · `src/screens/conta/sobre.ts` · `CLAUDE.md`
 
 ### 1.20.0 — Configurações completas: editar perfil, alterar senha, excluir conta, ajuda, Termos de uso e Política de privacidade
 

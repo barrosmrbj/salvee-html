@@ -1,6 +1,29 @@
 {
-  "versaoAtual": "1.20.0",
+  "versaoAtual": "1.20.1",
   "historico": [
+    {
+      "versao": "1.20.1",
+      "data": "2026-10-11",
+      "tipo": "patch",
+      "titulo": "Logo oficial aparece no menu, na aba e no app instalado (fim do coração antigo em cache)",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "Correção: o menu lateral, a aba do navegador e o app instalado continuavam mostrando o coração branco antigo, porque a Hostinger guarda /icons/ em cache por 1 ano e o arquivo novo tinha o mesmo nome",
+        "Ícones com nome novo (icons/salvee-192.png, salvee-512.png, salvee-maskable-512.png, salvee-apple-touch.png, favicon-salvee-32/48.png): todo navegador baixa a logo oficial na hora"
+      ],
+      "fontes": [
+        "public/icons/",
+        "public/favicon-salvee-32.png",
+        "public/favicon-salvee-48.png",
+        "public/manifest.json",
+        "index.html",
+        "src/components/BottomNav.ts",
+        "src/screens/conta/sobre.ts",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.20.0",
       "data": "2026-10-11",
