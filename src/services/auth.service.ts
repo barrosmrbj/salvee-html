@@ -66,6 +66,22 @@ export const authService = {
     })
   },
 
+  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await request('/auth/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword, newPassword }),
+    })
+  },
+
+  /** exclusão definitiva da conta (Configurações → Segurança → Excluir conta) */
+  async deleteAccount(password: string): Promise<void> {
+    await request('/users/me', {
+      method: 'DELETE',
+      body: JSON.stringify({ confirm: 'EXCLUIR', password: password || undefined }),
+    })
+    this.logout()
+  },
+
   logout(): void {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')

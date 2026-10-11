@@ -307,6 +307,14 @@ async function initDb() {
     await db.schema.alterTable('users', t => t.string('account_type').defaultTo('user'))
   }
 
+  // aceite dos Termos de uso e da Política de privacidade no cadastro (LGPD: prova do aceite e de qual versão)
+  if (!(await db.schema.hasColumn('users', 'terms_version'))) {
+    await db.schema.alterTable('users', t => t.string('terms_version', 20).nullable())
+  }
+  if (!(await db.schema.hasColumn('users', 'terms_accepted_at'))) {
+    await db.schema.alterTable('users', t => t.timestamp('terms_accepted_at').nullable())
+  }
+
   // falha aqui não pode impedir o servidor de subir: só registra no log
   if (isProduction) await unifyMysqlCollation().catch(err => console.error('Falha ao unificar a collation:', err.message))
   await normalizeUploadUrls()

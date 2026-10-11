@@ -39,9 +39,13 @@ node server/scripts/exportar-mysql.js  # SQLite local → server/export/salvee-m
 src/
   main.ts, router.ts      # router por HASH (#/rota), rotas com `protected: true` exigem token
   config/versoes.json     # fonte única de versões (ver "Controle de versão")
+  config/empresa.ts       # dados da empresa (razão social, CNPJ, contato, encarregado) e versão dos Termos
+  content/legal.ts        # texto dos Termos de uso e da Política de privacidade
+  utils/validation.ts     # regras de e-mail e senha (iguais a server/validation.js)
   components/             # Button, Input (senha com botão de olho), Toast, Card, Avatar, Badge, BottomNav, BottomSheet, ProgressBar, NumericKeyboard, Spinner, SocialLogin, PostCard, LocationPicker (mapa Leaflet)
   screens/                # cada tela exporta render(): HTMLElement, mount(), unmount()
     auth/                 # login, register, forgot-password, reset-password, verify-email, oauth (retorno do login social)
+    conta/                # editar-perfil, seguranca (senha), excluir-conta, ajuda, sobre, legal (Termos e Privacidade)
     onboarding/           # choose-profile, verify-phone (sem uso no fluxo atual), institution-register, welcome-success
     admin/                # institution-approvals, user-management, donation-approvals
     feed, search, calendar, profile, settings, donation, institution-profile, splash, welcome
@@ -53,6 +57,7 @@ server/
   db.js                   # conexão Knex + initDb() (cria tabelas e colunas novas na subida, normaliza links de imagem)
   mailer.js               # envio de e-mail (SMTP da Hostinger) e layout dos e-mails
   uploads.js              # pasta das imagens (UPLOAD_DIR ou server/uploads)
+  validation.js           # regras de e-mail e senha do cadastro (8+ caracteres, letras e números)
   settings.js             # configurações do admin (tabela settings): regra de pontos, promoção, recompensas ligadas
   attention.js            # ranking de atenção (doações confirmadas em 30 dias + seguidores): feed, destaques, busca
   middleware/auth.js      # JWT (Bearer), req.userId
@@ -70,13 +75,13 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 
 ### Rotas do frontend (`src/router.ts`)
 
-`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`* (`?corrigir=<id>` = corrigir e reenviar), `/institution-status`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/admin/donations`*, `/admin/promotions`*, `/gamification`* (aba Prêmios), `/admin/gamification`* (regras, só admin), `/admin/rewards`*, `/admin/validate`* (validar QR), `/post/new?tipo=common|event|campaign`*, `/post/:id`* (detalhe + comentários), `/post/:id/edit`*, `/campanha/:id`* (tela da campanha), `/donate/:id?campanha=<postId>`* (* = protegida).
+`/`, `/welcome`, `/login`, `/register`, `/forgot-password`, `/reset-password`, `/verify-email`, `/oauth` (retorno do login social), `/choose-profile`, `/verify-phone`, `/welcome-success`, `/register/institution`* (`?corrigir=<id>` = corrigir e reenviar), `/institution-status`*, `/feed`*, `/search`*, `/institution/:id`*, `/donate/:id`*, `/calendar`*, `/profile`*, `/settings`*, `/admin/institutions`*, `/admin/users`*, `/settings/perfil`*, `/settings/seguranca`*, `/termos`, `/privacidade`, `/excluir-conta` (públicas: as lojas de apps exigem link aberto), `/ajuda`, `/sobre`, `/admin/donations`*, `/admin/promotions`*, `/gamification`* (aba Prêmios), `/admin/gamification`* (regras, só admin), `/admin/rewards`*, `/admin/validate`* (validar QR), `/post/new?tipo=common|event|campaign`*, `/post/:id`* (detalhe + comentários), `/post/:id/edit`*, `/campanha/:id`* (tela da campanha), `/donate/:id?campanha=<postId>`* (* = protegida).
 
 ### API (`server/routes/`, prefixo `/api`)
 
-- `auth`: register (envia "confirme seu e-mail"), login, logout, me (inclui `emailVerified`), forgot-password (link por e-mail, 1 h), reset-password, verify-email, resend-verification, mail-status, send-phone-code, verify-phone. E-mail: `server/mailer.js` (SMTP da Hostinger; sem `SMTP_USER`/`SMTP_PASS`, em dev o e-mail sai no log e em produção as rotas respondem 503 e o cadastro pula a confirmação). Links em `email_tokens` (só o hash). Como configurar: `docs/configuracao/email.md`. A tela `/verify-phone` continua no código, mas o cadastro agora vai para `/verify-email`. SMS ainda sem provedor: em dev o código sai no log do servidor; em produção `send-phone-code` responde 503 e a tela oferece "Pular por enquanto"
+- `auth`: register (valida e-mail e senha, exige `acceptTerms` e grava `terms_version`/`terms_accepted_at`; envia "confirme seu e-mail"), login (e-mail sem diferenciar maiúsculas), change-password, logout, me (inclui `emailVerified`), forgot-password (link por e-mail, 1 h), reset-password, verify-email, resend-verification, mail-status, send-phone-code, verify-phone. E-mail: `server/mailer.js` (SMTP da Hostinger; sem `SMTP_USER`/`SMTP_PASS`, em dev o e-mail sai no log e em produção as rotas respondem 503 e o cadastro pula a confirmação). Links em `email_tokens` (só o hash). Como configurar: `docs/configuracao/email.md`. A tela `/verify-phone` continua no código, mas o cadastro agora vai para `/verify-email`. SMS ainda sem provedor: em dev o código sai no log do servidor; em produção `send-phone-code` responde 503 e a tela oferece "Pular por enquanto"
 - `auth/oauth` (login social, `routes/oauth.js`): `GET /providers` (quais estão configurados), `GET /:provider` (vai para Google/Facebook/Apple), `GET|POST /:provider/callback` (cria ou vincula o usuário por `google_id`/`facebook_id`/`apple_id` ou e-mail confirmado e volta em `#/oauth?token=`; erro volta em `#/login?erro=`). Provedor sem variáveis fica desativado e **o botão não aparece** (sem nenhum configurado, a seção "ou entre com" fica oculta: logos de Google/Apple/Facebook sem login real fizeram o Google Safe Browsing marcar o site como "Perigoso"). Como criar as credenciais: `docs/configuracao/login-social.md` (pendente: o cliente ainda não tem o e-mail do projeto).
-- `users`: GET/PATCH `/me` (inclui `role`), GET/PUT `/profile`
+- `users`: GET/PATCH `/me` (inclui `role`; `avatarUrl` só `/uploads/...`), GET/PUT `/profile`, `DELETE /me {confirm: "EXCLUIR", password}` (exclui a conta: apaga dados e atividade e instituições não publicadas; doações ficam sem mensagem; bloqueia o único admin e o responsável por instituição publicada; conta de login social não precisa de senha)
 - `institutions`: `POST|DELETE /:id/follow` (seguir; só aprovadas), `GET /:id` traz `following` e `followersCount`; lista, `/destaques`, `/mine` (instituições do usuário, qualquer status, com motivo), `/mine/:id` (dados completos para corrigir, só responsável/admin/gestor), `/:id`, `POST /register/step` (etapa com `institutionId` atualiza, nunca duplica; etapa vazia é ignorada), `POST /:id/submit` (draft ou needs_revision → pending; `/resubmit` é o nome antigo)
 - `feed` (`routes/feed.js`): `GET /?page=&institutionId=&seguindo=1` (aba "Para você" ranqueada por novidade + afinidade + urgência + engajamento + impulsionamento de quem recebeu menos, com `boosted` = etiqueta "Precisa de apoio"; mural e "Seguindo" em ordem cronológica; cada post traz `images[]`, `registered`, `canEdit`), `GET /:id`, `POST /` (cria post comum, evento ou campanha), `PATCH /:id`, `DELETE /:id`; curtidas `POST|DELETE /:id/like`; comentários `GET|POST /:id/comments` e `DELETE /comments/:commentId` (apagam: autor, instituição dona do post, admin/gestor). Cada post traz também `liked`, `likeCount`, `commentCount`. Só o **responsável por instituição aprovada** cria/edita; excluir também admin/gestor (moderação). Imagens: até 5, só links `/uploads/...`
 - `search` (`routes/search.js`): `GET /promocoes` (banners ativos do admin; sem nenhum, campanhas em destaque), `GET /?q=&category=` → `{ institutions, campaigns }` (menos ajudadas primeiro), `/categories` (categorias reais com contagem), `/cities`, `/causas?category=&city=&lat=&lng=` (campanhas em andamento; com GPS do usuário, mais perto primeiro e `distanceKm`; sem, cidade escolhida primeiro); `donations` (`/initiate` com `postId` opcional da campanha, `/history`), `gamification` (`/balance`, `/rules` (regra vigente), `/rewards` (disponíveis, com `canRedeem`/`reason`), `POST /rewards/:id/redeem` (desconta Salves com proteção a duplo toque e devolve o código do QR), `/my-rewards`), `calendar` (`/my-events`, `/events/:id/register`)
@@ -107,7 +112,7 @@ public/                   # arquivos estáticos de origem do Vite (logos, promos
 - **Escolha Usuário/Instituição depois de criar a conta** (o PDF põe antes): as duas começam pelo mesmo acesso, o do responsável.
 - **Confirmação de cadastro por e-mail** no lugar do SMS (o PDF trata telefone como opcional/futuro).
 - **Confirmação manual de doações** por admin/gestor até haver PIX real com webhook.
-- Navegação inferior hoje: Feed, Buscar, Agenda, Perfil (gamificação dentro do Perfil). O PDF pede **Feed, Busca, Gamificação, Calendário** + Configurações no topo — pendente.
+- Navegação inferior: Feed, Buscar, Prêmios, Agenda, como no PDF (v1.19.0); Perfil e Configurações pelo topo.
 - O que ainda falta do PDF está em `docs/PENDENCIAS.md` (seção "Comparação com a especificação").
 
 ## Ambiente
@@ -190,10 +195,11 @@ Bloco **gerado** por `npm run versao:changelog` a partir de `versoes.json`. Não
 
 <!-- catalogo-versoes:inicio -->
 
-Versão atual: **1.19.0** · 40 versões
+Versão atual: **1.20.0** · 41 versões
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| 1.20.0 | 11/10/2026 | Minor | Configurações completas: editar perfil, alterar senha, excluir conta, ajuda, Termos de uso e Política de privacidade | Configurações, Autenticação, Perfil, Servidor, Banco de dados |
 | 1.19.0 | 11/10/2026 | Minor | Recompensas com QR Code, aba Prêmios e regra de pontos configurável pelo admin | Gamificação, Admin, Doação, Perfil, Feed, Configurações, Servidor, Banco de dados |
 | 1.18.4 | 11/10/2026 | Patch | Logo oficial como ícone da aba e do app instalado | Sistema |
 | 1.18.3 | 11/10/2026 | Patch | Tablet e computador sem tela esticada: interface ampliada na proporção do celular | Sistema |

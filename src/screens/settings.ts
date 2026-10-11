@@ -66,24 +66,21 @@ export function mount(): void {
   }).catch(() => {})
 
   const groups: Array<{ title?: string; items: SettingItem[] }> = [
+    // só itens que funcionam (Notificações entra com a spec 21)
     {
+      title: 'Conta',
       items: [
-        { label: 'Perfil', icon: '👤', action: () => { window.location.hash = '/profile' } },
-        { label: 'Notificações', icon: '🔔', action: () => {} },
-        { label: 'Geral', icon: '⚙️', action: () => {} },
-        { label: 'Acessibilidade', icon: '♿', action: () => {} },
+        { label: 'Editar perfil', icon: '👤', action: () => { window.location.hash = '/settings/perfil' } },
+        { label: 'Segurança (senha e exclusão da conta)', icon: '🔒', action: () => { window.location.hash = '/settings/seguranca' } },
       ],
     },
     {
+      title: 'Ajuda e informações',
       items: [
-        { label: 'Pagamentos & assinaturas', icon: '💳', action: () => {} },
-        { label: 'Segurança', icon: '🔒', action: () => {} },
-      ],
-    },
-    {
-      items: [
-        { label: 'Centro de ajuda', icon: '❓', action: () => {} },
-        { label: 'Sobre Salvee', icon: 'ℹ️', action: () => {} },
+        { label: 'Centro de ajuda', icon: '❓', action: () => { window.location.hash = '/ajuda' } },
+        { label: 'Sobre o Salvee', icon: 'ℹ️', action: () => { window.location.hash = '/sobre' } },
+        { label: 'Termos de uso', icon: '📄', action: () => { window.location.hash = '/termos' } },
+        { label: 'Política de privacidade', icon: '🛡️', action: () => { window.location.hash = '/privacidade' } },
       ],
     },
     {

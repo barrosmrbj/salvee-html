@@ -5,6 +5,7 @@ const { db } = require('../db')
 const crypto = require('crypto')
 const { signToken, authMiddleware } = require('../middleware/auth')
 const { mailEnabled, sendMail, layout } = require('../mailer')
+const { normalizeEmail, isEmail, passwordError } = require('../validation')
 
 const router = express.Router()
 
@@ -65,16 +66,26 @@ async function sendVerificationEmail(req, user) {
 // POST /auth/register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    const { password } = req.body
+    const name = String(req.body.name || '').trim()
+    const email = normalizeEmail(req.body.email)
     const accountType = req.body.accountType === 'institution' ? 'institution' : 'user'
-    if (!name || !email || !password) return res.status(400).json({ error: 'Campos obrigatórios: name, email, password' })
+    if (!name || !email || !password) return res.status(400).json({ error: 'Preencha nome, e-mail e senha' })
+    if (name.length < 2 || name.length > 120) return res.status(400).json({ error: 'Informe o seu nome' })
+    if (!isEmail(email)) return res.status(400).json({ error: 'E-mail inválido' })
+    const pwError = passwordError(password)
+    if (pwError) return res.status(400).json({ error: pwError })
+    if (req.body.acceptTerms !== true) return res.status(400).json({ error: 'Aceite os Termos de uso e a Política de privacidade para continuar' })
 
-    const existing = await db('users').where({ email }).first()
+    const existing = await db('users').whereRaw('LOWER(email) = ?', [email]).first()
     if (existing) return res.status(409).json({ error: 'E-mail já cadastrado' })
 
-    const password_hash = await bcrypt.hash(password, 10)
+    const password_hash = await bcrypt.hash(String(password), 10)
     const id = uuidv4()
-    await db('users').insert({ id, name, email, password_hash, account_type: accountType })
+    await db('users').insert({
+      id, name, email, password_hash, account_type: accountType,
+      terms_version: String(req.body.termsVersion || '').slice(0, 20) || null, terms_accepted_at: new Date(),
+    })
 
     const user = await db('users').where({ id }).first()
     // a confirmação por e-mail não pode impedir o cadastro: falha vai só para o log
@@ -93,10 +104,10 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body
     if (!email || !password) return res.status(400).json({ error: 'Campos obrigatórios' })
 
-    const user = await db('users').where({ email }).first()
+    const user = await db('users').whereRaw('LOWER(email) = ?', [normalizeEmail(email)]).first()
     if (!user) return res.status(401).json({ error: 'E-mail ou senha incorretos' })
 
-    const valid = await bcrypt.compare(password, user.password_hash)
+    const valid = await bcrypt.compare(String(password), user.password_hash)
     if (!valid) return res.status(401).json({ error: 'E-mail ou senha incorretos' })
 
     const token = signToken(user.id)
@@ -157,7 +168,8 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   try {
     const { token, password } = req.body
-    if (!password || String(password).length < 6) return res.status(400).json({ error: 'A senha precisa ter pelo menos 6 caracteres' })
+    const pwError = passwordError(password)
+    if (pwError) return res.status(400).json({ error: pwError })
     const row = await findValidToken(token, 'reset')
     if (!row) return res.status(400).json({ error: 'Link inválido ou vencido. Peça um novo em "Esqueci minha senha".' })
 
@@ -168,6 +180,27 @@ router.post('/reset-password', async (req, res) => {
       await trx('email_tokens').where({ id: row.id }).update({ used_at: new Date() })
       await trx('email_tokens').where({ user_id: row.user_id, type: 'reset' }).whereNull('used_at').delete()
     })
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// POST /auth/change-password  { currentPassword, newPassword } (Configurações → Segurança)
+router.post('/change-password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+    const user = await db('users').where({ id: req.userId }).first()
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' })
+    if (!currentPassword || !(await bcrypt.compare(String(currentPassword), user.password_hash))) {
+      return res.status(400).json({ error: 'Senha atual incorreta' })
+    }
+    const pwError = passwordError(newPassword)
+    if (pwError) return res.status(400).json({ error: pwError })
+    if (String(newPassword) === String(currentPassword)) return res.status(400).json({ error: 'A nova senha precisa ser diferente da atual' })
+    const password_hash = await bcrypt.hash(String(newPassword), 10)
+    await db('users').where({ id: user.id }).update({ password_hash, updated_at: new Date() })
     res.json({ ok: true })
   } catch (err) {
     console.error(err)

@@ -3,6 +3,7 @@ import { Button, Input, getInputValue, showToast, LoadingOverlay } from '@/compo
 import { authService } from '@/services'
 import { ApiError } from '@/services/api'
 import { getHashQuery } from '@/router'
+import { PASSWORD_HINT, passwordError } from '@/utils/validation'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -33,7 +34,7 @@ export function mount(): void {
 
   const form = document.getElementById('reset-form')!
   form.querySelector('#field-password')!.appendChild(
-    Input({ id: 'password', label: 'Nova senha', type: 'password', placeholder: 'Mínimo de 6 caracteres', required: true })
+    Input({ id: 'password', label: 'Nova senha', type: 'password', placeholder: PASSWORD_HINT, required: true })
   )
   form.querySelector('#field-confirm')!.appendChild(
     Input({ id: 'confirm', label: 'Confirme a nova senha', type: 'password', placeholder: '••••••••', required: true })
@@ -46,7 +47,8 @@ export function mount(): void {
     e.preventDefault()
     const password = getInputValue(form, 'password')
     const confirm = getInputValue(form, 'confirm')
-    if (password.length < 6) { showToast('A senha precisa ter pelo menos 6 caracteres', 'error'); return }
+    const pwError = passwordError(password)
+    if (pwError) { showToast(pwError, 'error'); return }
     if (password !== confirm) { showToast('As senhas não coincidem', 'error'); return }
 
     const overlay = LoadingOverlay()

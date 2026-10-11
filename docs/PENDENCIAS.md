@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 11/10/2026 (v1.19.0). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 11/10/2026 (v1.20.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -32,16 +32,16 @@ O cliente ainda não tem **domínio próprio** nem **e-mail do projeto**. Com o 
       Pular por enquanto (verificação), Criar nova senha e Confirme seu e-mail.
 
 ## 25. Funcionalidades da versão 1 (checklist do PDF)
-Conferido em 11/10/2026 (v1.19.0): **17 completas, 1 parcial, 1 sem funcionar de verdade** (de 19 + painel admin).
+Conferido em 11/10/2026 (v1.20.0): **19 completas, 1 parcial (doação sem PIX real), 0 sem funcionar** (de 19 + painel admin).
 ✅ completo · 🟡 parcial · ❌ não funciona de verdade.
 
 | # | Funcionalidade (seção 25) | Situação | O que falta |
 |---|---|---|---|
 | 1 | Splash e onboarding | ✅ | — |
 | 2 | Escolha entre usuário e instituição | ✅ | Feita depois de criar a conta (decisão do projeto). |
-| 3 | Cadastro de usuário comum | 🟡 | Validar senha mínima e formato do e-mail no cadastro. |
+| 3 | Cadastro de usuário comum | ✅ | Formato do e-mail, senha com 8+ caracteres, letras e números, e aceite dos Termos gravado com a versão (v1.20.0). |
 | 4 | Cadastro institucional com validação | ✅ | Aprovar / pedir revisão / rejeitar / corrigir e reenviar / telas de situação; várias fotos e horário (v1.14.0). |
-| 5 | Login e recuperação de senha | 🟡 | Código pronto; falta a caixa de e-mail do cliente (domínio próprio). |
+| 5 | Login e recuperação de senha | ✅ | Código pronto e testado; o envio real só depende da caixa de e-mail do cliente (domínio próprio). |
 | 6 | Feed | ✅ | "Para você" ranqueado com impulsionamento de quem recebeu menos e etiqueta "Precisa de apoio" (v1.14.0). |
 | 7 | Curtidas e comentários | ✅ | — |
 | 8 | Posts, campanhas e eventos | ✅ | Vídeo (opcional no PDF). |
@@ -55,49 +55,47 @@ Conferido em 11/10/2026 (v1.19.0): **17 completas, 1 parcial, 1 sem funcionar de
 | 16 | Gamificação básica com XP e Salves | ✅ | Aba Prêmios na navegação e regra de pontos configurável pelo admin, com liga/desliga e promoção (v1.19.0). |
 | 17 | Recompensas e QR Code | ✅ | Resgate com QR Code único, Minhas recompensas (disponível/usada/vencida), validação no parceiro por admin/gestor, cadastro de recompensas e parceiros (v1.19.0). Parceiro com login próprio fica para depois (spec 26). |
 | 18 | Calendário de eventos confirmados | ✅ | Falta detalhe do evento com mapa e cancelar ali. |
-| 19 | Configurações | ❌ | 7 itens sem ação: Notificações, Geral, Acessibilidade, Pagamentos, Segurança (alterar senha), Ajuda, Sobre (termos e privacidade). |
+| 19 | Configurações | ✅ | Editar perfil (nome e foto), Segurança (alterar senha e excluir conta), Centro de ajuda, Sobre, Termos de uso e Política de privacidade (v1.20.0). Itens sem função saíram; Notificações volta com a spec 21. Termos/Política com dados da empresa "[a definir]" em `src/config/empresa.ts`. |
 | — | Painel administrativo mínimo | ✅ | Instituições, doações, usuários, moderação, promoções, recompensas/parceiros e regras de pontos. Falta gerenciar categorias. |
 
-**Prioridade sugerida:** 19 (alterar senha, termos, privacidade, ajuda, sobre) → 3 → 18 (detalhe do evento com mapa).
+**Prioridade sugerida:** 18 (detalhe do evento com mapa) → notificações (21) → categorias no admin.
+**Falta do cliente para os Termos:** razão social, CNPJ, endereço, e-mail de contato e encarregado de dados (`src/config/empresa.ts`) e revisão jurídica do texto.
 **Dependem do cliente:** 5 (e-mail/domínio), 15 (provedor de PIX), login social (credenciais).
 
 ## Comparação com a especificação (`.Documentacao/Especificação SALVEE.pdf`)
-Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Números = seções do PDF.
+Refeita em 11/10/2026 (v1.20.0). ✅ feito · 🟡 parcial · ❌ não existe. Números = seções do PDF.
 
 | Seção | Situação | O que falta |
 |---|---|---|
-| 5 Navegação | 🟡 | Abas devem ser Feed, Busca, **Gamificação**, Calendário (+ Configurações no topo); hoje Feed, Buscar, Agenda, Perfil. Botão "+" só para instituição aprovada ✅ (v1.10.0). |
-| 6.1 Splash | ✅ | — |
-| 6.2/6.3 Boas-vindas e tipo de conta | ✅ | Escolha Usuário/Instituição logo depois de criar o acesso, gravada em `users.account_type` (v1.13.1). Diferença consciente: o PDF põe a escolha antes do cadastro, mas as duas contas começam pelo mesmo acesso (o do responsável). |
-| 7 Cadastro de usuário | 🟡 | Validar tamanho mínimo de senha e formato do e-mail no cadastro. Login social ✅ (sem duplicar por e-mail). |
-| 8 Cadastro de instituição | 🟡 | 3 etapas (PDF sugere 6). Documento salvo e visível no admin, cidade/estado e etapa 1 sem duplicar ✅ (v1.12.0). Faltam horários de funcionamento e **várias fotos** (só 1). |
-| 8.6/8.7 Status | ✅ | "Pedir revisão" no admin (com o que corrigir) e a instituição corrige e reenvia (v1.12.0). |
-| 9.3 Recuperar senha | ✅ | Falta só o e-mail do cliente (SMTP). |
-| 9.4/10 Login de instituição por status | ✅ | Tela de situação depois do login, aviso no feed e atalho em Configurações (v1.12.0). Falta avisar por e-mail/notificação quando o status muda (21). |
-| 11 Feed | 🟡 | Botões Ajudar / Doar / Participar ✅ (v1.10.0); curtir, comentar e detalhe ✅ (v1.11.0); seguir instituições e aba "Seguindo" ✅ (v1.13.0). Falta o **algoritmo com impulsionamento** de instituições menos ajudadas (hoje só por data). |
-| 11.6 Mídia | 🟡 | Carrossel de até 5 imagens ✅ (v1.10.0). Falta vídeo. |
-| 12 Criação de conteúdo | ✅ | Post, evento e campanha; editar/excluir (v1.10.0). Falta vídeo. |
-| 13 Perfil da instituição | 🟡 | Mural com as publicações ✅ (v1.10.0). Faltam carrossel de fotos da instituição, barra de meta de arrecadação, mapa + rota (Maps/Waze), conferir discador do telefone. |
-| 14 Doação | 🟡 | Só PIX e sem anônima ✅ (v1.9.1). Falta **PIX real** e doação ligada a campanha. |
-| 15 Campanhas | 🟡 | Criação, progresso, prazo, Doar ligado e arrecadado somado ✅ (v1.10.0); tela da campanha ✅ (v1.13.0). Falta aparecer na **busca** e em "Causas perto de você". |
-| 16 Eventos | 🟡 | Criação e **Participar** (entra na agenda) ✅ (v1.10.0). Falta avisar o participante quando o evento muda. |
-| 17 Busca | 🟡 | "Causas perto de você" usa dados fixos: geolocalização real + fallback por cidade. |
-| 18 Gamificação | 🟡 | Resgate não fica registrado; QR é só texto (sem validação/uso único); falta "Minhas recompensas", requisito de nível e **regra de XP/Salves configurável** (hoje fixa: valor/2 e valor/4). |
-| 19 Calendário | 🟡 | Tela de detalhe com mapa, rota e cancelar participação. |
-| 20 Configurações | 🟡 | Maioria dos itens sem ação: editar perfil (API existe), alterar senha, notificações, ajuda, termos e privacidade. |
-| 21 Notificações | ❌ | Nenhuma. |
-| 22 Painel admin | 🟡 | Aprovar/rejeitar/pedir revisão ✅, confirmar doações ✅, papéis ✅, excluir publicações e comentários ✅. Faltam: tela de moderação de conteúdo, categorias, recompensas/parceiros, acompanhar campanhas. |
-| 24 Estados | ✅/🟡 | Várias telas mostram dados de exemplo quando a API falha (pode esconder erros). |
+| 5 Navegação | ✅ | Feed, Buscar, Prêmios, Agenda; Perfil e Configurações pelo topo (v1.19.0). |
+| 6 Splash, boas-vindas e tipo de conta | ✅ | Escolha depois de criar o acesso (diferença consciente). |
+| 7 Cadastro de usuário | ✅ | Validação de e-mail e senha e aceite dos Termos (v1.20.0). Login social pronto, sem credenciais. |
+| 8 Cadastro de instituição | ✅ | Etapas com rascunho, fotos, horário, documento e local no mapa. |
+| 9/10 Login, recuperar senha e status da instituição | ✅ | Falta avisar por e-mail/notificação quando o status muda (21). |
+| 11 Feed | ✅ | Impulsionamento, curtir, comentar, seguir. |
+| 11.6/12 Mídia | 🟡 | Até 5 imagens; falta **vídeo**. |
+| 13 Perfil da instituição | ✅ | Falta só meta mensal fora de campanha. |
+| 14 Doação | 🟡 | Só PIX com confirmação manual; falta **PIX real** (provedor + webhook). |
+| 15 Campanhas | ✅ | Na busca e em "Causas perto de você" (v1.14.0). |
+| 16 Eventos | 🟡 | Falta avisar o participante quando o evento muda (depende de 21). |
+| 17 Busca | ✅ | GPS opcional, categorias e promoções. |
+| 18 Gamificação | ✅ | QR de uso único e regras configuráveis (v1.19.0). Login próprio de parceiro fica para depois (26). |
+| 19 Calendário | 🟡 | Falta tela de **detalhe do evento** com mapa, rota e cancelar. |
+| 20 Configurações | ✅ | v1.20.0. Notificações entra com a 21. |
+| 21 Notificações | ❌ | Nenhuma (push e e-mail de avisos). |
+| 22 Painel admin | 🟡 | Faltam gerenciar **categorias**, tela de moderação de conteúdo e acompanhar campanhas. |
+| 24 Estados | 🟡 | Algumas telas mostram dados de exemplo quando a API falha. |
 | 27.1 Selo | ✅ | — |
 
 ## Próximas funções (ordem sugerida)
 - [x] Criação de conteúdo, mural, botões Doar/Participar/Ajudar (v1.10.0).
 - [x] Curtir, comentar e tela de detalhe do post (v1.11.0).
 - [x] Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro (v1.13.0).
-- [ ] Vídeo nas publicações (11.6); campanhas na busca (15.2).
+- [ ] Vídeo nas publicações (11.6).
 - [x] Telas de status da instituição no login, pedir revisão e reenviar correções (v1.12.0).
 - [x] Recompensas com QR Code, Minhas recompensas, aba Prêmios e regra de pontos configurável (v1.19.0).
+- [x] Configurações completas, Termos de uso, Política de privacidade, excluir conta e validação do cadastro (v1.20.0).
 - [ ] **PIX real**: integrar provedor (Mercado Pago, Asaas, Efí…); o webhook substitui a confirmação manual de doações.
-- [ ] "Perto de você" com **geolocalização real** (17.6); detalhe do evento com mapa (19.6); notificações (21).
+- [ ] Detalhe do evento com mapa (19.6); notificações (21); categorias no admin (22).
 - [ ] **SMS** para verificar celular (opcional; hoje a confirmação é por e-mail). Tela `/verify-phone` mantida.
 - [ ] Backup periódico de `~/salvee-uploads` e do MySQL (hPanel → Backups).

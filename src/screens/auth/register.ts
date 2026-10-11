@@ -1,6 +1,8 @@
 import { Button, Input, getInputValue, showToast, LoadingOverlay, SocialLogin } from '@/components'
 import { authService } from '@/services'
 import { ApiError } from '@/services/api'
+import { PASSWORD_HINT, isEmail, passwordError } from '@/utils/validation'
+import { LEGAL_VERSION } from '@/config/empresa'
 
 export function render(): HTMLElement {
   const el = document.createElement('div')
@@ -22,7 +24,7 @@ export function render(): HTMLElement {
         <div id="field-confirm"></div>
         <label class="flex items-start gap-3 text-sm text-gray-600 cursor-pointer">
           <input type="checkbox" id="terms" class="mt-0.5 accent-salvee-orange" />
-          <span>Eu concordo com os <a href="#" class="text-salvee-orange underline">termos & condições</a></span>
+          <span>Li e concordo com os <a href="#/termos" target="_blank" rel="noopener" class="text-salvee-orange underline">Termos de uso</a> e a <a href="#/privacidade" target="_blank" rel="noopener" class="text-salvee-orange underline">Política de privacidade</a></span>
         </label>
         <div id="btn-register"></div>
       </form>
@@ -46,7 +48,7 @@ export function mount(): void {
   const form = document.getElementById('register-form')!
   form.querySelector('#field-name')!.appendChild(Input({ id: 'name', label: 'Nome', placeholder: 'Ex. José Lucas', required: true }))
   form.querySelector('#field-email')!.appendChild(Input({ id: 'email', label: 'Email', type: 'email', placeholder: 'seuemail@gmail.com', required: true }))
-  form.querySelector('#field-password')!.appendChild(Input({ id: 'password', label: 'Senha', type: 'password', placeholder: '••••••••', required: true }))
+  form.querySelector('#field-password')!.appendChild(Input({ id: 'password', label: 'Senha', type: 'password', placeholder: PASSWORD_HINT, required: true }))
   form.querySelector('#field-confirm')!.appendChild(Input({ id: 'confirm', label: 'Confirme a senha', type: 'password', placeholder: '••••••••', required: true }))
 
   document.getElementById('btn-register')!.appendChild(
@@ -64,13 +66,17 @@ export function mount(): void {
     const terms = (form.querySelector('#terms') as HTMLInputElement).checked
 
     if (!name || !email || !password) { showToast('Preencha todos os campos', 'error'); return }
+    if (name.trim().length < 2) { showToast('Informe o seu nome', 'error'); return }
+    if (!isEmail(email)) { showToast('E-mail inválido. Confira se digitou certo.', 'error'); return }
+    const pwError = passwordError(password)
+    if (pwError) { showToast(pwError, 'error'); return }
     if (password !== confirm) { showToast('As senhas não coincidem', 'error'); return }
-    if (!terms) { showToast('Aceite os termos para continuar', 'error'); return }
+    if (!terms) { showToast('Aceite os Termos de uso e a Política de privacidade para continuar', 'error'); return }
 
     const overlay = LoadingOverlay()
     document.body.appendChild(overlay)
     try {
-      await authService.register({ name, email, password })
+      await authService.register({ name: name.trim(), email: email.trim(), password, acceptTerms: true, termsVersion: LEGAL_VERSION })
       // confirmação por e-mail (SMS fica para quando houver provedor; tela /verify-phone mantida)
       window.location.hash = '/verify-email'
     } catch (err) {

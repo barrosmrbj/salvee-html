@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.19.0**
+**Versão atual: 1.20.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.20.0** | 11/10/2026 | Minor | Configurações completas: editar perfil, alterar senha, excluir conta, ajuda, Termos de uso e Política de privacidade | Configurações, Autenticação, Perfil, Servidor, Banco de dados |
 | **1.19.0** | 11/10/2026 | Minor | Recompensas com QR Code, aba Prêmios e regra de pontos configurável pelo admin | Gamificação, Admin, Doação, Perfil, Feed, Configurações, Servidor, Banco de dados |
 | **1.18.4** | 11/10/2026 | Patch | Logo oficial como ícone da aba e do app instalado | Sistema |
 | **1.18.3** | 11/10/2026 | Patch | Tablet e computador sem tela esticada: interface ampliada na proporção do celular | Sistema |
@@ -61,6 +62,22 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.20.0 — Configurações completas: editar perfil, alterar senha, excluir conta, ajuda, Termos de uso e Política de privacidade
+
+*11/10/2026 · Minor · Configurações, Autenticação, Perfil, Servidor, Banco de dados*
+
+- Editar perfil: nome e foto (trocar ou remover); o e-mail aparece, mas só muda pelo suporte (spec 20)
+- Segurança: alterar senha com a senha atual e excluir a conta de forma definitiva, digitando EXCLUIR (LGPD art. 18 e exigência das lojas de apps)
+- Excluir conta apaga perfil, curtidas, comentários, seguidas, inscrições, pontos, recompensas e instituições não publicadas; as doações ficam sem nome nem mensagem para a prestação de contas; bloqueia o único admin e quem é responsável por instituição publicada
+- Página pública #/excluir-conta, que explica como pedir a exclusão (link exigido pela Google Play)
+- Termos de uso e Política de privacidade (LGPD) em páginas públicas #/termos e #/privacidade, com versão e data; dados da empresa em src/config/empresa.ts
+- Centro de ajuda com perguntas frequentes e contato; tela Sobre com versão e links
+- Cadastro valida o formato do e-mail e a senha (8+ caracteres, letras e números) no app e no servidor, e grava o aceite dos Termos com a versão (colunas terms_version e terms_accepted_at); a mesma regra vale para criar nova senha
+- Login e cadastro sem diferenciar maiúsculas no e-mail
+- Itens de Configurações sem função (Geral, Acessibilidade, Pagamentos) saíram; Notificações volta com a spec 21
+
+Fontes: `server/validation.js` · `server/routes/auth.js` · `server/routes/users.js` · `server/db.js` · `src/screens/settings.ts` · `src/screens/conta/editar-perfil.ts` · `src/screens/conta/seguranca.ts` · `src/screens/conta/excluir-conta.ts` · `src/screens/conta/ajuda.ts` · `src/screens/conta/sobre.ts` · `src/screens/conta/legal.ts` · `src/content/legal.ts` · `src/config/empresa.ts` · `src/utils/validation.ts` · `src/components/PageHeader.ts` · `src/screens/auth/register.ts` · `src/screens/auth/reset-password.ts` · `src/services/auth.service.ts` · `src/services/user.service.ts` · `src/router.ts` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.19.0 — Recompensas com QR Code, aba Prêmios e regra de pontos configurável pelo admin
 

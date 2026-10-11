@@ -1,0 +1,241 @@
+// Textos dos Termos de uso e da Política de privacidade (telas #/termos e #/privacidade).
+// Rascunho feito a partir de modelos de mercado e da LGPD (Lei 13.709/2018), descrevendo o que o Salvee
+// faz de fato. Recomenda-se revisão jurídica antes de publicar nas lojas. Mudou algo relevante:
+// atualizar o texto, subir LEGAL_VERSION em src/config/empresa.ts e a data.
+import { EMPRESA, LEGAL_UPDATED_AT, LEGAL_VERSION, campo } from '@/config/empresa'
+
+/** parágrafo (string) ou lista de itens (string[]) */
+export type LegalBlock = string | string[]
+export interface LegalSection { titulo: string; blocos: LegalBlock[] }
+export interface LegalDoc { titulo: string; resumo: string; secoes: LegalSection[] }
+
+const controlador = () =>
+  `${campo(EMPRESA.razaoSocial, 'razão social')}, inscrita no CNPJ ${campo(EMPRESA.cnpj, 'CNPJ')}, com sede em ${campo(EMPRESA.endereco, 'endereço')}`
+const contato = () => campo(EMPRESA.emailContato, 'e-mail de contato')
+const encarregado = () =>
+  `${campo(EMPRESA.encarregado, 'nome do encarregado')}, pelo e-mail ${campo(EMPRESA.emailEncarregado || EMPRESA.emailContato, 'e-mail do encarregado')}`
+
+export function termos(): LegalDoc {
+  return {
+    titulo: 'Termos de uso',
+    resumo: `Versão ${LEGAL_VERSION}, atualizada em ${LEGAL_UPDATED_AT}. Ao criar uma conta ou usar o Salvee, você concorda com estes Termos e com a Política de privacidade.`,
+    secoes: [
+      {
+        titulo: '1. Quem somos e o que é o Salvee',
+        blocos: [
+          `O Salvee é uma plataforma digital que conecta pessoas que querem ajudar (doadores e voluntários) a instituições sociais. Ele é mantido por ${controlador()} ("Salvee", "nós").`,
+          'Pelo Salvee você pode conhecer instituições, acompanhar publicações, campanhas e eventos, fazer doações, participar de eventos e acumular pontos (XP e Salves) que podem ser trocados por recompensas oferecidas por parceiros.',
+          'O Salvee é um intermediário tecnológico: ele aproxima doadores e instituições, mas não é o beneficiário das doações nem executa os projetos das instituições.',
+        ],
+      },
+      {
+        titulo: '2. Aceite e idade mínima',
+        blocos: [
+          'Para usar o Salvee você precisa ler e aceitar estes Termos e a Política de privacidade. Se não concordar, não use a plataforma.',
+          'O Salvee é destinado a maiores de 18 anos. Adolescentes só podem usar com autorização e acompanhamento do pai, mãe ou responsável legal, que responde pelo uso. Doações devem ser feitas por maiores de 18 anos.',
+        ],
+      },
+      {
+        titulo: '3. Sua conta',
+        blocos: [
+          [
+            'Informe dados verdadeiros e mantenha-os atualizados.',
+            'A conta é pessoal: não compartilhe sua senha. Tudo o que for feito com o seu acesso é de sua responsabilidade.',
+            'Avise-nos imediatamente se suspeitar de uso indevido da sua conta.',
+            'Você pode excluir sua conta a qualquer momento em Configurações → Segurança → Excluir conta.',
+          ],
+        ],
+      },
+      {
+        titulo: '4. Instituições',
+        blocos: [
+          'Qualquer pessoa cadastrada pode pedir o cadastro de uma instituição. Quem cadastra declara que tem autorização para representá-la e que as informações e documentos enviados são verdadeiros.',
+          'Toda instituição passa por análise antes de aparecer na plataforma. O Salvee pode aprovar, pedir correções ou recusar o cadastro, e pode suspender ou remover uma instituição que descumpra estes Termos ou a lei.',
+          [
+            'A instituição é a única responsável pelas informações que publica, pelas campanhas e eventos que divulga e pelo uso dos recursos recebidos, que devem ir para a finalidade informada.',
+            'A instituição deve prestar contas aos doadores quando solicitada e cumprir a legislação aplicável (inclusive fiscal e de proteção de dados).',
+            'A análise do Salvee reduz riscos, mas não é uma auditoria nem garantia sobre a gestão da instituição.',
+          ],
+        ],
+      },
+      {
+        titulo: '5. Doações',
+        blocos: [
+          'A doação é um ato voluntário, feito diretamente para a instituição escolhida. Neste momento, a forma de pagamento disponível é o PIX.',
+          'No momento, o Salvee não cobra taxa do doador. Se isso mudar, ou se o meio de pagamento cobrar alguma tarifa, a informação aparecerá antes de você confirmar a doação.',
+          'A doação aparece como "pendente" até ser confirmada. Os pontos (XP e Salves) só são creditados depois da confirmação.',
+          'Doações, em regra, não são reembolsáveis. Em caso de erro (valor errado, instituição errada ou cobrança em duplicidade), fale com o suporte em até 7 dias: vamos analisar e, quando cabível, intermediar a devolução junto à instituição.',
+          'O Salvee não emite recibo fiscal em nome das instituições. Benefícios fiscais, quando existirem, dependem da instituição e da legislação.',
+        ],
+      },
+      {
+        titulo: '6. Pontos (XP e Salves) e recompensas',
+        blocos: [
+          [
+            'XP e Salves são pontos de reconhecimento. Eles não são dinheiro, não podem ser comprados, vendidos, transferidos nem trocados por dinheiro.',
+            'As regras de pontuação, níveis e promoções podem mudar. A regra vigente fica visível no app.',
+            'As recompensas são oferecidas por parceiros, em quantidade limitada e com validade. Disponibilidade, qualidade e entrega são de responsabilidade do parceiro.',
+            'Cada recompensa resgatada gera um QR Code de uso único. Depois de usado ou vencido, ele não vale de novo e os Salves não voltam.',
+            'Fraude, uso de várias contas ou qualquer tentativa de obter pontos indevidamente leva ao cancelamento dos pontos e das recompensas, e pode levar à exclusão da conta.',
+          ],
+        ],
+      },
+      {
+        titulo: '7. Eventos e voluntariado',
+        blocos: [
+          'Os eventos são organizados pelas instituições, que respondem por eles: local, horário, segurança e eventuais mudanças. Ao participar, siga as orientações da instituição organizadora.',
+        ],
+      },
+      {
+        titulo: '8. Conteúdo publicado e regras de convivência',
+        blocos: [
+          'Você é responsável pelo que publica (comentários, fotos e textos). Ao publicar, você autoriza o Salvee a exibir esse conteúdo na plataforma, sem custo, enquanto ele estiver publicado.',
+          'É proibido:',
+          [
+            'publicar conteúdo falso, enganoso, ofensivo, discriminatório, violento, sexual ou que viole direitos de terceiros (inclusive imagem de pessoas sem autorização e direitos autorais);',
+            'usar o Salvee para golpes, arrecadações falsas, propaganda política ou comercial não autorizada, spam ou correntes;',
+            'se passar por outra pessoa ou instituição;',
+            'tentar invadir, copiar em massa, sobrecarregar ou burlar a segurança da plataforma.',
+          ],
+          'O Salvee pode remover conteúdos e suspender ou excluir contas que descumpram estas regras, e colaborar com autoridades quando exigido por lei. Para denunciar algo, fale com o suporte.',
+        ],
+      },
+      {
+        titulo: '9. Propriedade intelectual',
+        blocos: [
+          'A marca, a logo, o layout e o software do Salvee pertencem aos seus titulares e não podem ser copiados ou usados sem autorização. Os nomes e logos das instituições e parceiros pertencem a eles.',
+        ],
+      },
+      {
+        titulo: '10. Disponibilidade e responsabilidade',
+        blocos: [
+          'Trabalhamos para manter o Salvee no ar e seguro, mas ele pode passar por interrupções, manutenções e falhas. Na medida permitida pela lei, o Salvee não responde por danos causados por atos das instituições, dos parceiros ou de outros usuários, nem por falhas de serviços de terceiros (como internet, bancos e meios de pagamento).',
+          'Nada nestes Termos limita os seus direitos previstos no Código de Defesa do Consumidor.',
+        ],
+      },
+      {
+        titulo: '11. Privacidade',
+        blocos: [
+          'O tratamento dos seus dados pessoais está descrito na Política de privacidade, que faz parte destes Termos.',
+        ],
+      },
+      {
+        titulo: '12. Mudanças nestes Termos',
+        blocos: [
+          'Podemos atualizar estes Termos. Quando a mudança for relevante, avisaremos no app ou por e-mail antes de ela valer. Continuar usando o Salvee depois do aviso significa concordar com a nova versão.',
+        ],
+      },
+      {
+        titulo: '13. Lei aplicável e contato',
+        blocos: [
+          'Estes Termos seguem as leis do Brasil. Fica eleito o foro do domicílio do usuário para resolver qualquer questão.',
+          `Dúvidas, denúncias e pedidos: ${contato()}.`,
+        ],
+      },
+    ],
+  }
+}
+
+export function privacidade(): LegalDoc {
+  return {
+    titulo: 'Política de privacidade',
+    resumo: `Versão ${LEGAL_VERSION}, atualizada em ${LEGAL_UPDATED_AT}. Explica quais dados o Salvee usa, para quê, com quem compartilha e como você exerce os seus direitos, conforme a Lei Geral de Proteção de Dados (LGPD, Lei 13.709/2018).`,
+    secoes: [
+      {
+        titulo: '1. Quem cuida dos seus dados',
+        blocos: [
+          `O controlador dos dados é ${controlador()}.`,
+          `Encarregado pelo tratamento de dados pessoais (LGPD art. 41): ${encarregado()}.`,
+        ],
+      },
+      {
+        titulo: '2. Quais dados usamos',
+        blocos: [
+          [
+            'Cadastro: nome, e-mail, senha (guardada de forma criptografada, nunca em texto), foto de perfil (opcional) e tipo de conta. Se você entrar com Google, Facebook ou Apple, recebemos deles nome, e-mail, foto e um identificador.',
+            'Doações: valor, instituição e campanha escolhidas, data, situação (pendente, confirmada ou cancelada) e meio de pagamento.',
+            'Participação: curtidas, comentários, instituições que você segue, eventos em que se inscreveu, pontos (XP e Salves), nível e recompensas resgatadas (código, data e uso).',
+            'Localização: só se você ligar "Perto de mim" na busca. A posição é arredondada (cerca de 1 km), usada só naquela busca e não é guardada.',
+            'Instituições: dados do responsável e da instituição (CNPJ, endereço, contato, localização no mapa, fotos e documentos enviados para a análise).',
+            'Dados técnicos: endereço IP, data e hora de acesso e informações do aparelho e do navegador, guardados por segurança e por exigência do Marco Civil da Internet.',
+          ],
+          'O app guarda no seu aparelho apenas o necessário para funcionar (o acesso à sua conta e preferências como o "Perto de mim"). Não usamos cookies de publicidade nem ferramentas de rastreamento de terceiros.',
+        ],
+      },
+      {
+        titulo: '3. Para que usamos e com qual base legal',
+        blocos: [
+          [
+            'Criar e manter sua conta, registrar doações, creditar pontos e entregar recompensas: execução do contrato (estes Termos).',
+            'Guardar o registro das doações e dos acessos: cumprimento de obrigação legal e exercício regular de direitos.',
+            'Segurança, prevenção a fraudes, análise das instituições e melhoria do app, inclusive a ordem do feed, que dá mais visibilidade a quem recebeu menos ajuda: legítimo interesse, sempre respeitando os seus direitos.',
+            'Localização para "Perto de mim" e envio de comunicações opcionais: consentimento, que você pode retirar a qualquer momento.',
+          ],
+          'Não vendemos seus dados pessoais.',
+        ],
+      },
+      {
+        titulo: '4. Com quem compartilhamos',
+        blocos: [
+          [
+            'Instituições: a instituição que recebe sua doação ou em cujo evento você se inscreve pode receber os dados necessários para identificar e agradecer a participação (nome, valor e data).',
+            'Outros usuários: seu nome, foto e comentários aparecem para quem vê a publicação comentada.',
+            'Parceiros de recompensas: ao validar um QR Code, o parceiro vê o nome da recompensa e quem a está usando.',
+            'Prestadores de serviço que nos ajudam a operar: hospedagem e e-mail (Hostinger), mapas (OpenStreetMap e Google Maps, quando você abre um mapa) e, quando houver, provedores de pagamento e de login social. Eles só podem usar os dados para prestar o serviço.',
+            'Autoridades públicas, quando houver obrigação legal ou ordem judicial.',
+          ],
+          'Alguns desses prestadores podem guardar dados fora do Brasil. Nesses casos, exigimos medidas de proteção compatíveis com a LGPD.',
+        ],
+      },
+      {
+        titulo: '5. Por quanto tempo guardamos',
+        blocos: [
+          'Os dados da conta ficam guardados enquanto ela existir. Quando você exclui a conta, apagamos seus dados pessoais e sua atividade (perfil, curtidas, comentários, inscrições, recompensas e instituições não publicadas).',
+          'Os registros de doação são mantidos sem seu nome e sem mensagem, pelo prazo exigido em lei, para a prestação de contas das instituições. Os registros de acesso são guardados por 6 meses (Marco Civil da Internet, art. 15).',
+        ],
+      },
+      {
+        titulo: '6. Seus direitos',
+        blocos: [
+          'Pela LGPD (art. 18) você pode, a qualquer momento:',
+          [
+            'confirmar se tratamos seus dados e acessá-los;',
+            'corrigir dados incompletos, inexatos ou desatualizados (pelo app, em Perfil);',
+            'pedir anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desacordo com a lei;',
+            'pedir a portabilidade dos dados;',
+            'excluir sua conta e os dados tratados com o seu consentimento (pelo app, em Configurações → Segurança → Excluir conta);',
+            'saber com quem compartilhamos seus dados;',
+            'retirar o consentimento e saber as consequências de não dá-lo;',
+            'reclamar à Autoridade Nacional de Proteção de Dados (ANPD).',
+          ],
+          `Para exercer esses direitos, fale com o encarregado: ${encarregado()}. Respondemos em até 15 dias.`,
+        ],
+      },
+      {
+        titulo: '7. Segurança',
+        blocos: [
+          'Usamos conexão criptografada (HTTPS), senhas protegidas por hash, acesso restrito por perfil (somente a equipe autorizada vê dados de doações e cadastros) e códigos de uso único para recompensas. Nenhum sistema é 100% seguro: se acontecer um incidente que traga risco a você, avisaremos e comunicaremos a ANPD, como manda a lei.',
+        ],
+      },
+      {
+        titulo: '8. Crianças e adolescentes',
+        blocos: [
+          'O Salvee é destinado a maiores de 18 anos. Adolescentes só podem usar com autorização e acompanhamento do responsável legal. Não coletamos de propósito dados de crianças; se percebermos que isso aconteceu, apagaremos os dados.',
+        ],
+      },
+      {
+        titulo: '9. Mudanças nesta Política',
+        blocos: [
+          'Podemos atualizar esta Política. Quando a mudança for relevante, avisaremos no app ou por e-mail. A data e a versão no topo mostram a atualização mais recente.',
+        ],
+      },
+      {
+        titulo: '10. Como excluir sua conta',
+        blocos: [
+          'No app: Configurações → Segurança → Excluir conta. A exclusão é definitiva.',
+          `Sem acesso ao app: peça a exclusão pelo e-mail ${campo(EMPRESA.emailEncarregado || EMPRESA.emailContato, 'e-mail do encarregado')}, a partir do e-mail cadastrado.`,
+        ],
+      },
+    ],
+  }
+}

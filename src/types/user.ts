@@ -30,4 +30,7 @@ export interface RegisterPayload {
   password: string
   phone?: string
   accountType?: 'user' | 'institution'
+  /** aceite dos Termos de uso e da Política de privacidade (obrigatório) */
+  acceptTerms?: boolean
+  termsVersion?: string
 }
