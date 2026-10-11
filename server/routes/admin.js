@@ -277,6 +277,180 @@ router.delete('/promotions/:id', authMiddleware, requireGestor, async (req, res)
   }
 })
 
+// ---- Gamificação: configurações (só admin) ----
+const { getSetting, setSetting } = require('../settings')
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+router.get('/settings/gamification', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const [points, rewards] = await Promise.all([getSetting('points'), getSetting('rewards')])
+    res.json({ points, rewards })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// PUT /admin/settings/gamification  { points: {...}, rewards: { enabled } }
+router.put('/settings/gamification', authMiddleware, requireAdmin, async (req, res) => {
+  try {
+    const p = req.body.points || {}
+    const promo = p.promo || {}
+    const num = (v, min, max) => { const n = Number(v); return Number.isFinite(n) && n >= min && n <= max ? n : null }
+    const reaisPerXp = num(p.reaisPerXp, 0.01, 100000)
+    const reaisPerSalve = num(p.reaisPerSalve, 0.01, 100000)
+    const xpMultiplier = num(promo.xpMultiplier, 1, 10)
+    const salvesMultiplier = num(promo.salvesMultiplier, 1, 10)
+    if (reaisPerXp === null || reaisPerSalve === null) return res.status(400).json({ error: 'Informe quantos reais valem 1 XP e 1 Salve (maior que zero)' })
+    if (xpMultiplier === null || salvesMultiplier === null) return res.status(400).json({ error: 'Multiplicador da promoção entre 1 e 10' })
+    for (const d of [promo.startsAt, promo.endsAt]) if (d && !DATE_RE.test(d)) return res.status(400).json({ error: 'Data inválida' })
+    if (promo.startsAt && promo.endsAt && promo.startsAt > promo.endsAt) return res.status(400).json({ error: 'A promoção termina antes de começar' })
+
+    const points = {
+      enabled: Boolean(p.enabled),
+      reaisPerXp, reaisPerSalve,
+      promo: {
+        enabled: Boolean(promo.enabled),
+        label: String(promo.label || '').trim().slice(0, 80),
+        xpMultiplier, salvesMultiplier,
+        startsAt: promo.startsAt || null, endsAt: promo.endsAt || null,
+      },
+    }
+    const rewards = { enabled: Boolean(req.body.rewards?.enabled) }
+    await setSetting('points', points, req.userId)
+    await setSetting('rewards', rewards, req.userId)
+    res.json({ points, rewards })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// ---- Recompensas e parceiros (admin e gestor) ----
+function formatAdminReward(r, redeemed = 0) {
+  return {
+    id: r.id, title: r.title, description: r.description || '', cost: r.cost,
+    partnerName: r.partner_name || '', partnerLogoUrl: r.partner_logo_url || null, rewardType: r.reward_type || '',
+    minLevel: r.min_level || 0, validUntil: r.valid_until || null, active: !(r.active === 0 || r.active === false),
+    redeemed,
+  }
+}
+
+function rewardFields(body, partial) {
+  const f = {}
+  const has = k => body[k] !== undefined
+  if (!partial || has('title')) {
+    const t = String(body.title || '').trim()
+    if (!t) return { error: 'Informe o nome da recompensa' }
+    f.title = t.slice(0, 120)
+  }
+  if (!partial || has('cost')) {
+    const c = Number(body.cost)
+    if (!Number.isInteger(c) || c <= 0) return { error: 'Custo em Salves: número inteiro maior que zero' }
+    f.cost = c
+  }
+  if (has('description')) f.description = String(body.description || '').trim().slice(0, 500) || null
+  if (has('partnerName')) f.partner_name = String(body.partnerName || '').trim().slice(0, 120) || null
+  if (has('partnerLogoUrl')) {
+    if (body.partnerLogoUrl && !/^\/uploads\/[\w.-]+$/.test(body.partnerLogoUrl)) return { error: 'Logo inválida' }
+    f.partner_logo_url = body.partnerLogoUrl || null
+  }
+  if (has('rewardType')) f.reward_type = String(body.rewardType || '').trim().slice(0, 60) || null
+  if (has('minLevel')) {
+    const l = Number(body.minLevel || 0)
+    if (!Number.isInteger(l) || l < 0) return { error: 'Nível mínimo inválido' }
+    f.min_level = l
+  }
+  if (has('validUntil')) {
+    if (body.validUntil && !DATE_RE.test(body.validUntil)) return { error: 'Validade inválida' }
+    f.valid_until = body.validUntil || null
+  }
+  if (has('active')) f.active = Boolean(body.active)
+  return { fields: f }
+}
+
+router.get('/rewards', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const [list, counts] = await Promise.all([
+      db('rewards').orderBy('created_at', 'desc'),
+      db('user_rewards').groupBy('reward_id').select('reward_id').count({ n: '*' }),
+    ])
+    const redeemed = new Map(counts.map(c => [c.reward_id, Number(c.n)]))
+    res.json(list.map(r => formatAdminReward(r, redeemed.get(r.id) || 0)))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+router.post('/rewards', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const { fields, error } = rewardFields(req.body, false)
+    if (error) return res.status(400).json({ error })
+    const id = require('uuid').v4()
+    await db('rewards').insert({ id, active: true, min_level: 0, ...fields })
+    res.status(201).json(formatAdminReward(await db('rewards').where({ id }).first()))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+router.patch('/rewards/:id', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const reward = await db('rewards').where({ id: req.params.id }).first()
+    if (!reward) return res.status(404).json({ error: 'Recompensa não encontrada' })
+    const { fields, error } = rewardFields(req.body, true)
+    if (error) return res.status(400).json({ error })
+    if (Object.keys(fields).length) await db('rewards').where({ id: reward.id }).update({ ...fields, updated_at: new Date() })
+    res.json(formatAdminReward(await db('rewards').where({ id: reward.id }).first()))
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// excluir só se ninguém resgatou (senão o histórico perde o nome): para tirar do ar, desative
+router.delete('/rewards/:id', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const used = await db('user_rewards').where({ reward_id: req.params.id }).first()
+    if (used) return res.status(409).json({ error: 'Já foi resgatada por alguém: desative em vez de excluir' })
+    await db('rewards').where({ id: req.params.id }).delete()
+    res.json({ ok: true })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
+// ---- Validar QR Code no parceiro (spec 18.9; admin e gestor) ----
+// POST /admin/rewards/validate { code, confirm }: sem confirm só mostra; com confirm marca como usada (uso único)
+router.post('/rewards/validate', authMiddleware, requireGestor, async (req, res) => {
+  try {
+    const { formatMyReward, myRewardsQuery } = require('./gamification')
+    const code = String(req.body.code || '').trim().toUpperCase()
+    if (!code) return res.status(400).json({ error: 'Informe o código' })
+    const row = await myRewardsQuery()
+      .leftJoin('users', 'user_rewards.user_id', 'users.id')
+      .select('users.name as user_name', 'users.email as user_email')
+      .where('user_rewards.code', code).first()
+    if (!row) return res.status(404).json({ error: 'Código não encontrado' })
+    const info = { ...formatMyReward(row), userName: row.user_name || '', userEmail: row.user_email || '' }
+    if (info.status === 'used') return res.status(409).json({ error: 'Esta recompensa já foi usada', reward: info })
+    if (info.status === 'expired') return res.status(410).json({ error: 'Esta recompensa está vencida', reward: info })
+    if (!req.body.confirm) return res.json({ ok: true, reward: info })
+
+    // where used_at nulo: dois leitores ao mesmo tempo não usam duas vezes
+    const changed = await db('user_rewards').where({ id: row.id }).whereNull('used_at')
+      .update({ used_at: new Date(), validated_by: req.userId, updated_at: new Date() })
+    if (!changed) return res.status(409).json({ error: 'Esta recompensa já foi usada' })
+    res.json({ ok: true, reward: { ...info, status: 'used', usedAt: new Date().toISOString() } })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: 'Erro interno' })
+  }
+})
+
 function formatAdminInst(i) {
   return {
     id: i.id,

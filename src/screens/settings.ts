@@ -48,9 +48,12 @@ export function mount(): void {
         { label: 'Aprovar instituições', icon: '🏢', action: () => { window.location.hash = '/admin/institutions' } },
         { label: 'Confirmar doações', icon: '💰', action: () => { window.location.hash = '/admin/donations' } },
         { label: 'Promoções da busca', icon: '📣', action: () => { window.location.hash = '/admin/promotions' } },
+        { label: 'Recompensas e parceiros', icon: '🎁', action: () => { window.location.hash = '/admin/rewards' } },
+        { label: 'Validar recompensa (QR)', icon: '🔍', action: () => { window.location.hash = '/admin/validate' } },
       ]
       if (user.role === 'admin') {
         adminItems.push({ label: 'Gerenciar usuários', icon: '👥', action: () => { window.location.hash = '/admin/users' } })
+        adminItems.push({ label: 'Pontos e recompensas (regras)', icon: '⚙️', action: () => { window.location.hash = '/admin/gamification' } })
       }
 
       const container = document.getElementById('settings-list')!

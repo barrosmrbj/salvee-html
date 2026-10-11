@@ -1,6 +1,6 @@
 # Pendências do Salvee
 
-Atualizado em 10/10/2026 (v1.15.0). Ler no início de cada sessão e atualizar ao concluir algo.
+Atualizado em 11/10/2026 (v1.19.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
 - Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
@@ -32,7 +32,7 @@ O cliente ainda não tem **domínio próprio** nem **e-mail do projeto**. Com o 
       Pular por enquanto (verificação), Criar nova senha e Confirme seu e-mail.
 
 ## 25. Funcionalidades da versão 1 (checklist do PDF)
-Conferido em 10/10/2026 (v1.15.0): **15 completas, 2 parciais, 2 sem funcionar de verdade** (de 19 + painel admin).
+Conferido em 11/10/2026 (v1.19.0): **17 completas, 1 parcial, 1 sem funcionar de verdade** (de 19 + painel admin).
 ✅ completo · 🟡 parcial · ❌ não funciona de verdade.
 
 | # | Funcionalidade (seção 25) | Situação | O que falta |
@@ -52,13 +52,13 @@ Conferido em 10/10/2026 (v1.15.0): **15 completas, 2 parciais, 2 sem funcionar d
 | 13 | Destaques | ✅ | Menos ajuda recente (30 dias) e menos seguidores primeiro (v1.14.0). |
 | 14 | Causas perto de você | ✅ | Campanhas reais; "Perto de mim" com GPS opcional do usuário (distância em km) ou pela cidade; instituição marca o local no cadastro por GPS, endereço ou mapa (v1.15.0). Instituições antigas sem local precisam marcar em "Editar dados e fotos". |
 | 15 | Doação com método realmente suportado | 🟡 | Só PIX na tela, mas sem cobrança real: o admin confirma à mão. Falta integrar provedor. |
-| 16 | Gamificação básica com XP e Salves | ✅ | Pontos só com doação confirmada. Faltam aba própria na navegação e regra de pontos configurável. |
-| 17 | Recompensas e QR Code | ❌ | Resgate desconta Salves e não guarda nada; QR é só texto; sem "Minhas recompensas" nem validação no parceiro. |
+| 16 | Gamificação básica com XP e Salves | ✅ | Aba Prêmios na navegação e regra de pontos configurável pelo admin, com liga/desliga e promoção (v1.19.0). |
+| 17 | Recompensas e QR Code | ✅ | Resgate com QR Code único, Minhas recompensas (disponível/usada/vencida), validação no parceiro por admin/gestor, cadastro de recompensas e parceiros (v1.19.0). Parceiro com login próprio fica para depois (spec 26). |
 | 18 | Calendário de eventos confirmados | ✅ | Falta detalhe do evento com mapa e cancelar ali. |
 | 19 | Configurações | ❌ | 7 itens sem ação: Notificações, Geral, Acessibilidade, Pagamentos, Segurança (alterar senha), Ajuda, Sobre (termos e privacidade). |
-| — | Painel administrativo mínimo | ✅ | Instituições, doações, usuários, moderação. Faltam recompensas/parceiros e categorias. |
+| — | Painel administrativo mínimo | ✅ | Instituições, doações, usuários, moderação, promoções, recompensas/parceiros e regras de pontos. Falta gerenciar categorias. |
 
-**Prioridade sugerida:** 17 + aba Gamificação → 19 (alterar senha, termos, privacidade, ajuda, sobre) → 3 → 18 (detalhe do evento com mapa).
+**Prioridade sugerida:** 19 (alterar senha, termos, privacidade, ajuda, sobre) → 3 → 18 (detalhe do evento com mapa).
 **Dependem do cliente:** 5 (e-mail/domínio), 15 (provedor de PIX), login social (credenciais).
 
 ## Comparação com a especificação (`.Documentacao/Especificação SALVEE.pdf`)
@@ -96,9 +96,8 @@ Feita em 07/10/2026 (v1.9.1). ✅ feito · 🟡 parcial · ❌ não existe. Núm
 - [x] Tela da campanha, seguir instituições e escolha do tipo de conta antes do cadastro (v1.13.0).
 - [ ] Vídeo nas publicações (11.6); campanhas na busca (15.2).
 - [x] Telas de status da instituição no login, pedir revisão e reenviar correções (v1.12.0).
-- [ ] **Recompensas com QR Code** de uso único e "Minhas recompensas"; XP/Salves configurável (18).
+- [x] Recompensas com QR Code, Minhas recompensas, aba Prêmios e regra de pontos configurável (v1.19.0).
 - [ ] **PIX real**: integrar provedor (Mercado Pago, Asaas, Efí…); o webhook substitui a confirmação manual de doações.
-- [ ] Navegação com aba de **Gamificação** (5).
 - [ ] "Perto de você" com **geolocalização real** (17.6); detalhe do evento com mapa (19.6); notificações (21).
 - [ ] **SMS** para verificar celular (opcional; hoje a confirmação é por e-mail). Tela `/verify-phone` mantida.
 - [ ] Backup periódico de `~/salvee-uploads` e do MySQL (hPanel → Backups).

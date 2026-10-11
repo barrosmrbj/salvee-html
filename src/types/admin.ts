@@ -63,3 +63,45 @@ export interface AdminPromotion {
 }
 
 export type PromotionPayload = Partial<Omit<AdminPromotion, 'id' | 'createdAt'>>
+
+/** configurações de gamificação (Configurações → Pontos e recompensas) */
+export interface GamificationSettings {
+  points: {
+    enabled: boolean
+    reaisPerXp: number
+    reaisPerSalve: number
+    promo: { enabled: boolean; label: string; xpMultiplier: number; salvesMultiplier: number; startsAt: string | null; endsAt: string | null }
+  }
+  rewards: { enabled: boolean }
+}
+
+export interface AdminReward {
+  id: string
+  title: string
+  description: string
+  cost: number
+  partnerName: string
+  partnerLogoUrl: string | null
+  rewardType: string
+  minLevel: number
+  validUntil: string | null
+  active: boolean
+  /** quantas vezes já foi resgatada */
+  redeemed: number
+}
+
+export type RewardPayload = Partial<Omit<AdminReward, 'id' | 'redeemed'>>
+
+/** resposta da validação do QR no parceiro */
+export interface ValidatedReward {
+  id: string
+  code: string
+  status: 'available' | 'used' | 'expired'
+  title: string
+  partnerName: string
+  userName: string
+  userEmail: string
+  expiresAt: string | null
+  usedAt: string | null
+  redeemedAt: string
+}

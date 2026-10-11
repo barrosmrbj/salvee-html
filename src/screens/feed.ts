@@ -1,5 +1,5 @@
 // src/screens/feed.ts
-import { BottomNav, PostCard, Spinner } from '@/components'
+import { Avatar, BottomNav, PostCard, Spinner } from '@/components'
 import { authService, feedService, institutionService } from '@/services'
 
 export function render(): HTMLElement {
@@ -7,9 +7,9 @@ export function render(): HTMLElement {
   el.className = 'screen bg-white relative'
   el.innerHTML = `
     <header class="bg-white px-4 pt-4 pb-3 sticky top-0 z-30 flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-      </div>
+      <button id="profile-btn" type="button" class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0" aria-label="Meu perfil">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </button>
       <h1 id="greeting" class="flex-1 text-lg font-bold text-gray-900 truncate">Olá!</h1>
       <button id="settings-btn" class="text-gray-700 flex-shrink-0" aria-label="Configurações">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -46,12 +46,18 @@ export function mount(): void {
     .catch(() => {})
 
   document.getElementById('settings-btn')!.addEventListener('click', () => { window.location.hash = '/settings' })
+  document.getElementById('profile-btn')!.addEventListener('click', () => { window.location.hash = '/profile' })
 }
 
 function loadGreeting(): void {
   const greeting = document.getElementById('greeting')!
   authService.getMe()
-    .then(user => { greeting.textContent = `Olá, ${user.name.split(' ')[0]}!` })
+    .then(user => {
+      greeting.textContent = `Olá, ${user.name.split(' ')[0]}!`
+      // foto ou inicial no botão do perfil
+      const btn = document.getElementById('profile-btn')
+      if (btn) { btn.innerHTML = ''; btn.appendChild(Avatar(user.name, user.avatarUrl, 'md')) }
+    })
     .catch(() => { greeting.textContent = 'Olá!' })
 }
 

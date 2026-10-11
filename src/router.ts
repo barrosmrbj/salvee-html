@@ -39,6 +39,10 @@ const ROUTES: RouteDefinition[] = [
   { path: '/post/new', load: () => import('@/screens/post-editor'), protected: true },
   { path: '/post/:id', load: () => import('@/screens/post-detail'), protected: true },
   { path: '/post/:id/edit', load: () => import('@/screens/post-editor'), protected: true },
+  { path: '/gamification', load: () => import('@/screens/gamification'), protected: true },
+  { path: '/admin/gamification', load: () => import('@/screens/admin/gamification-settings'), protected: true },
+  { path: '/admin/rewards', load: () => import('@/screens/admin/rewards'), protected: true },
+  { path: '/admin/validate', load: () => import('@/screens/admin/validate-reward'), protected: true },
   { path: '/admin/promotions', load: () => import('@/screens/admin/promotions'), protected: true },
   { path: '/admin/donations', load: () => import('@/screens/admin/donation-approvals'), protected: true },
 ]

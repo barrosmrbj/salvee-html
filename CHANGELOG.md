@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.18.4**
+**Versão atual: 1.19.0**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.19.0** | 11/10/2026 | Minor | Recompensas com QR Code, aba Prêmios e regra de pontos configurável pelo admin | Gamificação, Admin, Doação, Perfil, Feed, Configurações, Servidor, Banco de dados |
 | **1.18.4** | 11/10/2026 | Patch | Logo oficial como ícone da aba e do app instalado | Sistema |
 | **1.18.3** | 11/10/2026 | Patch | Tablet e computador sem tela esticada: interface ampliada na proporção do celular | Sistema |
 | **1.18.2** | 10/10/2026 | Patch | Manifesto do app passa a ser /manifest.json | Sistema, Servidor |
@@ -60,6 +61,21 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.19.0 — Recompensas com QR Code, aba Prêmios e regra de pontos configurável pelo admin
+
+*11/10/2026 · Minor · Gamificação, Admin, Doação, Perfil, Feed, Configurações, Servidor, Banco de dados*
+
+- Correção: resgatar uma recompensa descontava os Salves e não guardava nada; agora cada resgate gera uma recompensa com QR Code único em "Minhas recompensas" (spec 18.8)
+- Nova aba Prêmios (troféu) na barra de baixo, como no PDF e no mockup: avatar, nível, barra até o próximo nível, XP e Salves, promoção ativa, abas Disponíveis e Minhas recompensas (pronta para usar, usada ou vencida); o Perfil passa a abrir pelo avatar no topo do feed
+- Resgate confere Salves e nível mínimo, desconta com proteção contra toque duplo e mostra o QR Code com o código em texto (spec 18.6 a 18.10)
+- Validar recompensa no parceiro (admin e gestor): lê o QR pela câmera ou pelo código digitado, mostra de quem é e confirma o uso; o código não vale de novo (spec 18.9)
+- Recompensas e parceiros (admin e gestor): criar, editar, ativar/desativar, nível mínimo, validade, tipo e logo; só exclui se ninguém resgatou (spec 22.1)
+- Pontos e recompensas (só admin): liga/desliga a pontuação, reais por XP e por Salve, promoção (ex.: Salves em dobro) com multiplicador e período, e liga/desliga os resgates para todos; exemplo ao vivo do que uma doação de R$ 100 rende (spec 18.11 e 27.6)
+- Doação usa a regra configurada: a pontuação estimada no resumo e a gravada na doação seguem a configuração e a promoção
+- Tabelas settings e user_rewards; colunas active, min_level, valid_until e reward_type em rewards; script opcional docs/sql/v1.19.0-recompensas-e-pontos.sql
+
+Fontes: `server/settings.js` · `server/routes/gamification.js` · `server/routes/admin.js` · `server/routes/donations.js` · `server/db.js` · `src/screens/gamification.ts` · `src/screens/admin/gamification-settings.ts` · `src/screens/admin/rewards.ts` · `src/screens/admin/validate-reward.ts` · `src/components/RewardQr.ts` · `src/components/BottomNav.ts` · `src/screens/feed.ts` · `src/screens/profile.ts` · `src/screens/donation.ts` · `src/screens/settings.ts` · `src/services/gamification.service.ts` · `src/services/admin.service.ts` · `src/types/gamification.ts` · `src/types/admin.ts` · `src/router.ts` · `docs/sql/v1.19.0-recompensas-e-pontos.sql` · `CLAUDE.md` · `docs/PENDENCIAS.md`
 
 ### 1.18.4 — Logo oficial como ícone da aba e do app instalado
 

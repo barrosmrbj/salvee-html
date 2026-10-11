@@ -263,6 +263,44 @@ async function initDb() {
     })
   }
 
+  // configurações do sistema ajustáveis pelo admin (server/settings.js): regra de pontos, recompensas
+  if (!(await db.schema.hasTable('settings'))) {
+    await db.schema.createTable('settings', t => {
+      sameCollation(t)
+      t.string('key', 64).primary()
+      t.text('value').notNullable() // JSON
+      t.string('updated_by', 36)
+      t.timestamps(true, true)
+    })
+  }
+
+  // recompensas (spec 18.6): ativa/inativa, nível mínimo, validade e tipo
+  const rewardColumns = {
+    active: t => t.boolean('active').defaultTo(true),
+    min_level: t => t.integer('min_level').defaultTo(0),
+    valid_until: t => t.string('valid_until'), // AAAA-MM-DD: último dia para resgatar e usar
+    reward_type: t => t.string('reward_type'),  // ex.: Desconto, Brinde, Serviço
+  }
+  for (const [column, add] of Object.entries(rewardColumns)) {
+    if (!(await db.schema.hasColumn('rewards', column))) await db.schema.alterTable('rewards', add)
+  }
+
+  // recompensas resgatadas (spec 18.7 a 18.10): uma linha por resgate, com código único do QR
+  if (!(await db.schema.hasTable('user_rewards'))) {
+    await db.schema.createTable('user_rewards', t => {
+      sameCollation(t)
+      t.string('id', 36).primary()
+      t.string('user_id', 36).notNullable().index()
+      t.string('reward_id', 36).notNullable()
+      t.string('code', 32).notNullable().unique() // vai no QR Code; uso único
+      t.integer('cost_paid').notNullable()
+      t.string('expires_at')                       // AAAA-MM-DD (validade da recompensa no resgate)
+      t.timestamp('used_at').nullable()
+      t.string('validated_by', 36)
+      t.timestamps(true, true)
+    })
+  }
+
   // tipo de conta escolhido antes do cadastro (spec 6.3): user | institution.
   // Define só o caminho depois do cadastro; quem publica continua sendo o responsável por instituição aprovada.
   if (!(await db.schema.hasColumn('users', 'account_type'))) {

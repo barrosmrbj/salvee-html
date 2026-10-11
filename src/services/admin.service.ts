@@ -1,5 +1,6 @@
 import { request } from './api'
-import type { AdminDonation, AdminInstitution, AdminPromotion, AdminUser, DonationStatus, InstitutionStatus, PromotionPayload } from '@/types'
+import type { AdminDonation, AdminInstitution, AdminPromotion, AdminReward, AdminUser, DonationStatus, GamificationSettings, InstitutionStatus, PromotionPayload, RewardPayload, ValidatedReward } from '@/types'
+import { ApiError } from './api'
 
 export const adminService = {
   async listInstitutions(status?: InstitutionStatus): Promise<AdminInstitution[]> {
@@ -27,6 +28,39 @@ export const adminService = {
       method: 'PATCH',
       body: JSON.stringify({ role }),
     })
+  },
+
+  async getGamificationSettings(): Promise<GamificationSettings> {
+    return request<GamificationSettings>('/admin/settings/gamification')
+  },
+
+  async saveGamificationSettings(settings: GamificationSettings): Promise<GamificationSettings> {
+    return request<GamificationSettings>('/admin/settings/gamification', { method: 'PUT', body: JSON.stringify(settings) })
+  },
+
+  async listRewards(): Promise<AdminReward[]> {
+    return request<AdminReward[]>('/admin/rewards')
+  },
+
+  async createReward(payload: RewardPayload): Promise<AdminReward> {
+    return request<AdminReward>('/admin/rewards', { method: 'POST', body: JSON.stringify(payload) })
+  },
+
+  async updateReward(id: string, payload: RewardPayload): Promise<AdminReward> {
+    return request<AdminReward>(`/admin/rewards/${id}`, { method: 'PATCH', body: JSON.stringify(payload) })
+  },
+
+  async deleteReward(id: string): Promise<void> {
+    await request<void>(`/admin/rewards/${id}`, { method: 'DELETE' })
+  },
+
+  /** confirm=false só consulta; confirm=true marca como usada. Erros (já usada, vencida) trazem a recompensa */
+  async validateReward(code: string, confirm: boolean): Promise<{ ok: boolean; reward?: ValidatedReward; error?: string }> {
+    try {
+      return await request<{ ok: boolean; reward: ValidatedReward }>('/admin/rewards/validate', { method: 'POST', body: JSON.stringify({ code, confirm }) })
+    } catch (err) {
+      return { ok: false, error: err instanceof ApiError ? err.message : 'Erro ao validar' }
+    }
   },
 
   async listPromotions(): Promise<AdminPromotion[]> {

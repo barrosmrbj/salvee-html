@@ -1,5 +1,5 @@
 // src/screens/profile.ts
-import { BottomNav, Avatar, Spinner, showToast, Button } from '@/components'
+import { BottomNav, Avatar, Spinner } from '@/components'
 import { userService, gamificationService, donationService, institutionService } from '@/services'
 import type { User, GameBalance, Reward, Donation, Institution, MyInstitution } from '@/types'
 
@@ -29,7 +29,7 @@ export function mount(): void {
   Promise.all([
     userService.getProfile().catch(() => getMockUser()),
     gamificationService.getBalance().catch(() => getMockBalance()),
-    gamificationService.listRewards().catch(() => getMockRewards()),
+    Promise.resolve([] as Reward[]),
     donationService.getHistory().catch(() => getMockDonations()),
     institutionService.list().catch(() => []),
   ]).then(([user, balance, rewards, donations, institutions]) => {
@@ -38,7 +38,7 @@ export function mount(): void {
   })
 }
 
-function renderProfile(user: User, balance: GameBalance, rewards: Reward[], donations: Donation[], institutions: Institution[]): void {
+function renderProfile(user: User, balance: GameBalance, _rewards: Reward[], donations: Donation[], institutions: Institution[]): void {
   const content = document.getElementById('profile-content')!
   content.classList.remove('hidden')
 
@@ -115,113 +115,23 @@ function renderProfile(user: User, balance: GameBalance, rewards: Reward[], dona
     .then(mine => { if (mine.length) instStatus.appendChild(institutionStatusCard(mine)) })
     .catch(() => {})
 
-  // Tabs
-  const tabBar = document.createElement('div')
-  tabBar.className = 'flex border-b border-gray-100 bg-white'
+  // atalho para a aba Prêmios (recompensas e QR Codes ficam lá)
+  const prizes = document.createElement('button')
+  prizes.type = 'button'
+  prizes.className = 'mx-4 mt-4 w-[calc(100%-2rem)] flex items-center justify-between gap-3 bg-salvee-orange text-white rounded-2xl px-4 py-3 text-left'
+  prizes.innerHTML = '<span class="font-semibold text-sm">🏆 Trocar Salves por recompensas</span><span class="text-xs underline">Prêmios ›</span>'
+  prizes.addEventListener('click', () => { window.location.hash = '/gamification' })
+  content.appendChild(prizes)
 
-  const activeTabClass = 'flex-1 py-3 text-xs font-semibold text-salvee-orange border-b-2 border-salvee-orange'
-  const inactiveTabClass = 'flex-1 py-3 text-xs font-medium text-gray-400 border-b-2 border-transparent'
-
-  const tabAvailable = document.createElement('button')
-  tabAvailable.className = activeTabClass
-  tabAvailable.textContent = 'Recompensas'
-  const tabMy = document.createElement('button')
-  tabMy.className = inactiveTabClass
-  tabMy.textContent = 'Resgatadas'
-  const tabHistory = document.createElement('button')
-  tabHistory.className = inactiveTabClass
-  tabHistory.textContent = 'Histórico'
-
-  tabBar.appendChild(tabAvailable)
-  tabBar.appendChild(tabMy)
-  tabBar.appendChild(tabHistory)
-  content.appendChild(tabBar)
-
+  const historyTitle = document.createElement('h2')
+  historyTitle.className = 'px-4 pt-5 text-sm font-bold text-gray-900'
+  historyTitle.textContent = 'Histórico de doações'
+  content.appendChild(historyTitle)
   const tabContent = document.createElement('div')
   tabContent.id = 'tab-content'
-  tabContent.className = 'grid grid-cols-1 gap-3 p-4'
+  tabContent.className = 'flex flex-col gap-3 p-4'
   content.appendChild(tabContent)
-
-  const setActive = (active: HTMLButtonElement) => {
-    ;[tabAvailable, tabMy, tabHistory].forEach(t => {
-      t.className = t === active ? activeTabClass : inactiveTabClass
-    })
-  }
-
-  tabAvailable.addEventListener('click', () => {
-    setActive(tabAvailable)
-    tabContent.className = 'grid grid-cols-1 gap-3 p-4'
-    renderRewardsList(rewards)
-  })
-  tabMy.addEventListener('click', () => {
-    setActive(tabMy)
-    tabContent.className = 'grid grid-cols-1 gap-3 p-4'
-    tabContent.innerHTML = '<p class="text-center text-gray-400 py-8 col-span-full">Nenhuma recompensa resgatada.</p>'
-  })
-  tabHistory.addEventListener('click', () => {
-    setActive(tabHistory)
-    tabContent.className = 'flex flex-col gap-3 p-4'
-    renderDonationHistory(donations, institutions)
-  })
-
-  renderRewardsList(rewards)
-}
-
-function renderRewardsList(rewards: Reward[]): void {
-  const grid = document.getElementById('tab-content')!
-  grid.innerHTML = ''
-  rewards.forEach(reward => {
-    const card = document.createElement('div')
-    card.className = 'bg-white rounded-2xl border border-gray-100 p-4 flex items-center gap-4'
-
-    const logoDiv = document.createElement('div')
-    logoDiv.className = 'w-14 h-14 rounded-2xl bg-gray-100 overflow-hidden flex items-center justify-center flex-shrink-0'
-    if (reward.partnerLogoUrl) {
-      const img = document.createElement('img')
-      img.src = reward.partnerLogoUrl
-      img.alt = reward.partnerName ?? ''
-      img.className = 'w-full h-full object-cover'
-      logoDiv.appendChild(img)
-    } else {
-      logoDiv.textContent = '🎁'
-    }
-    card.appendChild(logoDiv)
-
-    const info = document.createElement('div')
-    info.className = 'flex-1 min-w-0'
-    const titleP = document.createElement('p')
-    titleP.className = 'font-semibold text-gray-900 text-sm'
-    titleP.textContent = reward.title
-    info.appendChild(titleP)
-    if (reward.partnerName) {
-      const partnerP = document.createElement('p')
-      partnerP.className = 'text-xs text-gray-500'
-      partnerP.textContent = reward.partnerName
-      info.appendChild(partnerP)
-    }
-    const descP = document.createElement('p')
-    descP.className = 'text-xs text-gray-400 mt-0.5'
-    descP.textContent = reward.description
-    info.appendChild(descP)
-    card.appendChild(info)
-
-    const btnContainer = document.createElement('div')
-    btnContainer.className = 'flex-shrink-0'
-    btnContainer.appendChild(Button({
-      label: `${reward.cost} SLV`,
-      variant: 'primary',
-      onClick: async () => {
-        try {
-          await gamificationService.redeemReward(reward.id)
-          showToast('Recompensa resgatada! Verifique seu QR Code.', 'success')
-        } catch {
-          showToast('Salves insuficientes', 'error')
-        }
-      },
-    }))
-    card.appendChild(btnContainer)
-    grid.appendChild(card)
-  })
+  renderDonationHistory(donations, institutions)
 }
 
 function renderDonationHistory(donations: Donation[], _institutions: Institution[]): void {
@@ -373,13 +283,6 @@ function getMockUser(): User {
 
 function getMockBalance(): GameBalance {
   return { xp: 350, salves: 500, level: 5, xpToNextLevel: 150, levelName: 'Voluntário' }
-}
-
-function getMockRewards(): Reward[] {
-  return [
-    { id: 'r1', title: 'Xbox Gamepass', description: '3 Meses Ultimate', cost: 250, partnerName: 'Xbox' },
-    { id: 'r2', title: 'Café Grátis', description: '1 café expresso', cost: 50, partnerName: 'Café Local' },
-  ]
 }
 
 export function unmount(): void {

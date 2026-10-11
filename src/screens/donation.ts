@@ -1,6 +1,7 @@
 // src/screens/donation.ts
 import { Button, NumericKeyboard, showToast, LoadingOverlay } from '@/components'
-import { donationService, feedService, institutionService } from '@/services'
+import { donationService, estimatePoints, feedService, gamificationService, institutionService } from '@/services'
+import type { GameRules } from '@/types'
 import { getHashQuery } from '@/router'
 import type { Institution, PaymentMethod } from '@/types'
 import girlSvg from '../../.Documentacao/ilustracoes_salvee/__girl_salvee_004.svg?url'
@@ -14,6 +15,7 @@ let paymentMethod: PaymentMethod = 'pix'
 let institution: Institution | null = null
 let xpEarned = 0
 let salvesEarned = 0
+let rules: GameRules | null = null
 // doação pelo botão Doar de uma campanha (#/donate/:id?campanha=<postId>)
 let campaignId: string | null = null
 let campaignTitle = ''
@@ -30,6 +32,7 @@ export function mount(): void {
   const el = document.querySelector('[data-institution-id]') as HTMLElement
   const id = el?.dataset['institutionId'] ?? ''
 
+  gamificationService.getRules().then(r => { rules = r; if (step === 'summary') renderStep() }).catch(() => {})
   campaignId = getHashQuery().get('campanha')
   if (campaignId) {
     feedService.getPostById(campaignId)
@@ -250,8 +253,8 @@ function renderPaymentStep(container: HTMLElement): void {
 }
 
 function renderSummaryStep(container: HTMLElement): void {
-  const xp = Math.floor(amount / 2)
-  const salves = Math.floor(amount / 4)
+  // mesma conta do servidor, pela regra configurada pelo admin (pontuação, R$ por ponto, promoção)
+  const { xp, salves } = estimatePoints(amount, rules)
 
   const wrapper = document.createElement('div')
   wrapper.className = 'p-6 flex flex-col gap-4'
@@ -304,7 +307,7 @@ function renderSummaryStep(container: HTMLElement): void {
   if (campaignTitle) addRow('Campanha', campaignTitle)
   addRow('Valor', `R$ ${amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 'font-bold text-salvee-orange text-lg')
   addRow('Pontuação', `+${xp}XP · +${salves}SLV`)
-  addRow('', 'Creditada após a confirmação do pagamento', 'text-xs text-gray-400')
+  addRow('', rules && !rules.pointsEnabled ? 'Pontuação pausada no momento' : rules?.promo ? `${rules.promo.label || 'Promoção'} incluída · creditada após a confirmação` : 'Creditada após a confirmação do pagamento', 'text-xs text-gray-400')
   if (message) addRow('Mensagem', message)
   wrapper.appendChild(details)
 

@@ -2,6 +2,7 @@ const express = require('express')
 const { v4: uuidv4 } = require('uuid')
 const { db } = require('../db')
 const { authMiddleware } = require('../middleware/auth')
+const { pointsFor } = require('../settings')
 
 const router = express.Router()
 
@@ -23,8 +24,8 @@ router.post('/initiate', authMiddleware, async (req, res) => {
 
     // A doação nasce pendente: XP/Salves ficam reservados e só são creditados quando o pagamento
     // for confirmado (hoje por admin/gestor em PATCH /admin/donations/:id/status).
-    const xpEarned = Math.floor(value / 2)
-    const salvesEarned = Math.floor(value / 4)
+    // regra de pontos configurável pelo admin (server/settings.js): liga/desliga, R$ por XP/Salve e promoção
+    const { xp: xpEarned, salves: salvesEarned } = await pointsFor(value)
     const id = uuidv4()
 
     await db('donations').insert({
