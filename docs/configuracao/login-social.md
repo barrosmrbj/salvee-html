@@ -8,7 +8,7 @@ credenciais dela forem colocadas nas **variáveis de ambiente do app na Hostinge
 > projeto (ex.: `contato@salvee...`). As contas de desenvolvedor ficam no nome dele, e não no de quem
 > desenvolveu. Nunca colar a chave secreta em chat, e-mail ou no git.
 
-Endereço do site em produção: `https://skyblue-hedgehog-581364.hostingersite.com`
+Endereço do site em produção: `https://magenta-jay-118109.hostingersite.com`
 (se o domínio mudar, trocar nas URIs de retorno abaixo e no cadastro de cada rede).
 
 ---
@@ -53,7 +53,7 @@ Sem isso, só "testadores" cadastrados um a um conseguem entrar.
 | URIs de redirecionamento autorizados | as duas linhas abaixo (uma por **+ Adicionar URI**) |
 
 ```
-https://skyblue-hedgehog-581364.hostingersite.com/api/auth/oauth/google/callback
+https://magenta-jay-118109.hostingersite.com/api/auth/oauth/google/callback
 http://localhost:8000/api/auth/oauth/google/callback
 ```
 (a primeira é a do site no ar; a segunda, para testar no computador. Sem espaço nem barra no final.)
@@ -68,7 +68,7 @@ Clicar em **Fazer download do JSON** e guardar em local seguro: a chave secreta 
 aparece nesta hora (se perder, gera-se outra).
 
 ### Parte 6: colocar na Hostinger
-hPanel → app **skyblue-hedgehog** → **Variáveis de ambiente** → **Editar** → **Adicionar mais**:
+hPanel → app **magenta-jay** → **Variáveis de ambiente** → **Editar** → **Adicionar mais**:
 
 | Chave | Valor |
 |---|---|
@@ -78,7 +78,7 @@ hPanel → app **skyblue-hedgehog** → **Variáveis de ambiente** → **Editar*
 Salvar e **reimplantar** o app.
 
 ### Parte 7: testar
-1. `https://skyblue-hedgehog-581364.hostingersite.com/api/auth/oauth/providers` deve mostrar `"google":true`.
+1. `https://magenta-jay-118109.hostingersite.com/api/auth/oauth/providers` deve mostrar `"google":true`.
 2. No app: tela de login → botão do Google → escolher a conta → volta logado no feed.
 3. Para testar no computador: colocar as mesmas duas variáveis no `server/.env` e rodar `npm run dev:all`.
 
@@ -87,7 +87,7 @@ Salvar e **reimplantar** o app.
 ## Facebook (grátis; exige política de privacidade publicada)
 1. **https://developers.facebook.com** → **Meus apps → Criar app** → caso de uso **Autenticar e solicitar dados dos usuários com o Login do Facebook**.
 2. Em **Login do Facebook → Configurações**, em **URIs de redirecionamento do OAuth válidos**:
-   `https://skyblue-hedgehog-581364.hostingersite.com/api/auth/oauth/facebook/callback`
+   `https://magenta-jay-118109.hostingersite.com/api/auth/oauth/facebook/callback`
 3. **Configurações do app → Básico**: copiar **ID do app** e **Chave secreta do app**; preencher URL da
    **Política de privacidade** e de **exclusão de dados** (obrigatórias para publicar).
 4. Mudar o app de **Em desenvolvimento** para **Ao vivo** (senão só administradores/testadores entram).
@@ -97,8 +97,8 @@ Salvar e **reimplantar** o app.
 1. **https://developer.apple.com/account** → **Certificates, Identifiers & Profiles**.
 2. **Identifiers → App IDs**: criar um App ID com **Sign in with Apple** ligado.
 3. **Identifiers → Services IDs**: criar (ex.: `com.salvee.web`), ligar **Sign in with Apple** →
-   **Configure**: domínio `skyblue-hedgehog-581364.hostingersite.com` e Return URL
-   `https://skyblue-hedgehog-581364.hostingersite.com/api/auth/oauth/apple/callback`.
+   **Configure**: domínio `magenta-jay-118109.hostingersite.com` e Return URL
+   `https://magenta-jay-118109.hostingersite.com/api/auth/oauth/apple/callback`.
 4. **Keys**: criar chave com **Sign in with Apple**, baixar o arquivo `.p8` (só baixa uma vez) e anotar o **Key ID**.
 5. **Team ID**: canto superior direito da conta (ou em Membership).
 6. Variáveis na Hostinger:

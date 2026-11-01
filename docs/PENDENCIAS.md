@@ -3,10 +3,12 @@
 Atualizado em 11/10/2026 (v1.20.0). Ler no início de cada sessão e atualizar ao concluir algo.
 
 ## Situação atual
-- Produção: Node.js App da Hostinger em `https://skyblue-hedgehog-581364.hostingersite.com`
-  (frontend + API), MySQL `u526770669_salvee`, deploy automático a cada push na `master`.
-- O domínio antigo `darkblue-rook-985577.hostingersite.com` só redireciona para o novo.
-- Variáveis já no painel do app: JWT_SECRET, PUBLIC_URL, DB_* e UPLOAD_DIR (`/home/u526770669/salvee-uploads`).
+- Produção (v1.20.2, conta nova da Hostinger, plano Business): Node.js App em
+  `https://magenta-jay-118109.hostingersite.com` (domínio provisório; o definitivo ainda será comprado),
+  deploy automático a cada push na `master`. Passo a passo: `docs/configuracao/hostinger-nova-conta.md`.
+- **A fazer na conta nova:** criar como **Node.js App** (não site estático), criar o banco MySQL,
+  importar os dados e preencher as variáveis (JWT_SECRET, PUBLIC_URL, DB_*, UPLOAD_DIR).
+- Conta antiga (`skyblue-hedgehog-581364`, MySQL `u526770669_salvee`) e site estático `darkblue-rook-985577`: serão desligados.
 
 ## Aguardando o cliente
 O cliente ainda não tem **domínio próprio** nem **e-mail do projeto**. Com o domínio temporário
@@ -22,7 +24,7 @@ O cliente ainda não tem **domínio próprio** nem **e-mail do projeto**. Com o 
 
 ## Fazer assim que possível
 - [ ] **Alerta "Perigoso" do Chrome** (Google Safe Browsing): a meta de verificação já está no site (v1.9.2).
-      No Search Console, concluir a verificação de `https://skyblue-hedgehog-581364.hostingersite.com`,
+      No Search Console, concluir a verificação de `https://magenta-jay-118109.hostingersite.com`,
       ver **Segurança e ações manuais → Problemas de segurança** e **Solicitar revisão**. Com o domínio próprio,
       verificar o domínio novo também.
 - [ ] Trocar a senha do `admin@salvee.com` (ainda é a padrão `Salvee@2025`).

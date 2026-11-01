@@ -1,6 +1,27 @@
 {
-  "versaoAtual": "1.20.1",
+  "versaoAtual": "1.20.2",
   "historico": [
+    {
+      "versao": "1.20.2",
+      "data": "2026-11-01",
+      "tipo": "patch",
+      "titulo": "Mudança para a conta nova da Hostinger (magenta-jay) e fim da página \"Este endereço não é mais usado\"",
+      "modulos": [
+        "Sistema"
+      ],
+      "itens": [
+        "Removida a página endereco-antigo.html: os domínios antigos (skyblue-hedgehog e darkblue-rook) serão desligados",
+        ".htaccess da raiz deixa de mostrar o aviso de endereço antigo: se o repositório for publicado como site estático por engano, serve o app (server/public), esconde o código-fonte e responde 503 em /api",
+        "Documentação atualizada para o domínio provisório magenta-jay-118109.hostingersite.com e passo a passo da conta nova (docs/configuracao/hostinger-nova-conta.md)"
+      ],
+      "fontes": [
+        ".htaccess",
+        "endereco-antigo.html",
+        "docs/configuracao/hostinger-nova-conta.md",
+        "docs/PENDENCIAS.md",
+        "CLAUDE.md"
+      ]
+    },
     {
       "versao": "1.20.1",
       "data": "2026-10-11",

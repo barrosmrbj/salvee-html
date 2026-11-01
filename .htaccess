@@ -1,10 +1,15 @@
-# Site estático antigo da Hostinger (darkblue-rook-985577, Git → public_html): mostra só a página
-# endereco-antigo.html com o link para o Node.js App de produção. Sem redirecionamento automático
-# (domínio que redireciona para outro é um dos sinais que o Google Safe Browsing trata como golpe).
-# Também impede que o código-fonte do repositório seja servido.
-# No Node.js App este arquivo não é usado: o Express serve server/public/.
+# Usado só quando o repositório é publicado como SITE ESTÁTICO (Git → public_html).
+# O certo na Hostinger é um Node.js App (Express serve frontend + API e este arquivo não é usado).
+# Se cair no site estático por engano: serve o build (server/public/) e esconde o código-fonte;
+# /api responde 503, porque sem o Node.js App a API não roda.
 Options -Indexes -MultiViews
+DirectoryIndex index.html
 
 RewriteEngine On
-RewriteCond %{REQUEST_URI} !^/endereco-antigo\.html$
-RewriteRule ^ /endereco-antigo.html [L]
+
+# API não existe no site estático
+RewriteRule ^api/ - [R=503,L]
+
+# Tudo o mais vem da pasta do build (o .htaccess de lá cuida das rotas do app)
+RewriteCond %{REQUEST_URI} !^/server/public/
+RewriteRule ^(.*)$ server/public/$1 [L]

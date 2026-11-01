@@ -3,7 +3,7 @@
 > Arquivo **gerado automaticamente** a partir de `src/config/versoes.json` 
 > (`npm run versao:changelog`). Não edite à mão — edite o JSON e regenere.
 
-**Versão atual: 1.20.1**
+**Versão atual: 1.20.2**
 
 ## Como numerar (MAJOR.MINOR.PATCH)
 
@@ -19,6 +19,7 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 
 | Versão | Data | Tipo | O que mudou | Módulos |
 |---|---|---|---|---|
+| **1.20.2** | 01/11/2026 | Patch | Mudança para a conta nova da Hostinger (magenta-jay) e fim da página "Este endereço não é mais usado" | Sistema |
 | **1.20.1** | 11/10/2026 | Patch | Logo oficial aparece no menu, na aba e no app instalado (fim do coração antigo em cache) | Sistema |
 | **1.20.0** | 11/10/2026 | Minor | Configurações completas: editar perfil, alterar senha, excluir conta, ajuda, Termos de uso e Política de privacidade | Configurações, Autenticação, Perfil, Servidor, Banco de dados |
 | **1.19.0** | 11/10/2026 | Minor | Recompensas com QR Code, aba Prêmios e regra de pontos configurável pelo admin | Gamificação, Admin, Doação, Perfil, Feed, Configurações, Servidor, Banco de dados |
@@ -63,6 +64,16 @@ Várias mudanças entregues juntas viram **uma** versão, pela parte de maior pe
 | **0.1.0** | 29/04/2026 | Minor | Base do projeto: Vite + TypeScript + Tailwind, serviços, rotas e componentes | Sistema |
 
 ## Detalhes
+
+### 1.20.2 — Mudança para a conta nova da Hostinger (magenta-jay) e fim da página "Este endereço não é mais usado"
+
+*01/11/2026 · Patch · Sistema*
+
+- Removida a página endereco-antigo.html: os domínios antigos (skyblue-hedgehog e darkblue-rook) serão desligados
+- .htaccess da raiz deixa de mostrar o aviso de endereço antigo: se o repositório for publicado como site estático por engano, serve o app (server/public), esconde o código-fonte e responde 503 em /api
+- Documentação atualizada para o domínio provisório magenta-jay-118109.hostingersite.com e passo a passo da conta nova (docs/configuracao/hostinger-nova-conta.md)
+
+Fontes: `.htaccess` · `endereco-antigo.html` · `docs/configuracao/hostinger-nova-conta.md` · `docs/PENDENCIAS.md` · `CLAUDE.md`
 
 ### 1.20.1 — Logo oficial aparece no menu, na aba e no app instalado (fim do coração antigo em cache)
 

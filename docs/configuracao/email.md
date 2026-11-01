@@ -28,7 +28,7 @@ No computador (dev), sem as variáveis, o e-mail aparece no terminal do servidor
    **SMTP**: servidor `smtp.hostinger.com`, porta `465`, SSL.
 
 ## Parte 2: colocar no app
-hPanel → app **skyblue-hedgehog** → **Variáveis de ambiente** → **Editar** → **Adicionar mais**:
+hPanel → app **magenta-jay** → **Variáveis de ambiente** → **Editar** → **Adicionar mais**:
 
 | Chave | Valor |
 |---|---|
@@ -41,7 +41,7 @@ hPanel → app **skyblue-hedgehog** → **Variáveis de ambiente** → **Editar*
 Salvar e **reimplantar**.
 
 ## Parte 3: testar
-1. `https://skyblue-hedgehog-581364.hostingersite.com/api/auth/mail-status` deve mostrar `{"enabled":true}`.
+1. `https://magenta-jay-118109.hostingersite.com/api/auth/mail-status` deve mostrar `{"enabled":true}`.
 2. No app: **Entrar → Esqueci minha senha** → digitar um e-mail cadastrado → o e-mail chega em até 1 minuto
    (ver também o spam) → **Criar nova senha** → entrar com a nova senha.
 3. Criar uma conta nova → chega "Confirme seu e-mail" → tocar no botão → "E-mail confirmado!".

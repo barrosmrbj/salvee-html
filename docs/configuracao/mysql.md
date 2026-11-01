@@ -13,7 +13,7 @@ para quem quiser criar ou conferir na mão.
 ## Como conferir depois de um deploy
 **Pelo SSH** (mostra o log do app):
 ```bash
-tail -30 ~/domains/skyblue-hedgehog-581364.hostingersite.com/hbuilds/current/nodejs/console.log
+tail -30 ~/domains/magenta-jay-118109.hostingersite.com/hbuilds/current/nodejs/console.log
 ```
 Tem que aparecer `Database ready` e `Salvee API <versão> running`. Erro de banco aparece como
 `Falha ao conectar/preparar o banco` ou `Falha ao unificar a collation`.
