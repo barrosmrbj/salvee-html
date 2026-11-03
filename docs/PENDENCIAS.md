@@ -97,7 +97,7 @@ Refeita em 11/10/2026 (v1.20.0). ✅ feito · 🟡 parcial · ❌ não existe. N
 - [x] Telas de status da instituição no login, pedir revisão e reenviar correções (v1.12.0).
 - [x] Recompensas com QR Code, Minhas recompensas, aba Prêmios e regra de pontos configurável (v1.19.0).
 - [x] Configurações completas, Termos de uso, Política de privacidade, excluir conta e validação do cadastro (v1.20.0).
-- [ ] **PIX real**: integrar provedor (Mercado Pago, Asaas, Efí…); o webhook substitui a confirmação manual de doações.
+- [ ] **PIX real com Mercado Pago**: plano por etapas em `docs/configuracao/mercado-pago.md`. **Aguardando o cliente** (mensagem enviada em 03/11/2026): escolha do modelo (A: cada instituição recebe direto; B: conta do Salvee repassa), taxa, se a conta MP é CPF ou CNPJ, criação da aplicação, credenciais de teste e instituição piloto. O webhook substitui a confirmação manual de doações.
 - [ ] Detalhe do evento com mapa (19.6); notificações (21); categorias no admin (22).
 - [ ] **SMS** para verificar celular (opcional; hoje a confirmação é por e-mail). Tela `/verify-phone` mantida.
 - [ ] Backup periódico de `~/salvee-uploads` e do MySQL (hPanel → Backups).
