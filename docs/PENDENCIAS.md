@@ -98,6 +98,7 @@ Refeita em 11/10/2026 (v1.20.0). ✅ feito · 🟡 parcial · ❌ não existe. N
 - [x] Recompensas com QR Code, Minhas recompensas, aba Prêmios e regra de pontos configurável (v1.19.0).
 - [x] Configurações completas, Termos de uso, Política de privacidade, excluir conta e validação do cadastro (v1.20.0).
 - [ ] **PIX real com Mercado Pago**: plano por etapas em `docs/configuracao/mercado-pago.md`. **Aguardando o cliente** (mensagem enviada em 03/11/2026): escolha do modelo (A: cada instituição recebe direto; B: conta do Salvee repassa), taxa, se a conta MP é CPF ou CNPJ, criação da aplicação, credenciais de teste e instituição piloto. O webhook substitui a confirmação manual de doações.
+- [ ] **Publicação nas lojas (Google Play e App Store)**: planejamento para o cliente em `plano-de-negocio/docs/Salvee-Plano-apps-lojas-v1.0.pdf` (fonte `.html` ao lado). **Aguardando o cliente**: ordem das lojas, taxa das doações, D-U-N-S e contas de organização, dados da empresa nos Termos. Obrigatório antes do envio: Capacitor, endereço completo da API e CORS no app, denunciar/bloquear (Apple 1.2), doação pelo Safari no iPhone (Apple 3.2.2), leitor de QR nativo, permissões e ícones.
 - [ ] Detalhe do evento com mapa (19.6); notificações (21); categorias no admin (22).
 - [ ] **SMS** para verificar celular (opcional; hoje a confirmação é por e-mail). Tela `/verify-phone` mantida.
 - [ ] Backup periódico de `~/salvee-uploads` e do MySQL (hPanel → Backups).

@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Salvee nas lojas de aplicativos — Planejamento</title>
+<!-- Fonte do PDF "Salvee-Plano-apps-lojas-v1.0.pdf". Editou aqui? Gere o PDF de novo (comando no fim do arquivo). -->
+<style>
+@page { size: A4; margin: 20mm 18mm 18mm; }
+body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; font-size: 10.5pt; line-height: 1.5; margin: 0; }
+header { display: flex; align-items: center; gap: 12px; border-bottom: 3px solid #FF6B00; padding-bottom: 10px; margin-bottom: 14px; }
+header img { width: 48px; height: 48px; border-radius: 10px; }
+header .t { font-size: 19pt; font-weight: 700; color: #111827; line-height: 1.2; }
+header .s { font-size: 9pt; color: #FF6B00; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+header .d { font-size: 9pt; color: #6B7280; }
+h2 { font-size: 13pt; color: #111827; margin: 18px 0 6px; break-after: avoid; border-left: 4px solid #FF6B00; padding-left: 8px; }
+h3 { font-size: 11pt; color: #111827; margin: 12px 0 4px; break-after: avoid; }
+p { margin: 4px 0; text-align: justify; }
+ul, ol { margin: 4px 0 4px 18px; padding: 0; } li { margin: 2px 0; }
+table { width: 100%; border-collapse: collapse; margin: 6px 0 8px; font-size: 9.5pt; break-inside: avoid; }
+th { background: #FFF1E6; color: #9A3412; text-align: left; padding: 5px 6px; border: 1px solid #FDBA74; }
+td { padding: 5px 6px; border: 1px solid #E5E7EB; vertical-align: top; }
+.box { border-radius: 6px; padding: 8px 10px; margin: 8px 0; break-inside: avoid; }
+.info { background: #F3F4F6; color: #374151; }
+.ok { background: #ECFDF5; border: 1px solid #6EE7B7; color: #065F46; }
+.warn { background: #FFF7ED; border: 1px solid #FDBA74; color: #9A3412; }
+.todo { background: #FEF08A; font-weight: 600; padding: 0 3px; }
+.tag { display: inline-block; font-size: 8pt; font-weight: 700; border-radius: 4px; padding: 0 5px; }
+.obr { background: #FEE2E2; color: #991B1B; } .rec { background: #DBEAFE; color: #1E40AF; } .opc { background: #E5E7EB; color: #374151; }
+.diag { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; break-inside: avoid; }
+.diag .c { border: 2px solid #FF6B00; border-radius: 8px; padding: 6px 10px; text-align: center; font-size: 9pt; background: #fff; }
+.diag .c b { display: block; font-size: 10pt; }
+.diag .col { display: flex; flex-direction: column; gap: 6px; }
+.diag .arrow { color: #FF6B00; font-size: 16pt; font-weight: 700; }
+.resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.resumo-grid .box { margin: 0; }
+.small { font-size: 8.5pt; color: #6B7280; }
+.pb { break-before: page; }
+a { color: #C2410C; }
+</style>
+</head>
+<body>
+
+<header>
+  <img src="../../public/icons/salvee-192.png" alt="">
+  <div>
+    <div class="s">Salvee · Planejamento</div>
+    <div class="t">Salvee no Google Play e na App Store</div>
+    <div class="d">Custos, mudanças no projeto, requisitos e cronograma · versão 1.0 · novembro de 2026</div>
+  </div>
+</header>
+
+<h2>1. Resumo</h2>
+<p>O Salvee hoje é um site que funciona no celular e pode ser "instalado" na tela inicial (PWA). A proposta é
+publicá-lo também como <b>aplicativo de verdade</b> no <b>Google Play</b> (Android) e na <b>App Store</b> (iPhone),
+<b>sem refazer o projeto</b>: as mesmas telas e o mesmo servidor passam a ser empacotados como app com uma
+ferramenta chamada <b>Capacitor</b>. O site continua no ar como hoje; site, PWA e os dois apps convivem.</p>
+
+<div class="resumo-grid">
+  <div class="box ok"><b>O que muda pouco</b><br>Telas, regras, banco de dados e servidor (Hostinger) continuam os mesmos.
+    Cerca de 85% do que já existe é reaproveitado sem mudança.</div>
+  <div class="box ok"><b>Atualizações continuam livres</b><br>Mudanças no servidor e nos dados valem na hora, também nos apps.
+    Mudanças de tela vão para as lojas como nova versão (Google: horas a 2 dias; Apple: 1 a 2 dias).</div>
+  <div class="box info"><b>Custo fixo das lojas</b><br>Google Play: US$ 25 (uma vez só).<br>Apple: US$ 99 por ano.<br>
+    Não é preciso comprar um Mac (pode ser usado um Mac na nuvem).</div>
+  <div class="box info"><b>Prazo estimado</b><br>Cerca de <b>6 a 9 semanas</b> até os dois apps publicados,
+    contando o tempo de abertura das contas e de análise das lojas.</div>
+</div>
+
+<div class="box warn"><b>Ponto de atenção principal: doações no iPhone.</b> A Apple só deixa pagar uma doação
+<i>dentro</i> do app se quem recebe for uma ONG aprovada por ela e com Apple Pay. Como o Salvee usa PIX, no iPhone o
+botão <b>Doar</b> vai abrir a página de doação no Safari (navegador), já com a pessoa logada. No Android a doação
+continua dentro do app. Detalhes na seção 4.</div>
+
+<p><b>Ordem recomendada:</b> publicar <b>primeiro no Google Play</b> (mais barato, aprovação mais rápida, não precisa de Mac)
+e <b>logo em seguida na App Store</b>, com o mesmo código. A preparação comum é feita uma vez só e serve para os dois.</p>
+
+<h2>2. Como vai funcionar</h2>
+<div class="diag">
+  <div class="col">
+    <div class="c"><b>Site</b>navegador (como hoje)</div>
+    <div class="c"><b>App Android</b>Google Play</div>
+    <div class="c"><b>App iPhone</b>App Store</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="c"><b>Mesmo código das telas</b>Salvee (Vite + TypeScript)<br>empacotado com Capacitor</div>
+  <div class="arrow">→</div>
+  <div class="c"><b>Mesmo servidor</b>API + banco MySQL<br>na Hostinger</div>
+</div>
+<p>O <b>Capacitor</b> é uma ferramenta gratuita e muito usada que coloca o site dentro de um app e dá acesso a
+recursos do celular (câmera, localização, notificações, discador). Não é preciso escrever um app separado para cada
+sistema: um só código gera os dois apps e o site.</p>
+
+<h2>3. Atualizações depois de publicado</h2>
+<p>Publicar nas lojas <b>não limita</b> o Salvee a uma única versão. Funciona assim:</p>
+<table>
+  <tr><th style="width:38%">Tipo de mudança</th><th style="width:32%">Como chega ao usuário</th><th>Exemplos</th></tr>
+  <tr><td>Servidor, regras e dados</td><td><b>Na hora</b>, no site e nos apps (mesmo processo de hoje)</td>
+      <td>Aprovar instituição, regras de pontos, promoções, correções na API, novas recompensas</td></tr>
+  <tr><td>Telas e textos do app</td><td>Nova versão enviada à loja. Google: horas a 2 dias. Apple: normalmente 1 a 2 dias</td>
+      <td>Tela nova, botão novo, mudança de layout</td></tr>
+  <tr><td>Telas, com "atualização ao vivo" <span class="tag opc">opcional</span></td><td><b>Sem passar pela loja</b>, o app baixa as telas novas ao abrir</td>
+      <td>Correções rápidas de tela (permitido pelas lojas, desde que o app não mude de finalidade)</td></tr>
+  <tr><td>Recursos novos do celular</td><td>Sempre nova versão na loja</td><td>Pedir uma permissão nova, novo plugin</td></tr>
+</table>
+<p>Não há limite de quantas versões podem ser enviadas. O site continua sendo atualizado como hoje.</p>
+
+<h2>4. Doações no iPhone e no Android</h2>
+<h3>4.1 Regras das lojas</h3>
+<ul>
+  <li><b>Apple</b> (diretrizes 3.2.1 e 3.2.2): arrecadar dinheiro <i>dentro</i> do app só é permitido para
+    organizações sem fins lucrativos aprovadas pela Apple e com Apple Pay. Para os demais casos, a doação deve
+    acontecer <b>fora do app</b>, por exemplo no Safari.</li>
+  <li><b>Google Play</b>: aceita doações com pagamento próprio (PIX) para entidades sem fins lucrativos, sem usar o
+    sistema de cobrança do Google.</li>
+  <li><b>Nenhuma das duas lojas cobra porcentagem sobre doações.</b> As lojas só cobram comissão sobre venda de
+    conteúdo digital, e o Salvee não vende nada (as recompensas são benefícios em parceiros físicos).</li>
+</ul>
+
+<h3>4.2 E se as doações forem para a conta do Salvee, com uma porcentagem para o Salvee?</h3>
+<div class="box info"><b>O que diz a especificação oficial:</b> conferimos as 37 páginas da "Especificação SALVEE".
+<b>Não há nenhuma menção</b> a taxa, comissão, porcentagem ou repasse do Salvee sobre as doações. Os Termos de uso
+atuais (rascunho v1.0) dizem que "o Salvee não cobra taxa do doador", e o plano do PIX com Mercado Pago está
+aguardando essa decisão (padrão: 0%).</div>
+<p>Se o Salvee receber as doações e ficar com uma parte, o efeito é:</p>
+<ul>
+  <li><b>No iPhone:</b> o Salvee é uma empresa, não uma ONG aprovada pela Apple. Então a doação <b>obrigatoriamente</b>
+    acontece fora do app (Safari). Como o PIX não é Apple Pay, essa já é a recomendação mesmo sem a porcentagem: a
+    solução técnica é a mesma nos dois casos.</li>
+  <li><b>No Android:</b> o Google aceita doações para entidades sem fins lucrativos. Se o dinheiro passar pela conta do
+    Salvee com taxa, recomenda-se deixar isso claro na tela da doação e reconfirmar a política do Google no envio.</li>
+  <li><b>Fora das lojas:</b> exige mudar os Termos de uso, mostrar a taxa ao doador antes de confirmar, falar com um
+    contador (impostos sobre o que o Salvee recebe e repassa) e definir no Mercado Pago o modelo
+    "cada instituição recebe direto, com taxa do Salvee descontada automaticamente" (recomendado) ou
+    "tudo cai no Salvee e ele repassa" (repasse manual, mais arriscado).</li>
+</ul>
+<p><b>Pergunta para o cliente:</b> as instituições cadastradas serão sempre entidades sem fins lucrativos
+reconhecidas (com CNPJ de associação/fundação)? Isso facilita a aprovação nas duas lojas.</p>
+
+<h3>4.3 Como fica para quem doa no iPhone</h3>
+<ol>
+  <li>Toca em <b>Doar</b> no app.</li>
+  <li>O Safari abre a página de doação do Salvee, <b>já logado</b> (o app passa um código de uso único, que vale por poucos minutos).</li>
+  <li>A pessoa escolhe o valor e paga o PIX normalmente.</li>
+  <li>Volta ao app: pontos, Salves e o progresso da campanha aparecem atualizados quando a doação é confirmada.</li>
+</ol>
+
+<h2 class="pb">5. Mudanças no projeto</h2>
+<p><span class="tag obr">Obrigatória</span> sem isso as lojas reprovam ou o app não funciona ·
+<span class="tag rec">Recomendada</span> melhora muito a chance de aprovação ou a experiência ·
+<span class="tag opc">Opcional</span> pode ficar para depois.</p>
+<table>
+  <tr><th style="width:30%">Mudança</th><th>Por quê</th><th style="width:15%">Tipo</th></tr>
+  <tr><td>Empacotar com Capacitor (projetos Android e iOS)</td><td>Gera os dois apps a partir do código atual.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Endereço completo do servidor no app</td><td>No site o app chama "/api"; dentro do celular precisa do endereço inteiro do servidor. Também vale para as fotos.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Liberar os apps no servidor (CORS)</td><td>Configuração que permite ao app conversar com o servidor da Hostinger.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Denunciar conteúdo e bloquear usuário</td><td>A Apple exige isso em apps com comentários e publicações de usuários (diretriz 1.2). Hoje não existe. Inclui uma tela simples para o admin ver as denúncias.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Doação pelo Safari no iPhone</td><td>Regra da Apple (seção 4). Inclui o código de uso único para abrir já logado.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Leitor de QR Code nativo</td><td>A validação de recompensas usa um recurso que não existe no iPhone. Troca por um leitor que funciona nos dois.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Permissões: câmera, fotos e localização</td><td>As lojas exigem uma frase explicando o uso de cada permissão.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Ícones, tela de abertura e imagens das lojas</td><td>Gerados a partir da logo oficial; prints das telas para a página do app.</td><td><span class="tag obr">Obrigatória</span></td></tr>
+  <tr><td>Notificações (push)</td><td>Previstas na especificação (item 20.4). Ajudam a Apple a ver o Salvee como app de verdade, não "site embrulhado" (diretriz 4.2). Ex.: doação confirmada, evento amanhã, instituição aprovada.</td><td><span class="tag rec">Recomendada</span></td></tr>
+  <tr><td>Botões de voltar e abrir links externos</td><td>Botão voltar do Android, discador, mapas, Waze e WhatsApp abrindo nos apps certos.</td><td><span class="tag rec">Recomendada</span></td></tr>
+  <tr><td>Aviso de "nova versão disponível"</td><td>Pede para atualizar quando uma versão antiga deixar de ser compatível.</td><td><span class="tag rec">Recomendada</span></td></tr>
+  <tr><td>Login com Google/Facebook/Apple no app</td><td>Hoje nenhum está ligado. Se ligar Google ou Facebook no iPhone, a Apple exige também "Entrar com Apple" (diretriz 4.8).</td><td><span class="tag opc">Opcional</span></td></tr>
+  <tr><td>Links dos e-mails abrindo no app</td><td>Confirmar e-mail e trocar senha continuam funcionando pelo site; abrir direto no app é melhoria.</td><td><span class="tag opc">Opcional</span></td></tr>
+  <tr><td>Atualização ao vivo das telas</td><td>Corrigir telas sem esperar a loja (seção 3).</td><td><span class="tag opc">Opcional</span></td></tr>
+</table>
+<p class="small">Não muda: navegação, telas, regras de negócio, banco de dados, hospedagem na Hostinger, site e PWA.</p>
+
+<h2>6. Requisitos e o que o cliente precisa providenciar</h2>
+<h3>6.1 Contas nas lojas (em nome da empresa)</h3>
+<ul>
+  <li><b>Número D-U-N-S</b> da empresa (gratuito, pedido pelo site da Apple ou da Dun &amp; Bradstreet; leva de alguns dias a
+    2 semanas). Exigido pela Apple e pelo Google para contas de empresa.</li>
+  <li><b>Apple Developer Program</b> como organização: CNPJ, D-U-N-S, site da empresa, um Apple ID com verificação em duas
+    etapas (o iPhone do cliente serve). US$ 99/ano. A isenção dessa taxa existe só para ONGs e órgãos de governo.</li>
+  <li><b>Google Play Console</b> como organização: CNPJ, D-U-N-S, documento do responsável. US$ 25, uma vez só.
+    <i>Importante:</i> conta <b>pessoal</b> nova é obrigada a fazer um teste fechado com 12 testadores por 14 dias antes de
+    publicar; conta de <b>organização</b> não tem essa exigência.</li>
+  <li>Adicionar o desenvolvedor como usuário nas duas contas (sem passar a senha).</li>
+</ul>
+<h3>6.2 Documentos e informações</h3>
+<ul>
+  <li><b>Termos de uso e Política de privacidade finalizados</b>: hoje estão em rascunho, aguardando razão social, CNPJ,
+    endereço, e-mail de contato e encarregado de dados (LGPD). Recomenda-se revisão jurídica.</li>
+  <li>E-mail e telefone de suporte que aparecem nas lojas.</li>
+  <li>Decisão sobre a taxa do Salvee nas doações (seção 4.2).</li>
+  <li>Uma ou duas instituições reais aprovadas, com fotos e publicações, para o app não chegar vazio na análise.</li>
+</ul>
+<h3>6.3 Já está pronto no Salvee</h3>
+<ul>
+  <li>Excluir conta pelo app e por link público (exigido pelas duas lojas).</li>
+  <li>Termos e Política acessíveis por link aberto.</li>
+  <li>Telas adaptadas ao celular (inclusive iPhone com entalhe).</li>
+  <li>Doação mostrando só o meio de pagamento que funciona (PIX).</li>
+</ul>
+<h3>6.4 Para a análise das lojas</h3>
+<ul>
+  <li>Conta de teste para o revisor (e-mail e senha) e instruções curtas em inglês.</li>
+  <li>Fichas de privacidade: "Segurança dos dados" (Google) e "Privacidade do app" (Apple): quais dados o Salvee coleta e por quê.</li>
+  <li>Classificação etária, categoria (Estilo de vida / Social), descrição, ícone e prints de tela.</li>
+</ul>
+
+<h2>7. Estrutura e ferramentas</h2>
+<table>
+  <tr><th style="width:28%">Ferramenta</th><th>Para quê</th><th style="width:20%">Custo</th></tr>
+  <tr><td>Capacitor</td><td>Empacotar o Salvee como app Android e iOS.</td><td>Gratuito</td></tr>
+  <tr><td>Android Studio</td><td>Gerar e testar o app Android (roda no Windows).</td><td>Gratuito</td></tr>
+  <tr><td>Mac na nuvem (Codemagic ou similar)</td><td>Gerar o app do iPhone e enviar para a Apple <b>sem comprar um Mac</b>. A Apple só aceita apps gerados em computador Mac.</td><td>Plano gratuito com minutos mensais; acima disso, cerca de US$ 0,10/min ou Mac alugado ~US$ 30/mês</td></tr>
+  <tr><td>TestFlight (Apple)</td><td>O cliente testa o app no próprio iPhone antes de publicar.</td><td>Gratuito</td></tr>
+  <tr><td>Firebase Cloud Messaging</td><td>Enviar notificações para Android e iPhone.</td><td>Gratuito</td></tr>
+  <tr><td>Hostinger (plano atual)</td><td>Continua servindo o site e o servidor dos apps. Sem mudança de plano.</td><td>Já contratado</td></tr>
+  <tr><td>Atualização ao vivo (Capgo ou similar) <span class="tag opc">opcional</span></td><td>Enviar correções de tela sem passar pela loja.</td><td>~US$ 14/mês</td></tr>
+</table>
+<p><b>Precisa de Mac para fazer o app do iPhone?</b> Para <i>gerar</i> o app, sim, um computador com macOS, mas ele pode ser
+alugado na nuvem por minuto ou por mês. Todo o desenvolvimento continua no Windows. O iPhone do cliente é usado para testar
+pelo TestFlight. Comprar um Mac (a partir de ~R$ 5.000) é opcional e só vale a pena com uso frequente.</p>
+
+<h2 class="pb">8. Custos</h2>
+<table>
+  <tr><th>Item</th><th style="width:16%">Valor</th><th style="width:18%">Aprox. em R$*</th><th style="width:18%">Frequência</th></tr>
+  <tr><td>Google Play Console (organização)</td><td>US$ 25</td><td>R$ 140</td><td>Uma vez</td></tr>
+  <tr><td>Apple Developer Program (organização)</td><td>US$ 99</td><td>R$ 550</td><td>Por ano</td></tr>
+  <tr><td>Número D-U-N-S</td><td>Gratuito</td><td>R$ 0</td><td>Uma vez</td></tr>
+  <tr><td>Mac na nuvem para gerar o app do iPhone</td><td>US$ 0 a 30</td><td>R$ 0 a 170</td><td>Por mês, conforme uso</td></tr>
+  <tr><td>Notificações (Firebase)</td><td>Gratuito</td><td>R$ 0</td><td>—</td></tr>
+  <tr><td>Hospedagem (Hostinger)</td><td>Já contratada</td><td>—</td><td>Sem custo novo</td></tr>
+  <tr><td>Atualização ao vivo <span class="tag opc">opcional</span></td><td>~US$ 14</td><td>~R$ 80</td><td>Por mês</td></tr>
+  <tr><td>Revisão jurídica dos Termos e da Política</td><td colspan="2"><span class="todo">[a definir com o advogado]</span></td><td>Uma vez</td></tr>
+  <tr><td><b>Desenvolvimento (fases 1 a 3)</b></td><td colspan="2"><span class="todo">[a definir]</span></td><td>Uma vez</td></tr>
+  <tr><td><b>Manutenção e publicação de atualizações</b></td><td colspan="2"><span class="todo">[a definir]</span></td><td>Por mês</td></tr>
+</table>
+<p class="small">* Conversão aproximada (US$ 1 ≈ R$ 5,50), apenas para referência; o valor real segue o câmbio e o IOF do cartão no dia
+do pagamento. Valores das lojas conferidos em novembro de 2026; podem mudar.</p>
+<p><b>Custo fixo mínimo para estar nas duas lojas no primeiro ano:</b> cerca de <b>R$ 700</b> (US$ 25 + US$ 99), mais o
+desenvolvimento. Nos anos seguintes: cerca de <b>R$ 550/ano</b> da Apple.</p>
+
+<h2>9. Cronograma</h2>
+<table>
+  <tr><th style="width:22%">Fase</th><th>O que acontece</th><th style="width:16%">Duração</th></tr>
+  <tr><td><b>0. Decisões e contas</b><br><span class="small">cliente</span></td><td>Pedir o D-U-N-S, abrir as contas Apple e Google, decidir a taxa das doações, completar os dados da empresa nos Termos. <i>Pode começar já e corre em paralelo com a fase 1.</i></td><td>1 a 3 semanas</td></tr>
+  <tr><td><b>1. Base comum</b></td><td>Capacitor, endereço do servidor, denúncia/bloqueio, leitor de QR, permissões, ícones, notificações. Tudo testado no computador e no site antes.</td><td>2 a 3 semanas</td></tr>
+  <tr><td><b>2. Google Play</b></td><td>Gerar o app Android, teste interno com o cliente, fichas da loja, envio e publicação.</td><td>1 a 2 semanas</td></tr>
+  <tr><td><b>3. App Store</b></td><td>Doação pelo Safari, geração no Mac na nuvem, teste no iPhone do cliente pelo TestFlight, envio e publicação.</td><td>1 a 2 semanas</td></tr>
+  <tr><td><b>4. Manutenção</b></td><td>Novas versões quando necessário; o servidor continua sendo atualizado como hoje.</td><td>Contínuo</td></tr>
+</table>
+<p>Total estimado: <b>6 a 9 semanas</b> até os dois apps publicados. O maior risco de atraso é a abertura das contas
+(D-U-N-S) e uma eventual reprovação na primeira análise, que costuma ser resolvida com ajustes e novo envio em poucos dias.</p>
+
+<h2>10. Riscos de reprovação e como evitamos</h2>
+<table>
+  <tr><th style="width:32%">Risco</th><th>Como evitamos</th></tr>
+  <tr><td>Apple 4.2: "o app é só um site embrulhado"</td><td>Notificações, leitor de QR nativo, localização, câmera, navegação de app e instalação do mesmo jeito que qualquer app.</td></tr>
+  <tr><td>Apple 1.2: conteúdo publicado por usuários</td><td>Denunciar, bloquear, moderação pelo admin e contato de suporte visíveis.</td></tr>
+  <tr><td>Apple 3.2.2: arrecadação de dinheiro</td><td>Doação abre no Safari no iPhone (seção 4).</td></tr>
+  <tr><td>Apple 5.1.1: exigir cadastro para tudo</td><td>A Apple pode pedir que parte do app seja visível sem login (ex.: ver instituições). Se pedir, é ajuste pequeno.</td></tr>
+  <tr><td>Apple 4.8: login social</td><td>Se Google/Facebook forem ligados, incluir "Entrar com Apple".</td></tr>
+  <tr><td>Google: política de dados e de doações</td><td>Ficha de Segurança dos dados preenchida igual à Política de privacidade; instituições verificadas antes de receber doações (já é a regra do Salvee).</td></tr>
+  <tr><td>Termos incompletos</td><td>Finalizar razão social, CNPJ e encarregado antes do envio.</td></tr>
+</table>
+
+<h2>11. Decisões do cliente</h2>
+<ul>
+  <li>☐ Publicar primeiro no Google Play e depois na App Store (recomendado) ou os dois juntos?</li>
+  <li>☐ O Salvee vai ficar com alguma porcentagem das doações? Se sim, quanto, e a doação vai direto para a instituição (recomendado) ou passa pela conta do Salvee?</li>
+  <li>☐ As instituições serão sempre entidades sem fins lucrativos com CNPJ?</li>
+  <li>☐ Contas das lojas em nome da empresa (recomendado). Quem vai pedir o D-U-N-S?</li>
+  <li>☐ Dados da empresa para os Termos e a Política, e revisão jurídica.</li>
+  <li>☐ Incluir notificações já na primeira versão (recomendado)?</li>
+  <li>☐ Contratar a atualização ao vivo das telas agora ou depois?</li>
+</ul>
+
+<p class="small" style="margin-top:14px">Fontes: Diretrizes de análise da App Store (seções 1.2, 3.1, 3.2, 4.2, 4.8, 5.1.1); Política de pagamentos
+do Google Play; programa de isenção de taxa da Apple; Especificação funcional do Salvee (37 páginas). Regras das lojas mudam com
+frequência e serão reconferidas no momento do envio.</p>
+
+<!--
+Gerar o PDF (PowerShell, na pasta plano-de-negocio/docs):
+& "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" --headless=new --disable-gpu --no-pdf-header-footer --allow-file-access-from-files --print-to-pdf="$PWD\Salvee-Plano-apps-lojas-v1.0.pdf" "$PWD\Salvee-Plano-apps-lojas-v1.0.html"
+-->
+</body>
+</html>
